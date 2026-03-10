@@ -14,15 +14,15 @@ next-env.d.ts
 .worktrees/
 .playwright-mcp/
 
-# Non-web project files (tracked on other branches)
-docs/
-datasets.md
-project.md
-web.md
-description.md
-requirements.txt
-*.pdf
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Data & large files
+eda/ariel-ml-dataset/
 *.png
 *.gif
+
+# Research docs (local reference only)
 research/
-eda/
