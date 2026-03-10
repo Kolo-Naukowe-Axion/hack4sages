@@ -53,11 +53,9 @@ export default function ModelCard({
             {isQuantum ? "Quantum" : "Classical"}
           </span>
         </div>
-        {open ? (
-          <ChevronUp size={20} className="shrink-0 text-muted" />
-        ) : (
-          <ChevronDown size={20} className="shrink-0 text-muted" />
-        )}
+        <span className="shrink-0 text-muted">
+          {open ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        </span>
       </button>
 
       {open && (

@@ -20,12 +20,14 @@ export default function AnalyzeButton({ disabled, loading, onClick }: Props) {
             : "bg-cyan px-10 py-4 text-white shadow-lg shadow-cyan/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan/30"
         }`}
       >
-        {loading ? (
-          <Loader2 size={20} className="animate-spin" />
-        ) : (
-          <Scan size={20} />
-        )}
-        {loading ? "Analyzing..." : "Analyze Atmosphere"}
+        <span className="inline-flex items-center gap-3">
+          {loading ? (
+            <Loader2 size={20} className="animate-spin" />
+          ) : (
+            <Scan size={20} />
+          )}
+          <span>{loading ? "Analyzing..." : "Analyze Atmosphere"}</span>
+        </span>
       </button>
     </div>
   );
