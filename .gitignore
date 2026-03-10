@@ -1,2 +1,8 @@
-.venv/
 .DS_Store
+.claude/
+__MACOSX/
+
+# EDA data & environments
+eda/data/
+eda/.venv/
+eda/ariel-ml-dataset/
