@@ -45,10 +45,10 @@ Frosted glass card, asymmetric two-column (55/45):
     - Labels: `text-muted text-sm`, Values: `font-mono text-cyan`
     - Null values → `—`
 - **Right (45%)**:
-  - Recharts `AreaChart` with spectrum data
-  - X-axis: wavelength (μm), Y-axis: transit depth, styled with `stroke: var(--color-muted)`, mono tick font
-  - Area: `stroke: var(--color-cyan)`, `fill: rgba(0,229,255,0.08)`
-  - Custom tooltip in frosted glass style
+  - Nivo `ResponsiveLine` with area fill for spectrum data
+  - X-axis: wavelength (μm), Y-axis: transit depth, muted axis colors, mono tick font
+  - Line: cyan, area fill: `rgba(0,229,255,0.08)`
+  - Custom Nivo tooltip component in frosted glass style
   - Badge below: Lucide Satellite icon + "Real JWST Data" (green) or "Synthetic Spectrum" (muted outlined)
 
 ## Wiring

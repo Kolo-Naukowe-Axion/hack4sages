@@ -10,22 +10,39 @@
 - Create: `web/src/data/mockResults.ts`
 - Modify: `web/src/app/layout.tsx`
 - Modify: `web/src/app/globals.css`
+- Create: `.gitignore` (root)
 
 ## Steps
 
-### 1. Create Next.js project + install deps
+### 1. Create feature branch + .gitignore
 
 ```bash
 cd /Users/michalszczesny/projects/hack4sages
-npx create-next-app@latest web --typescript --eslint --app --tailwind --turbopack --src-dir --no-import-alias
-cd web && npm install recharts lucide-react
+git checkout -b feat/web
 ```
 
-### 2. Use Context7 to look up Tailwind v4 `@theme` syntax
+Create root `.gitignore`:
+```
+.DS_Store
+node_modules/
+.next/
+.env*
+```
+
+### 2. Create Next.js project + install deps
+
+```bash
+npx create-next-app@latest web --typescript --tailwind --eslint --app --src-dir --turbopack --no-import-alias --yes
+cd web && npm install @nivo/line @nivo/core lucide-react
+```
+
+Note: Using **Nivo** (not Recharts) — confirmed React 19 compatible. `@nivo/line` handles spectrum area/line charts.
+
+### 3. Use Context7 to look up Tailwind v4 `@theme` syntax
 
 Verify correct `@theme` / `@theme inline` usage for v4 before writing globals.css.
 
-### 3. Configure fonts in `src/app/layout.tsx`
+### 4. Configure fonts in `src/app/layout.tsx`
 
 ```tsx
 import type { Metadata } from "next";
@@ -52,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### 4. Configure theme in `src/app/globals.css`
+### 5. Configure theme in `src/app/globals.css`
 
 ```css
 @import "tailwindcss";
@@ -100,7 +117,7 @@ body::before {
 }
 ```
 
-### 5. Create TypeScript types in `src/types/index.ts`
+### 6. Create TypeScript types in `src/types/index.ts`
 
 ```ts
 export interface Planet {
@@ -143,17 +160,28 @@ export interface PlanetResults {
 }
 ```
 
-### 6. Create planet data in `src/data/planets.ts`
+### 7. Create planet data in `src/data/planets.ts`
 
-~15-20 rocky exoplanets with real NASA values (mass, radius, temperature, orbital period, distance). Include: TRAPPIST-1b-h, K2-18b (hasJWSTData: true), LHS 1140b, Proxima Cen b, TOI-700d, TOI-700e, Kepler-442b, Kepler-186f, GJ 1214b, LP 791-18d. Generate plausible mock spectrum curves (~50 points with absorption dips at ~1.4, ~2.3, ~3.3, ~4.3 μm).
+**Keep it compact** — use a `generateSpectrum()` helper function that creates ~50 wavelength/flux points from a base curve + absorption dip positions. Do NOT hardcode 50 individual data points per planet.
 
-### 7. Create mock results in `src/data/mockResults.ts`
+```ts
+// Helper: generate realistic spectrum from dip positions
+function generateSpectrum(dips: { pos: number; depth: number; width: number }[]): { wavelength: number; flux: number }[] {
+  // generate 50 points from 0.6 to 5.0 μm with gaussian dips at specified positions
+}
+```
 
-Pre-defined results per planet with realistic numbers (94.2%, 91.7%, 87.3% — not round). K2-18b: all detect biosignature. TRAPPIST-1e: quantum says uncertain, classical says none. Varied results to show model disagreement. Export `getMockResults(planetId): Promise<PlanetResults>` with 2-3s delay.
+~15-20 planets with real NASA values. Each planet entry is ~8 lines (properties) + a `generateSpectrum()` call.
 
-### 8. Verify + commit
+Planets: TRAPPIST-1b-h, K2-18b (hasJWSTData: true), LHS 1140b, Proxima Cen b, TOI-700d, TOI-700e, Kepler-442b, Kepler-186f, GJ 1214b, LP 791-18d.
+
+### 8. Create mock results in `src/data/mockResults.ts`
+
+Pre-defined results per planet with realistic numbers (94.2%, 91.7%, 87.3%). Use a helper to reduce repetition. K2-18b: all detect biosignature. TRAPPIST-1e: quantum uncertain, classical none. Export `getMockResults(planetId): Promise<PlanetResults>` with 2-3s delay.
+
+### 9. Verify + commit
 
 ```bash
-npm run dev  # verify server starts at localhost:3000
-git add web/ && git commit -m "scaffold: Next.js 15 with Tailwind v4, fonts, theme, data layer"
+npm run dev  # verify localhost:3000 works
+cd .. && git add .gitignore web/ && git commit -m "scaffold: Next.js 15 with Tailwind v4, Nivo, fonts, theme, data layer"
 ```

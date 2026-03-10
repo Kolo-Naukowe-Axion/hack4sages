@@ -8,7 +8,11 @@
 
 ## Tech Stack
 
-Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Recharts, lucide-react, next/font (Outfit, DM Sans, JetBrains Mono). Deploy on Vercel.
+Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS v4, Nivo (`@nivo/line` for charts), lucide-react, next/font (Outfit, DM Sans, JetBrains Mono). Deploy on Vercel.
+
+## Branch
+
+Work on `feat/web` branch. Merge to `main` when complete.
 
 ## Routes
 

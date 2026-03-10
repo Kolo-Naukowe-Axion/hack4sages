@@ -35,7 +35,7 @@ Centered, generous vertical padding (`py-12`):
 - **Detected gases**: flex-wrap pills (CH₄, O₃, H₂O, CO₂)
   - `bg-surface border border-border text-text text-sm px-3 py-1 rounded-full`
   - `hover:border-cyan/30 transition-colors`
-- **Spectrum mini-chart**: Recharts AreaChart (~150px) with colored vertical ReferenceArea bands at absorption wavelengths
+- **Spectrum mini-chart**: Nivo ResponsiveLine (~150px) with area fill and colored markers at absorption wavelengths
 - **Processing time**: `font-mono text-sm text-muted` right-aligned, e.g. "2.34s"
 
 Cards stagger in: `@keyframes fadeSlideUp` with `animation-delay: 0ms, 150ms, 300ms`.
