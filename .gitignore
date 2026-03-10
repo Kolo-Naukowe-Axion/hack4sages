@@ -1,2 +1,17 @@
+# OS
+.DS_Store
+
+# IDE & tools
+.claude/
+__MACOSX/
+
+# Python
 .venv/
+__pycache__/
+*.pyc
+
+# Data
+eda/data/
+eda/.venv/
+eda/ariel-ml-dataset/
 ariel-ml-dataset/
