@@ -7,9 +7,19 @@ Two design variants:
 - **`web/planet-field/`** — Interactive planet orbs in a dark star field, click to explore
 - **`web/notebook/`** — Jupyter notebook aesthetic with code cells and output blocks
 
+## Screenshots
+
+### Planet Field
+
+![Planet Field Landing](docs/screenshots/planet-field-landing.png)
+
+### Notebook
+
+![Notebook Landing](docs/screenshots/notebook-landing.png)
+
 ## Tech Stack
 
-Next.js 16, React 19, Tailwind CSS v4, Nivo, TypeScript
+Next.js 16, React 19, Tailwind CSS v4, Framer Motion, Nivo, TypeScript
 
 ## Run locally
 

@@ -11,10 +11,10 @@ const rows = [
 
 export function ComparisonTable() {
   return (
-    <div className="bg-space-800/60 backdrop-blur-md border border-white/8 rounded-2xl overflow-hidden">
-      <div className="p-6 border-b border-white/5">
-        <h3 className="font-bold text-white text-lg">Model Comparison</h3>
-        <p className="text-sm text-white/40 mt-1">
+    <div className="bg-surface border border-border rounded-lg overflow-hidden">
+      <div className="p-5 border-b border-border">
+        <h3 className="font-semibold text-text">Model Comparison</h3>
+        <p className="text-sm text-muted mt-1">
           Side-by-side metrics across all three models
         </p>
       </div>
@@ -22,17 +22,17 @@ export function ComparisonTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/5">
-              <th className="text-left px-6 py-3 text-[10px] uppercase tracking-wider text-white/30 font-medium">
+            <tr className="border-b border-border">
+              <th className="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-muted font-medium">
                 Metric
               </th>
-              <th className="text-left px-6 py-3 text-[10px] uppercase tracking-wider text-cyan/60 font-medium">
+              <th className="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-accent-blue font-medium">
                 QELM Vetrano
               </th>
-              <th className="text-left px-6 py-3 text-[10px] uppercase tracking-wider text-cyan/60 font-medium">
+              <th className="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-accent-blue font-medium">
                 QELM Extended
               </th>
-              <th className="text-left px-6 py-3 text-[10px] uppercase tracking-wider text-amber/60 font-medium">
+              <th className="text-left px-5 py-3 text-[11px] uppercase tracking-wider text-accent-green font-medium">
                 Classical RF
               </th>
             </tr>
@@ -41,14 +41,14 @@ export function ComparisonTable() {
             {rows.map((row, i) => (
               <tr
                 key={row.metric}
-                className={`border-b border-white/3 ${
-                  i % 2 === 0 ? "bg-white/[0.01]" : ""
+                className={`border-b border-border ${
+                  i % 2 === 0 ? "bg-surface" : "bg-elevated"
                 }`}
               >
-                <td className="px-6 py-2.5 text-white/50 font-medium">{row.metric}</td>
-                <td className="px-6 py-2.5 text-white">{row.qelm1}</td>
-                <td className="px-6 py-2.5 text-white">{row.qelm2}</td>
-                <td className="px-6 py-2.5 text-white">{row.rf}</td>
+                <td className="px-5 py-2.5 text-muted font-medium">{row.metric}</td>
+                <td className="px-5 py-2.5 text-text font-mono">{row.qelm1}</td>
+                <td className="px-5 py-2.5 text-text font-mono">{row.qelm2}</td>
+                <td className="px-5 py-2.5 text-text font-mono">{row.rf}</td>
               </tr>
             ))}
           </tbody>

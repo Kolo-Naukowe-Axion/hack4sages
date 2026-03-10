@@ -1,10 +1,8 @@
 "use client";
 
-import { StarField } from "@/components/StarField";
 import { ModelCard } from "@/components/ModelCard";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
-import { Cpu } from "lucide-react";
 
 const models = [
   {
@@ -70,31 +68,24 @@ export default function ModelsPage() {
   const scrollRef = useScrollReveal();
 
   return (
-    <div ref={scrollRef} className="relative min-h-screen pt-16">
-      <StarField />
+    <div ref={scrollRef} className="page-enter max-w-6xl mx-auto px-6 pt-20 pb-12">
+      <h1 className="text-xl font-semibold text-text mb-1">Models</h1>
+      <p className="text-sm text-muted mb-10 max-w-2xl">
+        Three models for atmospheric biosignature classification: two quantum
+        (QELM) running on real IQM Spark hardware, and one classical Random
+        Forest baseline.
+      </p>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
-        <div className="flex items-center gap-3 mb-2">
-          <Cpu className="w-5 h-5 text-cyan" />
-          <h1 className="text-2xl font-bold text-white">Models</h1>
-        </div>
-        <p className="text-sm text-white/40 mb-10 max-w-2xl">
-          Three models for atmospheric biosignature classification: two quantum
-          (QELM) running on real IQM Spark hardware, and one classical Random
-          Forest baseline.
-        </p>
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {models.map((m) => (
+          <div key={m.name} className="reveal">
+            <ModelCard {...m} />
+          </div>
+        ))}
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {models.map((m) => (
-            <div key={m.name} className="reveal">
-              <ModelCard {...m} />
-            </div>
-          ))}
-        </div>
-
-        <div className="reveal">
-          <ComparisonTable />
-        </div>
+      <div className="reveal">
+        <ComparisonTable />
       </div>
     </div>
   );

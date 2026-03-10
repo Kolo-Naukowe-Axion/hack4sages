@@ -1,17 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-space-900: #030712;
-  --color-space-800: #0a0f1e;
-  --color-space-700: #111827;
-  --color-space-600: #1a2332;
-  --color-cyan: #00d4ff;
-  --color-green: #00ff88;
-  --color-amber: #ffaa00;
-  --color-cyan-dim: #00d4ff33;
-  --color-green-dim: #00ff8833;
-  --color-amber-dim: #ffaa0033;
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-elevated: #22252f;
+  --color-border: #2a2d37;
+  --color-text: #e5e7eb;
+  --color-muted: #9ca3af;
+  --color-accent-blue: #3b82f6;
+  --color-accent-green: #22c55e;
+  --color-accent-amber: #f59e0b;
+  --color-accent-red: #ef4444;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+:root {
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --primary: var(--color-accent-blue);
+  --muted: var(--color-surface);
+  --muted-foreground: var(--color-muted);
+  --border: var(--color-border);
 }
 
 html {
@@ -19,41 +29,59 @@ html {
 }
 
 body {
-  background: var(--color-space-900);
-  color: #e2e8f0;
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-sans);
 }
 
+/* Scroll reveal — staggered children */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.reveal:nth-child(2) { transition-delay: 0.06s; }
+.reveal:nth-child(3) { transition-delay: 0.12s; }
+.reveal:nth-child(4) { transition-delay: 0.18s; }
+.reveal:nth-child(5) { transition-delay: 0.24s; }
+.reveal:nth-child(6) { transition-delay: 0.3s; }
 
 .animate-in {
   opacity: 1;
   transform: translateY(0);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+/* Page entrance */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.3); }
+.page-enter {
+  animation: page-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes twinkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+/* Fade in from below — for panels that appear dynamically */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+.fade-up {
+  animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* Stagger children utility */
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+.stagger-children > *:nth-child(1) { animation-delay: 0s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.16s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.24s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.32s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.4s; }

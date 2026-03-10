@@ -47,6 +47,9 @@ export const planets: Planet[] = [
     hasJWSTData: true,
     spectrumType: "jwst",
     spectrumData: generateSpectrum([co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 12,
+    discoveryContext: "Discovered by TRAPPIST telescope, confirmed by Spitzer. Innermost planet, tidally locked, too hot for liquid water.",
   },
   {
     id: "trappist-1c",
@@ -62,6 +65,9 @@ export const planets: Planet[] = [
     hasJWSTData: true,
     spectrumType: "jwst",
     spectrumData: generateSpectrum([co2Dip, waterDip]),
+    starType: "M-dwarf",
+    habitabilityScore: 22,
+    discoveryContext: "Discovered by TRAPPIST telescope. Dense, Venus-like. JWST found no thick atmosphere in 2023.",
   },
   {
     id: "trappist-1d",
@@ -77,6 +83,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, methaneDip]),
+    starType: "M-dwarf",
+    habitabilityScore: 68,
+    discoveryContext: "Discovered via transit photometry. Lightest in the system, likely rocky. Equilibrium temp near Earth's.",
   },
   {
     id: "trappist-1e",
@@ -92,6 +101,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, methaneDip, co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 82,
+    discoveryContext: "Considered most Earth-like in TRAPPIST-1 system. Iron core, rocky surface, potential liquid water.",
   },
   {
     id: "trappist-1f",
@@ -107,6 +119,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 61,
+    discoveryContext: "Discovered via transit. Similar mass to Earth. Possible ocean world with thick ice shell.",
   },
   {
     id: "trappist-1g",
@@ -122,6 +137,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([co2Dip, waterDip2]),
+    starType: "M-dwarf",
+    habitabilityScore: 48,
+    discoveryContext: "Largest planet in the system. Outer habitable zone edge. Possible subsurface ocean beneath ice.",
   },
   {
     id: "trappist-1h",
@@ -137,6 +155,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 15,
+    discoveryContext: "Outermost TRAPPIST-1 planet. Too cold for surface liquid water. Possible internal tidal heating.",
   },
   {
     id: "k2-18b",
@@ -157,6 +178,9 @@ export const planets: Planet[] = [
       waterDip,
       { pos: 3.9, depth: 0.008, width: 0.1 },
     ]),
+    starType: "M-dwarf",
+    habitabilityScore: 78,
+    discoveryContext: "Discovered by K2 mission. JWST detected CH₄ and CO₂ in 2023, possible DMS biosignature. Leading Hycean world candidate.",
   },
   {
     id: "lhs-1140b",
@@ -172,6 +196,9 @@ export const planets: Planet[] = [
     hasJWSTData: true,
     spectrumType: "jwst",
     spectrumData: generateSpectrum([waterDip, co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 72,
+    discoveryContext: "Discovered by MEarth Project. JWST observations suggest N₂-rich atmosphere. Possible temperate super-Earth.",
   },
   {
     id: "proxima-cen-b",
@@ -187,6 +214,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, methaneDip, co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 65,
+    discoveryContext: "Nearest known exoplanet. Discovered via radial velocity by ESO. Subject to intense stellar flares.",
   },
   {
     id: "toi-700d",
@@ -202,6 +232,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, co2Dip, methaneDip]),
+    starType: "M-dwarf",
+    habitabilityScore: 74,
+    discoveryContext: "First Earth-sized HZ planet found by TESS. Quiet M-dwarf host star with low flare activity.",
   },
   {
     id: "toi-700e",
@@ -217,6 +250,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, co2Dip]),
+    starType: "M-dwarf",
+    habitabilityScore: 71,
+    discoveryContext: "Fourth planet found in TOI-700 system by TESS. 95% Earth-sized, optimistic HZ location.",
   },
   {
     id: "kepler-442b",
@@ -232,6 +268,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([waterDip, co2Dip]),
+    starType: "K-dwarf",
+    habitabilityScore: 84,
+    discoveryContext: "Discovered by Kepler mission. One of the highest Earth Similarity Index scores. K-dwarf host is more stable than M-dwarfs.",
   },
   {
     id: "kepler-186f",
@@ -247,6 +286,9 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([co2Dip, waterDip2]),
+    starType: "M-dwarf",
+    habitabilityScore: 58,
+    discoveryContext: "First Earth-sized planet found in a habitable zone (Kepler). Outer HZ edge, Mars-like temperatures.",
   },
   {
     id: "gj-1214b",
@@ -262,6 +304,9 @@ export const planets: Planet[] = [
     hasJWSTData: true,
     spectrumType: "jwst",
     spectrumData: generateSpectrum([waterDip, { pos: 2.3, depth: 0.01, width: 0.15 }]),
+    starType: "M-dwarf",
+    habitabilityScore: 5,
+    discoveryContext: "First super-Earth with measured atmosphere. JWST revealed high-altitude haze in 2023. Benchmark for sub-Neptune studies.",
   },
   {
     id: "lp-791-18d",
@@ -277,5 +322,8 @@ export const planets: Planet[] = [
     hasJWSTData: false,
     spectrumType: "synthetic",
     spectrumData: generateSpectrum([co2Dip, waterDip, methaneDip]),
+    starType: "M-dwarf",
+    habitabilityScore: 32,
+    discoveryContext: "Discovered by Spitzer + TESS. Tidally heated by neighboring planet, likely volcanic. Possible outgassed atmosphere.",
   },
 ];

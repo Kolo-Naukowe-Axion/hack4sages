@@ -23,6 +23,10 @@ __pycache__/
 eda/ariel-ml-dataset/
 *.png
 *.gif
+!docs/screenshots/*.png
+
+# Agent context
+.agent-context/
 
 # Research docs (local reference only)
 research/

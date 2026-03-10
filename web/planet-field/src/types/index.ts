@@ -1,3 +1,5 @@
+export type StarType = "M-dwarf" | "K-dwarf" | "G-type" | "F-type";
+
 export interface Planet {
   id: string;
   name: string;
@@ -12,6 +14,9 @@ export interface Planet {
   hasJWSTData: boolean;
   spectrumType: "jwst" | "synthetic";
   spectrumData: { wavelength: number; flux: number }[];
+  starType: StarType;
+  habitabilityScore: number;
+  discoveryContext: string;
 }
 
 export type Verdict = "detected" | "none" | "uncertain";

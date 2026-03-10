@@ -2,11 +2,15 @@
 
 import { useEffect, useRef } from "react";
 
-interface Props {
-  className?: string;
+function seededRandom(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
 }
 
-export function StarField({ className = "" }: Props) {
+export function StarField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -16,65 +20,41 @@ export function StarField({ className = "" }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
-    const stars: { x: number; y: number; r: number; speed: number; phase: number }[] = [];
-
-    function resize() {
-      if (!canvas) return;
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-    }
-
-    function init() {
-      if (!canvas) return;
-      stars.length = 0;
-      const count = Math.floor((canvas.width * canvas.height) / 8000);
-      for (let i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          r: Math.random() * 1.2 + 0.3,
-          speed: Math.random() * 0.5 + 0.1,
-          phase: Math.random() * Math.PI * 2,
-        });
-      }
-    }
-
-    function draw(time: number) {
+    function draw() {
       if (!canvas || !ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
 
-      for (const star of stars) {
-        const opacity = 0.3 + 0.7 * Math.abs(Math.sin(time * 0.001 * star.speed + star.phase));
+      const w = canvas.width;
+      const h = canvas.height;
+      const rng = seededRandom(7919);
+      const count = Math.floor((w * h) / 8000);
+
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < count; i++) {
+        const x = rng() * w;
+        const y = rng() * h;
+        const alpha = 0.06 + rng() * 0.14;
+        const size = (0.4 + rng() * 0.7) * dpr;
+
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.fill();
       }
-
-      animationId = requestAnimationFrame(draw);
     }
 
-    resize();
-    init();
-    animationId = requestAnimationFrame(draw);
-
-    const onResize = () => {
-      resize();
-      init();
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", onResize);
-    };
+    draw();
+    window.addEventListener("resize", draw);
+    return () => window.removeEventListener("resize", draw);
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
+      className="fixed inset-0 w-full h-full pointer-events-none z-0"
     />
   );
 }

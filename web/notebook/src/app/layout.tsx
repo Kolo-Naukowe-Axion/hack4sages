@@ -16,9 +16,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ExoBiome_Analysis.ipynb - Jupyter Notebook",
+  title: "ExoBiome — Quantum Biosignature Detection",
   description:
-    "Quantum biosignature detection in exoplanet atmospheres — interactive notebook",
+    "Quantum biosignature detection in exoplanet atmospheres",
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <NotebookToolbar />
-        <main className="pt-[68px] pb-16">{children}</main>
+        <main className="pt-[74px] pb-16">{children}</main>
       </body>
     </html>
   );
