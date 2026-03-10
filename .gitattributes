@@ -1,4 +1,4 @@
-ariel-ml-dataset/** filter=lfs diff=lfs merge=lfs -text
-petitradtrans-adc2023-validation/** filter=lfs diff=lfs merge=lfs -text
-petitradtrans-adc2023-validation/README.md -filter -diff -merge text
-petitradtrans-adc2023-validation/manifest.json -filter -diff -merge text
+data/ariel-ml-dataset/** filter=lfs diff=lfs merge=lfs -text
+data/petitradtrans-adc2023-validation/** filter=lfs diff=lfs merge=lfs -text
+data/petitradtrans-adc2023-validation/README.md -filter -diff -merge text
+data/petitradtrans-adc2023-validation/manifest.json -filter -diff -merge text

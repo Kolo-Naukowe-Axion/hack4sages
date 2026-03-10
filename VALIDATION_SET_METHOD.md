@@ -65,7 +65,7 @@ changed to follow the official or directly verified behavior.
 ## 3. Local ADC Reference Data
 
 The repository already contains a local copy of the ADC-format dataset in
-`ariel-ml-dataset/`. We use it for two things only:
+`data/ariel-ml-dataset/`. We use it for two things only:
 
 1. To extract the canonical ADC output arrays:
    - `instrument_wlgrid`
@@ -97,7 +97,7 @@ These are not the same array.
 ### 3.2 Compact reference bundle
 
 The script `scripts/build_reference_bundle.py` builds
-`reference_data/adc2023_reference_bundle.npz` from:
+`data/reference_data/adc2023_reference_bundle.npz` from:
 
 - `TrainingData/AuxillaryTable.csv`
 - `TrainingData/Ground Truth Package/FM_Parameter_Table.csv`
@@ -556,7 +556,7 @@ scientific outputs.
 Once the production run and validation complete, the finished dataset is copied
 back into the local project at:
 
-- `petitradtrans-adc2023-validation/`
+- `data/petitradtrans-adc2023-validation/`
 
 Remote/local integrity is then checked using the generated manifest checksums.
 

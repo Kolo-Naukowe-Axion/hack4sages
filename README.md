@@ -19,13 +19,13 @@ Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
 
 ## Datasets
 
-- `ariel-ml-dataset/`: canonical ADC2023-format challenge dataset, committed with Git LFS.
-- `petitradtrans-adc2023-validation/`: generated pRT-based ADC2023 validation dataset, committed with Git LFS.
+- `data/ariel-ml-dataset/`: canonical ADC2023-format challenge dataset, committed with Git LFS.
+- `data/petitradtrans-adc2023-validation/`: generated pRT-based ADC2023 validation dataset, committed with Git LFS.
 
 ## Validation Set Tooling
 
 - `prt_adc2023_validation/`: generator, physics helpers, empirical prior, and validator.
-- `reference_data/adc2023_reference_bundle.npz`: compact empirical reference bundle built from the local ADC dataset.
+- `data/reference_data/adc2023_reference_bundle.npz`: compact empirical reference bundle built from the local ADC dataset.
 - `scripts/build_reference_bundle.py`: rebuild the compact empirical prior bundle.
 - `scripts/rebin_prt_opacities.py`: rebin official pRT correlated-k opacities to `R=400`.
 - `scripts/generate_validation_set.py`: generate shard outputs and assemble the final dataset.

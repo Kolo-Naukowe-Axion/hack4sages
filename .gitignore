@@ -19,5 +19,3 @@ generated-data/
 # EDA local assets
 eda/data/
 eda/.venv/
-eda/ariel-ml-dataset/
-

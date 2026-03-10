@@ -20,12 +20,11 @@ jupyter lab
 
 ## Dataset
 
-Download the [Ariel ML Data Challenge 2023](https://www.ariel-datachallenge.space/) dataset and place it in `ariel-ml-dataset/` (gitignored).
+The canonical dataset now lives in `../data/ariel-ml-dataset/` and is committed in the repo via Git LFS.
 
-```
+``` 
 eda/
 ├── ariel_eda.ipynb       # Main notebook
-├── ariel-ml-dataset/     # Dataset (gitignored)
 ├── requirements.txt      # Python dependencies
 └── README.md
 ```
