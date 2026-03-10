@@ -1,0 +1,9 @@
+h5py
+meson-python
+ninja
+numpy
+pandas
+petitRADTRANS==2.6.7
+scipy
+tables
+taurex

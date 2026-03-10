@@ -1,17 +1,23 @@
 # OS
 .DS_Store
+__MACOSX/
 
 # IDE & tools
 .claude/
-__MACOSX/
 
 # Python
 .venv/
+.venv-prt311/
+.local-prt/
+local_runs/
 __pycache__/
 *.pyc
 
-# Data
+# Generated runs and logs
+generated-data/
+
+# EDA local assets
 eda/data/
 eda/.venv/
 eda/ariel-ml-dataset/
-ariel-ml-dataset/
+
