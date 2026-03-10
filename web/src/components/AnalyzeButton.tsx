@@ -21,16 +21,11 @@ export default function AnalyzeButton({ disabled, loading, onClick }: Props) {
         }`}
       >
         {loading ? (
-          <>
-            <Loader2 size={20} className="animate-spin" />
-            Analyzing...
-          </>
+          <Loader2 size={20} className="animate-spin" />
         ) : (
-          <>
-            <Scan size={20} />
-            Analyze Atmosphere
-          </>
+          <Scan size={20} />
         )}
+        {loading ? "Analyzing..." : "Analyze Atmosphere"}
       </button>
     </div>
   );
