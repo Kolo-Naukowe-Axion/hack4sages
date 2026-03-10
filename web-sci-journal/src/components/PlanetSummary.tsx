@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import type { Planet } from "@/types";
 
@@ -8,6 +9,9 @@ interface Props {
 }
 
 export default function PlanetSummary({ planet }: Props) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const chartData = [
     {
       id: "spectrum",
@@ -58,6 +62,11 @@ export default function PlanetSummary({ planet }: Props) {
         <div>
           <div className="border border-border bg-paper p-4">
             <div className="h-[260px]">
+              {!mounted ? (
+                <div className="flex h-full items-center justify-center">
+                  <span className="text-sm text-muted">Loading chart...</span>
+                </div>
+              ) : (
               <ResponsiveLine
                 data={chartData}
                 margin={{ top: 12, right: 16, bottom: 44, left: 56 }}
@@ -135,6 +144,7 @@ export default function PlanetSummary({ planet }: Props) {
                 )}
                 useMesh={true}
               />
+              )}
             </div>
           </div>
           <p className="figure-caption mt-3">

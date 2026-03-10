@@ -24,14 +24,14 @@ export default function PlanetTimeline({ planets, selectedId, onSelect }: Props)
     <div className="relative">
       <button
         onClick={() => scroll("left")}
-        className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
+        className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
         aria-label="Scroll left"
       >
         <ChevronLeft size={18} />
       </button>
       <button
         onClick={() => scroll("right")}
-        className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
+        className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
         aria-label="Scroll right"
       >
         <ChevronRight size={18} />
@@ -49,6 +49,7 @@ export default function PlanetTimeline({ planets, selectedId, onSelect }: Props)
                 key={planet.id}
                 onClick={() => onSelect(planet.id)}
                 aria-pressed={isSelected}
+                aria-label={`${planet.name} — ${planet.starSystem} system${planet.inHabitableZone ? ", in habitable zone" : ""}`}
                 className={`group relative flex w-44 shrink-0 flex-col rounded-2xl border p-4 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan/30 ${
                   isSelected
                     ? "border-cyan bg-cyan/5 shadow-lg shadow-cyan/10"

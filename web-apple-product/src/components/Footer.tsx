@@ -54,9 +54,9 @@ export default function Footer() {
             </h4>
             <ul className="mt-3 space-y-1.5 text-sm text-muted">
               <li>Michal Szczesny</li>
-              <li>Team Member 2</li>
-              <li>Team Member 3</li>
-              <li>Team Member 4</li>
+              <li>Ariel Smolenski</li>
+              <li>Mateusz Karandys</li>
+              <li>Kacper Kramarz</li>
             </ul>
             <p className="mt-4 text-xs text-muted/50">HACK-4-SAGES 2026</p>
           </div>

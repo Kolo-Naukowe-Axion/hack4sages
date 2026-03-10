@@ -51,9 +51,9 @@ export default function Footer() {
           <h4 className="font-serif font-semibold text-heading">Authors</h4>
           <ul className="mt-2 space-y-1 text-muted">
             <li>Michal Szczesny</li>
-            <li>Team Member 2</li>
-            <li>Team Member 3</li>
-            <li>Team Member 4</li>
+            <li>Ariel Smolenski</li>
+            <li>Mateusz Karandys</li>
+            <li>Kacper Kramarz</li>
           </ul>
         </div>
       </div>

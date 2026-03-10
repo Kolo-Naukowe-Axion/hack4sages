@@ -18,6 +18,7 @@ export default function ComparisonTable() {
 
       <div className="overflow-x-auto border border-border bg-paper">
         <table className="w-full text-sm">
+          <caption className="sr-only">Model performance comparison</caption>
           <thead>
             <tr className="border-b-2 border-heading">
               <th className="px-5 py-3 text-left font-serif font-semibold text-heading">

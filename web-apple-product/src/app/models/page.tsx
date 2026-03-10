@@ -102,14 +102,14 @@ export default function ModelsPage() {
       <div className="relative mt-12">
         <button
           onClick={() => scroll("left")}
-          className="absolute -left-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
+          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
           aria-label="Scroll left"
         >
           <ChevronLeft size={18} />
         </button>
         <button
           onClick={() => scroll("right")}
-          className="absolute -right-4 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
+          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-deep text-muted shadow-lg transition-all hover:text-heading hover:shadow-xl"
           aria-label="Scroll right"
         >
           <ChevronRight size={18} />

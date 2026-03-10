@@ -16,7 +16,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-sm">
+    <nav aria-label="Main navigation" className="fixed top-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-6">
         <Link
           href="/"
@@ -53,6 +53,7 @@ export default function Navbar() {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="flex items-center justify-center p-2 text-muted transition-colors hover:text-heading md:hidden"
           aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
         >
           {mobileOpen ? <X size={18} /> : <Menu size={18} />}
         </button>
