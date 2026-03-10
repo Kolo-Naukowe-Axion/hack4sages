@@ -6,4 +6,11 @@ node_modules/
 docs/
 *.pdf
 *.png
+*.gif
 .playwright-mcp/
+
+# Non-web project files at root
+datasets.md
+project.md
+web.md
+requirements.txt
