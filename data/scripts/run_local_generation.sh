@@ -2,13 +2,14 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DATA_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+WORKSPACE_ROOT="$(cd "${DATA_ROOT}/.." && pwd)"
 
-OUTPUT_ROOT="${1:-${REPO_ROOT}/local_runs/full_20000_mac_$(date +%Y%m%d_%H%M%S)}"
-VENV_PATH="${PRT_ADC_VENV_PATH:-${REPO_ROOT}/.venv-prt311}"
+OUTPUT_ROOT="${1:-${DATA_ROOT}/local_runs/full_20000_mac_$(date +%Y%m%d_%H%M%S)}"
+VENV_PATH="${PRT_ADC_VENV_PATH:-${WORKSPACE_ROOT}/.venv-prt311}"
 PYTHON_BIN="${VENV_PATH}/bin/python"
-BUNDLE_PATH="${PRT_ADC_BUNDLE_PATH:-${REPO_ROOT}/data/reference_data/adc2023_reference_bundle.npz}"
-INPUT_DATA_PATH="${PRT_ADC_INPUT_DATA_PATH:-${REPO_ROOT}/.local-prt/input_data}"
+BUNDLE_PATH="${PRT_ADC_BUNDLE_PATH:-${DATA_ROOT}/reference_data/adc2023_reference_bundle.npz}"
+INPUT_DATA_PATH="${PRT_ADC_INPUT_DATA_PATH:-${WORKSPACE_ROOT}/.local-prt/input_data}"
 SAMPLE_COUNT="${PRT_ADC_SAMPLE_COUNT:-20000}"
 SHARD_SIZE="${PRT_ADC_SHARD_SIZE:-250}"
 WORKERS="${PRT_ADC_WORKERS:-3}"
@@ -35,7 +36,7 @@ PID_PATH="${OUTPUT_ROOT}/work/generator.pid"
 
 CMD=(
   "${PYTHON_BIN}"
-  "${REPO_ROOT}/scripts/generate_validation_set.py"
+  "${DATA_ROOT}/scripts/generate_validation_set.py"
   "--output-root" "${OUTPUT_ROOT}"
   "--bundle-path" "${BUNDLE_PATH}"
   "--p-rt-input-data-path" "${INPUT_DATA_PATH}"
@@ -67,7 +68,7 @@ echo "  log: ${LOG_PATH}"
 echo "  progress: ${OUTPUT_ROOT}/work/progress.json"
 echo
 echo "Monitor once:"
-echo "  ${PYTHON_BIN} ${REPO_ROOT}/scripts/check_generation_status.py --output-root ${OUTPUT_ROOT}"
+echo "  ${PYTHON_BIN} ${DATA_ROOT}/scripts/check_generation_status.py --output-root ${OUTPUT_ROOT}"
 echo
 echo "Monitor live:"
-echo "  ${PYTHON_BIN} ${REPO_ROOT}/scripts/check_generation_status.py --output-root ${OUTPUT_ROOT} --watch"
+echo "  ${PYTHON_BIN} ${DATA_ROOT}/scripts/check_generation_status.py --output-root ${OUTPUT_ROOT} --watch"

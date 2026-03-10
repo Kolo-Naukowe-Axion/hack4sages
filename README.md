@@ -13,8 +13,8 @@ Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
 
 ## Quick Start
 
-- **EDA**: see [`eda/README.md`](eda/README.md)
-- **Validation Set Method**: see [`VALIDATION_SET_METHOD.md`](VALIDATION_SET_METHOD.md)
+- **EDA**: see [`data/eda/README.md`](data/eda/README.md)
+- **Validation Set Method**: see [`data/VALIDATION_SET_METHOD.md`](data/VALIDATION_SET_METHOD.md)
 - **Web App**: switch to `feat/web` branch for setup instructions
 
 ## Datasets
@@ -22,16 +22,17 @@ Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
 - `data/ariel-ml-dataset/`: canonical ADC2023-format challenge dataset, committed with Git LFS.
 - `data/petitradtrans-adc2023-validation/`: generated pRT-based ADC2023 validation dataset, committed with Git LFS.
 
-## Validation Set Tooling
+## Data Workflow
 
-- `prt_adc2023_validation/`: generator, physics helpers, empirical prior, and validator.
+- `data/eda/`: exploratory data analysis of the ADC dataset.
+- `data/prt_adc2023_validation/`: generator, physics helpers, empirical prior, and validator.
 - `data/reference_data/adc2023_reference_bundle.npz`: compact empirical reference bundle built from the local ADC dataset.
-- `scripts/build_reference_bundle.py`: rebuild the compact empirical prior bundle.
-- `scripts/rebin_prt_opacities.py`: rebin official pRT correlated-k opacities to `R=400`.
-- `scripts/generate_validation_set.py`: generate shard outputs and assemble the final dataset.
-- `scripts/validate_validation_set.py`: validate shapes, physical consistency, noise, and checksums.
-- `scripts/check_generation_status.py`: inspect or watch generation progress from `work/progress.json`.
-- `scripts/run_local_generation.sh`: launch a local background generation run.
+- `data/scripts/build_reference_bundle.py`: rebuild the compact empirical prior bundle.
+- `data/scripts/rebin_prt_opacities.py`: rebin official pRT correlated-k opacities to `R=400`.
+- `data/scripts/generate_validation_set.py`: generate shard outputs and assemble the final dataset.
+- `data/scripts/validate_validation_set.py`: validate shapes, physical consistency, noise, and checksums.
+- `data/scripts/check_generation_status.py`: inspect or watch generation progress from `work/progress.json`.
+- `data/scripts/run_local_generation.sh`: launch a local background generation run.
 
 ## Scientific Sources
 

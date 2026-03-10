@@ -9,11 +9,11 @@ the build.
 It is intended to be an implementation-accurate methods record for the current
 generator code in:
 
-- `prt_adc2023_validation/`
-- `scripts/build_reference_bundle.py`
-- `scripts/rebin_prt_opacities.py`
-- `scripts/generate_validation_set.py`
-- `scripts/validate_validation_set.py`
+- `data/prt_adc2023_validation/`
+- `data/scripts/build_reference_bundle.py`
+- `data/scripts/rebin_prt_opacities.py`
+- `data/scripts/generate_validation_set.py`
+- `data/scripts/validate_validation_set.py`
 
 ## 1. Goal
 
@@ -83,7 +83,7 @@ The local training-set HDF5 shows that every ADC sample shares the same:
 - `instrument_wlgrid` (52 values)
 - `instrument_width` (52 values)
 
-Those arrays are recorded in `prt_adc2023_validation/constants.py` and are used
+Those arrays are recorded in `data/prt_adc2023_validation/constants.py` and are used
 as the authoritative output metadata arrays for this validation set.
 
 Important distinction:
@@ -96,7 +96,7 @@ These are not the same array.
 
 ### 3.2 Compact reference bundle
 
-The script `scripts/build_reference_bundle.py` builds
+The script `data/scripts/build_reference_bundle.py` builds
 `data/reference_data/adc2023_reference_bundle.npz` from:
 
 - `TrainingData/AuxillaryTable.csv`
@@ -153,7 +153,7 @@ It is extracted on the remote machine to:
 
 ### 5.2 R=400 rebinned opacities
 
-The script `scripts/rebin_prt_opacities.py` reproduces the authors’ `rebin.py`
+The script `data/scripts/rebin_prt_opacities.py` reproduces the authors’ `rebin.py`
 pattern:
 
 - it uses the full-resolution correlated-k species,
@@ -288,7 +288,7 @@ The truth package records the transformed quantities actually used by pRT:
 
 These are derived from `T_int`, `T3_unit`, `T2_unit`, `T1_unit`, `alpha`, and
 `log_delta_unit` using the same formulas implemented in
-`prt_adc2023_validation/physics.py`.
+`data/prt_adc2023_validation/physics.py`.
 
 ## 8. Distance, Scaling, and Noise
 
@@ -334,7 +334,7 @@ This is the authoritative binning definition we follow.
 
 The official baseline arrays are recorded in:
 
-- `prt_adc2023_validation/constants.py`
+- `data/prt_adc2023_validation/constants.py`
 
 These correspond to the baseline repo’s `ariel_resolution()` output.
 
@@ -404,7 +404,7 @@ forward-model truth.
 ### 10.3 Empirical conditional prior
 
 The empirical nearest-neighbor prior is implemented in
-`prt_adc2023_validation/empirical_prior.py`.
+`data/prt_adc2023_validation/empirical_prior.py`.
 
 Reference feature columns in the local ADC data:
 
@@ -502,7 +502,7 @@ Contains the unbinned native pRT spectra:
 
 ## 13. Validation and QA
 
-The validator in `prt_adc2023_validation/validate_dataset.py` checks:
+The validator in `data/prt_adc2023_validation/validate_dataset.py` checks:
 
 - exact ADC output schema and HDF5 key alignment,
 - exact match to canonical `instrument_wlgrid`,
@@ -562,16 +562,16 @@ Remote/local integrity is then checked using the generated manifest checksums.
 
 ## 16. Files in This Repo That Implement the Method
 
-- `prt_adc2023_validation/constants.py`
-- `prt_adc2023_validation/physics.py`
-- `prt_adc2023_validation/reference_bundle.py`
-- `prt_adc2023_validation/empirical_prior.py`
-- `prt_adc2023_validation/generate_dataset.py`
-- `prt_adc2023_validation/validate_dataset.py`
-- `scripts/build_reference_bundle.py`
-- `scripts/rebin_prt_opacities.py`
-- `scripts/generate_validation_set.py`
-- `scripts/validate_validation_set.py`
+- `data/prt_adc2023_validation/constants.py`
+- `data/prt_adc2023_validation/physics.py`
+- `data/prt_adc2023_validation/reference_bundle.py`
+- `data/prt_adc2023_validation/empirical_prior.py`
+- `data/prt_adc2023_validation/generate_dataset.py`
+- `data/prt_adc2023_validation/validate_dataset.py`
+- `data/scripts/build_reference_bundle.py`
+- `data/scripts/rebin_prt_opacities.py`
+- `data/scripts/generate_validation_set.py`
+- `data/scripts/validate_validation_set.py`
 
 ## 17. Summary of Resolved Implementation Issues
 

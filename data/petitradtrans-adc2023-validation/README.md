@@ -9,4 +9,4 @@ This directory contains the finalized `20,000`-sample pRT-based ADC2023 validati
 
 ## Method
 
-See [`../../VALIDATION_SET_METHOD.md`](../../VALIDATION_SET_METHOD.md) for the full generation methodology, scientific assumptions, provenance, and validation details.
+See [`../VALIDATION_SET_METHOD.md`](../VALIDATION_SET_METHOD.md) for the full generation methodology, scientific assumptions, provenance, and validation details.

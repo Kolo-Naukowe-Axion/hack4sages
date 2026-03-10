@@ -14,8 +14,9 @@ __pycache__/
 *.pyc
 
 # Generated runs and logs
-generated-data/
+data/generated-data/
+data/local_runs/
 
 # EDA local assets
-eda/data/
-eda/.venv/
+data/eda/data/
+data/eda/.venv/

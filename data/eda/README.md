@@ -5,7 +5,7 @@ Exploratory data analysis of the Ariel Space Mission ML dataset for exoplanet at
 ## Setup
 
 ```bash
-cd eda
+cd data/eda
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -20,10 +20,10 @@ jupyter lab
 
 ## Dataset
 
-The canonical dataset now lives in `../data/ariel-ml-dataset/` and is committed in the repo via Git LFS.
+The canonical dataset lives in `../ariel-ml-dataset/` and is committed in the repo via Git LFS.
 
-``` 
-eda/
+```
+data/eda/
 ├── ariel_eda.ipynb       # Main notebook
 ├── requirements.txt      # Python dependencies
 └── README.md
