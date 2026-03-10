@@ -41,3 +41,8 @@ body::before {
     radial-gradient(1px 1px at 90% 10%, rgba(255, 255, 255, 0.1) 1px, transparent 0);
   background-size: 100% 100%, 200px 200px, 300px 300px, 250px 250px, 350px 350px, 150px 150px;
 }
+
+.reveal.animate-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
