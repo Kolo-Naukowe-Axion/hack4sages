@@ -29,7 +29,7 @@ export default function PlanetSummary({ planet }: Props) {
   ];
 
   return (
-    <div className="animate-in-slide rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 lg:p-10">
+    <div className="animate-fade-in rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 lg:p-10">
       <div className="grid gap-10 lg:grid-cols-[55fr_45fr]">
         <div>
           <h2 className="font-display text-3xl font-semibold text-heading">

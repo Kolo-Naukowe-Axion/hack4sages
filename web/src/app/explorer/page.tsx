@@ -61,7 +61,7 @@ export default function ExplorerPage() {
       />
 
       {results && (
-        <div key={`results-${results.planetId}`}>
+        <div key={`results-${results.planetId}`} className="animate-fade-in">
           <ResultsPanel results={results} />
           <div className="pb-12">
             <BridgePanel />

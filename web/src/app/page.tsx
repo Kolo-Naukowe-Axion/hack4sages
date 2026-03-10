@@ -1,35 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { ArrowRight, Globe, Dna, Atom } from "lucide-react";
-
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const children = el.querySelectorAll(".reveal");
-    children.forEach((child) => observer.observe(child));
-
-    return () => observer.disconnect();
-  }, []);
-
-  return ref;
-}
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 export default function Home() {
   const explainerRef = useScrollReveal();
@@ -44,7 +17,7 @@ export default function Home() {
         <div className="pointer-events-none absolute top-[22%] right-0 w-[35%] h-px bg-border/50" />
 
         <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">
-          <div className="max-w-2xl">
+          <div className="hero-stagger max-w-2xl">
             <p className="font-mono text-sm uppercase tracking-widest text-muted">
               Quantum Biosignature Detection
             </p>

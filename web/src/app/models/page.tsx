@@ -3,6 +3,7 @@
 import ModelCard from "@/components/ModelCard";
 import ComparisonTable from "@/components/ComparisonTable";
 import Footer from "@/components/Footer";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const models = [
   {
@@ -78,6 +79,9 @@ const models = [
 ];
 
 export default function ModelsPage() {
+  const cardsRef = useScrollReveal();
+  const tableRef = useScrollReveal();
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
       <h1 className="font-display text-4xl font-bold text-heading">Models</h1>
@@ -86,14 +90,26 @@ export default function ModelsPage() {
         compared side by side.
       </p>
 
-      <div className="mt-10 space-y-6">
-        {models.map((m) => (
-          <ModelCard key={m.title} {...m} />
+      <div ref={cardsRef} className="mt-10 space-y-6">
+        {models.map((m, i) => (
+          <div
+            key={m.title}
+            className="reveal opacity-0 translate-y-6 transition-all duration-700"
+            style={{ transitionDelay: `${i * 100}ms` }}
+          >
+            <ModelCard {...m} />
+          </div>
         ))}
       </div>
 
-      <ComparisonTable />
-      <Footer />
+      <div ref={tableRef}>
+        <div className="reveal opacity-0 translate-y-6 transition-all duration-700">
+          <ComparisonTable />
+        </div>
+        <div className="reveal opacity-0 translate-y-6 transition-all duration-700 delay-150">
+          <Footer />
+        </div>
+      </div>
     </div>
   );
 }
