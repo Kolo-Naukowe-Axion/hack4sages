@@ -3,4 +3,7 @@ node_modules/
 .next/
 .env*
 .claude/
-docs/plans/
+docs/
+*.pdf
+*.png
+.playwright-mcp/
