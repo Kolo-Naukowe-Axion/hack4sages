@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Sans, JetBrains_Mono } from "next/font/google";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -36,7 +37,8 @@ export default function RootLayout({
       <body
         className={`${outfit.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        {children}
+        <Navbar />
+        <main className="pt-16">{children}</main>
       </body>
     </html>
   );
