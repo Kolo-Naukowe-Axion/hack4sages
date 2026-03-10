@@ -39,10 +39,9 @@ export default function PlanetTimeline({ planets, selectedId, onSelect }: Props)
 
       <div
         ref={scrollRef}
-        className="overflow-x-auto rounded-2xl bg-surface px-14 py-10"
+        className="no-scrollbar overflow-x-auto rounded-2xl bg-surface px-14 py-10"
         style={{ scrollbarWidth: "none" }}
       >
-        <style>{`::-webkit-scrollbar { display: none; }`}</style>
         <div className="relative flex items-center gap-8" style={{ minWidth: "max-content" }}>
           <div className="pointer-events-none absolute left-8 right-8 top-1/2 h-px -translate-y-1/2 bg-border" />
 

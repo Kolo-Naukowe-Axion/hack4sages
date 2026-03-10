@@ -38,6 +38,7 @@ export default function ModelCard({
     <div className="rounded-2xl bg-deep shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
         className="flex w-full items-center justify-between p-6 text-left focus:outline-none lg:p-8"
       >
         <div className="flex items-center gap-4">

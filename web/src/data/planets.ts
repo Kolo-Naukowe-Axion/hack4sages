@@ -17,7 +17,7 @@ function generateSpectrum(
       flux -= dip.depth * Math.exp(-0.5 * dist * dist);
     }
 
-    flux += (Math.random() - 0.5) * 0.003;
+    flux += ((Math.sin(wavelength * 127.1 + i * 311.7) * 43758.5453) % 1) * 0.003;
     points.push({
       wavelength: Math.round(wavelength * 1000) / 1000,
       flux: Math.round(flux * 10000) / 10000,
@@ -30,7 +30,6 @@ function generateSpectrum(
 const waterDip = { pos: 1.4, depth: 0.015, width: 0.15 };
 const co2Dip = { pos: 4.3, depth: 0.02, width: 0.2 };
 const methaneDip = { pos: 3.3, depth: 0.018, width: 0.18 };
-const ozoneDip = { pos: 9.6, depth: 0.01, width: 0.3 };
 const waterDip2 = { pos: 2.7, depth: 0.012, width: 0.12 };
 
 export const planets: Planet[] = [

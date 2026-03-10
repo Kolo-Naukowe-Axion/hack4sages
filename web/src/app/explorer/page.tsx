@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { planets } from "@/data/planets";
 import { getMockResults } from "@/data/mockResults";
 import type { PlanetResults } from "@/types";
@@ -14,6 +14,7 @@ export default function ExplorerPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [results, setResults] = useState<PlanetResults | null>(null);
   const [loading, setLoading] = useState(false);
+  const requestRef = useRef(0);
 
   const selectedPlanet = planets.find((p) => p.id === selectedId) ?? null;
 
@@ -21,12 +22,15 @@ export default function ExplorerPage() {
     setSelectedId(id);
     setResults(null);
     setLoading(false);
+    requestRef.current++;
   };
 
   const handleAnalyze = async () => {
     if (!selectedId) return;
+    const currentRequest = ++requestRef.current;
     setLoading(true);
     const data = await getMockResults(selectedId);
+    if (currentRequest !== requestRef.current) return;
     setResults(data);
     setLoading(false);
   };
