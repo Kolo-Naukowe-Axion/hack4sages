@@ -10,7 +10,7 @@ const models = [
     desc: "Quantum extreme learning machine based on Vetrano et al. 2025 — 5-qubit IQM Spark hardware.",
   },
   {
-    color: "bg-cyan",
+    color: "bg-teal",
     name: "QELM Extended",
     desc: "Extended quantum reservoir with optimized feature mapping for atmospheric retrieval.",
   },
@@ -23,11 +23,10 @@ const models = [
 
 export default function BridgePanel() {
   return (
-    <div className="rounded-2xl border border-border bg-deep/60 p-8 backdrop-blur-md lg:p-10">
+    <div className="rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 lg:p-10">
       <div className="grid gap-10 lg:grid-cols-[45fr_55fr]">
-        {/* Left */}
         <div>
-          <h3 className="font-display text-2xl font-bold text-heading">
+          <h3 className="font-display text-2xl font-semibold text-heading">
             Under the Hood
           </h3>
           <p className="mt-3 leading-relaxed text-muted">
@@ -37,7 +36,6 @@ export default function BridgePanel() {
           </p>
         </div>
 
-        {/* Right */}
         <div className="space-y-4">
           {models.map((m) => (
             <div key={m.name} className="flex items-start gap-3">
@@ -56,7 +54,7 @@ export default function BridgePanel() {
           <div className="pt-2">
             <Link
               href="/models"
-              className="inline-flex items-center gap-2 rounded-full border border-cyan/30 px-5 py-2.5 text-sm font-medium text-cyan transition-colors hover:bg-cyan/10"
+              className="inline-flex items-center gap-2 rounded-full border border-cyan/30 px-5 py-2.5 text-sm font-medium text-cyan transition-colors hover:bg-cyan/5"
             >
               Explore Models
               <ArrowRight size={16} />

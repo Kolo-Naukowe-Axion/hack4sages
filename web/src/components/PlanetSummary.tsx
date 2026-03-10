@@ -29,11 +29,10 @@ export default function PlanetSummary({ planet }: Props) {
   ];
 
   return (
-    <div className="animate-in-slide rounded-2xl border border-border bg-deep/60 p-8 backdrop-blur-md lg:p-10">
+    <div className="animate-in-slide rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 lg:p-10">
       <div className="grid gap-10 lg:grid-cols-[55fr_45fr]">
-        {/* Left — details */}
         <div>
-          <h2 className="font-display text-3xl font-bold text-heading">
+          <h2 className="font-display text-3xl font-semibold text-heading">
             {planet.name}
           </h2>
           <p className="mt-1 text-sm text-muted">{planet.starSystem} system</p>
@@ -55,7 +54,6 @@ export default function PlanetSummary({ planet }: Props) {
           </div>
         </div>
 
-        {/* Right — spectrum chart */}
         <div>
           <div className="h-[260px]">
             <ResponsiveLine
@@ -66,7 +64,7 @@ export default function PlanetSummary({ planet }: Props) {
               curve="monotoneX"
               enableArea={true}
               areaOpacity={0.08}
-              colors={["#00e5ff"]}
+              colors={["#312e81"]}
               lineWidth={2}
               enablePoints={false}
               enableGridX={false}
@@ -87,7 +85,7 @@ export default function PlanetSummary({ planet }: Props) {
                 axis: {
                   ticks: {
                     text: {
-                      fill: "#6b6b8d",
+                      fill: "#78716c",
                       fontFamily: "var(--font-mono)",
                       fontSize: 11,
                     },
@@ -95,20 +93,20 @@ export default function PlanetSummary({ planet }: Props) {
                 },
                 grid: {
                   line: {
-                    stroke: "#1e1e3a",
+                    stroke: "#e7e5e4",
                     strokeWidth: 1,
                   },
                 },
                 crosshair: {
                   line: {
-                    stroke: "#00e5ff",
+                    stroke: "#312e81",
                     strokeWidth: 1,
                     strokeOpacity: 0.5,
                   },
                 },
               }}
               tooltip={({ point }) => (
-                <div className="rounded-lg border border-border bg-deep/90 px-3 py-2 text-xs backdrop-blur-md">
+                <div className="rounded-lg border border-border bg-deep px-3 py-2 text-xs shadow-lg">
                   <span className="text-muted">λ = </span>
                   <span className="font-mono text-cyan">{Number(point.data.x).toFixed(3)} μm</span>
                   <span className="mx-2 text-border">|</span>
@@ -120,7 +118,6 @@ export default function PlanetSummary({ planet }: Props) {
             />
           </div>
 
-          {/* Data source badge */}
           <div className="mt-3 flex items-center gap-2">
             <Satellite size={14} className={planet.hasJWSTData ? "text-green" : "text-muted"} />
             {planet.hasJWSTData ? (

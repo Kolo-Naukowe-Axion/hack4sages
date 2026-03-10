@@ -39,26 +39,16 @@ export default function Home() {
     <>
       {/* Hero */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Transit visual — star + planet shadow */}
-        <div className="pointer-events-none absolute inset-0">
-          <div
-            className="absolute top-1/4 right-[10%] h-[500px] w-[500px] rounded-full opacity-[0.07]"
-            style={{
-              background: "radial-gradient(circle, #fef3c7 0%, #f59e0b 30%, transparent 70%)",
-            }}
-          />
-          <div
-            className="absolute top-[32%] right-[18%] h-[60px] w-[60px] rounded-full bg-void"
-            style={{ boxShadow: "0 0 40px 20px var(--color-void)" }}
-          />
-        </div>
+        {/* Editorial accent — thin ruled line */}
+        <div className="pointer-events-none absolute top-[20%] right-0 w-[40%] h-px bg-border" />
+        <div className="pointer-events-none absolute top-[22%] right-0 w-[35%] h-px bg-border/50" />
 
         <div className="relative mx-auto w-full max-w-7xl px-6 lg:px-8">
           <div className="max-w-2xl">
-            <h1
-              className="font-display text-5xl font-bold leading-[1.1] tracking-tight text-heading lg:text-7xl"
-              style={{ textShadow: "0 0 40px rgba(0,229,255,0.15)" }}
-            >
+            <p className="font-mono text-sm uppercase tracking-widest text-muted">
+              Quantum Biosignature Detection
+            </p>
+            <h1 className="mt-4 font-display text-5xl font-semibold leading-[1.1] tracking-tight text-heading lg:text-7xl">
               Detect Life
               <br />
               Beyond Earth
@@ -69,7 +59,7 @@ export default function Home() {
             </p>
             <Link
               href="/explorer"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-cyan px-8 py-4 font-display text-base font-semibold text-void shadow-[0_0_20px_rgba(0,229,255,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] focus:outline-none focus:ring-2 focus:ring-cyan/50"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-cyan px-8 py-4 font-display text-base font-semibold text-white shadow-lg shadow-cyan/20 transition-all hover:shadow-xl hover:shadow-cyan/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-cyan/30"
             >
               Explore Planets
               <ArrowRight size={18} />
@@ -87,7 +77,7 @@ export default function Home() {
           <div className="grid gap-6 lg:grid-cols-5">
             {/* Left — large card */}
             <div className="reveal opacity-0 translate-y-6 transition-all duration-700 lg:col-span-3">
-              <div className="rounded-2xl border border-border bg-deep/60 p-8 backdrop-blur-md transition-all duration-300 hover:border-cyan/20 hover:shadow-lg hover:shadow-cyan/5 lg:p-10">
+              <div className="rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10 lg:p-10">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-cyan/10 text-cyan">
                     <Globe size={24} />
@@ -108,7 +98,7 @@ export default function Home() {
                 </div>
 
                 {/* Inline spectrum illustration */}
-                <div className="mt-8 flex items-end gap-px rounded-xl bg-surface/40 p-6">
+                <div className="mt-8 flex items-end gap-px rounded-xl bg-surface p-6">
                   <div className="flex w-full items-end justify-between gap-[2px]">
                     {Array.from({ length: 50 }).map((_, i) => {
                       const h =
@@ -119,7 +109,7 @@ export default function Home() {
                       return (
                         <div
                           key={i}
-                          className="flex-1 rounded-t-sm bg-cyan/40"
+                          className="flex-1 rounded-t-sm bg-cyan/30"
                           style={{ height: `${Math.max(6, h)}px` }}
                         />
                       );
@@ -136,7 +126,7 @@ export default function Home() {
             {/* Right — two stacked cards */}
             <div className="flex flex-col gap-6 lg:col-span-2">
               <div className="reveal opacity-0 translate-y-6 transition-all duration-700 delay-150 flex-1">
-                <div className="h-full rounded-2xl border border-border bg-deep/60 p-8 backdrop-blur-md transition-all duration-300 hover:border-cyan/20 hover:shadow-lg hover:shadow-cyan/5">
+                <div className="h-full rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green/10 text-green">
                     <Dna size={24} />
                   </div>
@@ -153,7 +143,7 @@ export default function Home() {
               </div>
 
               <div className="reveal opacity-0 translate-y-6 transition-all duration-700 delay-300 flex-1">
-                <div className="h-full rounded-2xl border border-border bg-deep/60 p-8 backdrop-blur-md transition-all duration-300 hover:border-cyan/20 hover:shadow-lg hover:shadow-cyan/5">
+                <div className="h-full rounded-2xl bg-deep p-8 shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal/10 text-teal">
                     <Atom size={24} />
                   </div>
@@ -175,7 +165,7 @@ export default function Home() {
 
       {/* Separator */}
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <hr className="h-px border-0 bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+        <hr className="h-px border-0 bg-border" />
       </div>
 
       {/* Stats */}
@@ -191,7 +181,7 @@ export default function Home() {
               className={`reveal opacity-0 translate-y-6 transition-all duration-700`}
               style={{ transitionDelay: `${i * 150}ms` }}
             >
-              <span className="font-mono text-5xl font-bold text-cyan">
+              <span className="font-display text-5xl font-semibold text-heading">
                 {value}
               </span>
               <p className="mt-2 text-sm uppercase tracking-wide text-muted">

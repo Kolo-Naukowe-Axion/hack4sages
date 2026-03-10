@@ -12,19 +12,16 @@ const verdictStyles = {
   detected: {
     label: "BIOSIGNATURE DETECTED",
     color: "text-green",
-    shadow: "0 0 20px rgba(16,185,129,0.3)",
     ring: "var(--color-green)",
   },
   none: {
     label: "NO BIOSIGNATURE",
     color: "text-red",
-    shadow: "0 0 20px rgba(239,68,68,0.3)",
     ring: "var(--color-red)",
   },
   uncertain: {
     label: "UNCERTAIN",
     color: "text-amber",
-    shadow: "0 0 20px rgba(245,158,11,0.3)",
     ring: "var(--color-amber)",
   },
 };
@@ -36,17 +33,16 @@ export default function ResultCard({ result, index }: Props) {
 
   return (
     <div
-      className="rounded-2xl border border-border bg-deep/60 p-6 backdrop-blur-md transition-all duration-300 hover:border-cyan/20 hover:shadow-lg hover:shadow-cyan/5"
+      className="rounded-2xl bg-deep p-6 shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10"
       style={{ animation: `fadeSlideUp 0.5s ease-out ${index * 150}ms both` }}
     >
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-display text-lg font-semibold text-heading">
           {result.modelName}
         </h3>
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-            isQuantum ? "bg-cyan/10 text-cyan" : "bg-muted/20 text-muted"
+            isQuantum ? "bg-cyan/10 text-cyan" : "bg-surface text-muted"
           }`}
         >
           {isQuantum ? <Atom size={12} /> : <Brain size={12} />}
@@ -54,9 +50,7 @@ export default function ResultCard({ result, index }: Props) {
         </span>
       </div>
 
-      {/* Verdict + Confidence Ring */}
       <div className="mt-6 flex items-center gap-6">
-        {/* Confidence ring */}
         <div
           className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full"
           style={{
@@ -71,19 +65,13 @@ export default function ResultCard({ result, index }: Props) {
         </div>
 
         <div>
-          <p
-            className={`font-display text-lg font-bold ${v.color}`}
-            style={{ textShadow: v.shadow }}
-          >
+          <p className={`font-display text-lg font-bold ${v.color}`}>
             {v.label}
           </p>
-          <p className="mt-1 text-sm text-muted">
-            confidence score
-          </p>
+          <p className="mt-1 text-sm text-muted">confidence score</p>
         </div>
       </div>
 
-      {/* Detected Gases */}
       {result.detectedGases.length > 0 && (
         <div className="mt-6">
           <p className="mb-2 text-xs uppercase tracking-wide text-muted">
@@ -105,7 +93,6 @@ export default function ResultCard({ result, index }: Props) {
         </div>
       )}
 
-      {/* Processing time */}
       <div className="mt-6 text-right">
         <span className="font-mono text-sm text-muted">
           {(result.processingTimeMs / 1000).toFixed(2)}s

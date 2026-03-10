@@ -3,12 +3,10 @@ import { ExternalLink } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="mt-12">
-      {/* Separator */}
-      <hr className="h-px border-0 bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
+      <hr className="h-px border-0 bg-border" />
 
       <div className="py-20">
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr_1fr]">
-          {/* About */}
           <div>
             <h4 className="font-display text-lg font-semibold text-heading">
               About ExoBiome
@@ -22,7 +20,6 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Research */}
           <div>
             <h4 className="font-display text-lg font-semibold text-heading">
               Research
@@ -53,7 +50,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Team */}
           <div>
             <h4 className="font-display text-lg font-semibold text-heading">
               Team
@@ -68,8 +64,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 flex flex-wrap items-center gap-3 rounded-xl bg-surface/30 px-6 py-3">
+        <div className="mt-12 flex flex-wrap items-center gap-3 rounded-xl bg-surface px-6 py-3">
           <span className="text-xs font-medium text-muted">Built with</span>
           {["Next.js", "React", "Tailwind", "Nivo", "Qiskit", "sQUlearn"].map(
             (tech) => (

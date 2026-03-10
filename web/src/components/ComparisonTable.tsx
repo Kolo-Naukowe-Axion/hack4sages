@@ -12,17 +12,17 @@ const rows = [
 export default function ComparisonTable() {
   return (
     <div className="min-h-[40vh] py-12">
-      <h2 className="font-display text-2xl font-bold text-heading">
+      <h2 className="font-display text-2xl font-semibold text-heading">
         Model Comparison
       </h2>
       <p className="mt-2 text-muted">
         Side-by-side performance metrics across all three approaches.
       </p>
 
-      <div className="mt-8 overflow-x-auto rounded-2xl border border-border bg-deep/60 backdrop-blur-md">
+      <div className="mt-8 overflow-x-auto rounded-2xl bg-deep shadow-lg shadow-black/5">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-surface/50">
+            <tr className="bg-surface">
               <th className="px-6 py-4 text-left font-display font-semibold text-heading">
                 Metric
               </th>
@@ -41,7 +41,7 @@ export default function ComparisonTable() {
             {rows.map((row, i) => (
               <tr
                 key={row.metric}
-                className={i % 2 === 1 ? "bg-surface/10" : ""}
+                className={i % 2 === 1 ? "bg-surface/50" : ""}
               >
                 <td className="px-6 py-3 text-muted">{row.metric}</td>
                 <td className="border-l-2 border-cyan/20 px-6 py-3 text-center font-mono text-text">

@@ -14,10 +14,10 @@ export default function AnalyzeButton({ disabled, loading, onClick }: Props) {
       <button
         onClick={onClick}
         disabled={disabled || loading}
-        className={`inline-flex items-center gap-3 rounded-full font-display text-lg font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-cyan/50 ${
+        className={`inline-flex items-center gap-3 rounded-full font-display text-lg font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-cyan/20 ${
           disabled
-            ? "cursor-not-allowed bg-muted/20 px-10 py-4 text-muted opacity-50"
-            : "bg-cyan px-10 py-4 text-void shadow-[0_0_20px_rgba(0,229,255,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(0,229,255,0.5)]"
+            ? "cursor-not-allowed bg-surface px-10 py-4 text-muted opacity-50"
+            : "bg-cyan px-10 py-4 text-white shadow-lg shadow-cyan/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-cyan/30"
         }`}
       >
         {loading ? (

@@ -35,8 +35,7 @@ export default function ModelCard({
   const isQuantum = modelType === "quantum";
 
   return (
-    <div className="rounded-2xl border border-border bg-deep/60 backdrop-blur-md transition-all duration-300 hover:border-cyan/20 hover:shadow-lg hover:shadow-cyan/5">
-      {/* Header */}
+    <div className="rounded-2xl bg-deep shadow-lg shadow-black/5 transition-all duration-300 hover:shadow-xl hover:shadow-black/10">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between p-6 text-left focus:outline-none lg:p-8"
@@ -47,7 +46,7 @@ export default function ModelCard({
           </h3>
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-              isQuantum ? "bg-cyan/10 text-cyan" : "bg-muted/20 text-muted"
+              isQuantum ? "bg-cyan/10 text-cyan" : "bg-surface text-muted"
             }`}
           >
             {isQuantum ? <Atom size={12} /> : <Brain size={12} />}
@@ -61,7 +60,6 @@ export default function ModelCard({
         )}
       </button>
 
-      {/* Body */}
       {open && (
         <div className="border-t border-border px-6 pb-8 pt-6 lg:px-8">
           <p className="max-w-3xl leading-relaxed text-muted">{description}</p>
