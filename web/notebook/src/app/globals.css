@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@theme {
+  --color-nb-bg: #f7f7f7;
+  --color-nb-cell: #ffffff;
+  --color-nb-border: #e0e0e0;
+  --color-nb-toolbar: #ffffff;
+  --color-nb-toolbar-border: #cfcfcf;
+  --color-nb-prompt: #303f9f;
+  --color-nb-blue: #2196f3;
+  --color-nb-green: #4caf50;
+  --color-nb-orange: #ff9800;
+  --color-nb-text: #212121;
+  --color-nb-muted: #757575;
+  --color-nb-code-bg: #f5f5f5;
+  --color-nb-running: #ff9800;
+  --color-nb-success: #4caf50;
+  --color-nb-hover: #e3f2fd;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-nb-bg);
+  color: var(--color-nb-text);
+  font-family: var(--font-sans);
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.animate-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Cell stagger */
+.cell-stagger > *:nth-child(1) { transition-delay: 0ms; }
+.cell-stagger > *:nth-child(2) { transition-delay: 80ms; }
+.cell-stagger > *:nth-child(3) { transition-delay: 160ms; }
+.cell-stagger > *:nth-child(4) { transition-delay: 240ms; }
+.cell-stagger > *:nth-child(5) { transition-delay: 320ms; }
+.cell-stagger > *:nth-child(6) { transition-delay: 400ms; }
+.cell-stagger > *:nth-child(7) { transition-delay: 480ms; }
+.cell-stagger > *:nth-child(8) { transition-delay: 560ms; }
+.cell-stagger > *:nth-child(9) { transition-delay: 640ms; }
+
+/* Pulse for running cells */
+@keyframes cellPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.cell-running {
+  animation: cellPulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  html { scroll-behavior: auto; }
+}
