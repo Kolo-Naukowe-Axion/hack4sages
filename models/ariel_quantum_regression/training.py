@@ -66,6 +66,7 @@ class TrainingConfig:
     qnn_depth: int = 2
     qnn_init_scale: float = 0.1
     quantum_device: str = default_quantum_device()
+    quantum_use_async: bool = False
     classical_only: bool = False
     quantum_warmup_epochs: int = 5
     quantum_ramp_epochs: int = 4
@@ -401,14 +402,28 @@ def maybe_initialize_from_checkpoint(model: HybridArielRegressor, config: Traini
 
     payload = torch.load(checkpoint_path, map_location="cpu")
     state_dict = payload.get("model_state_dict", payload)
-    load_result = model.load_state_dict(state_dict, strict=False)
-    loaded_keys = len(state_dict) - len(load_result.unexpected_keys)
+    model_state = model.state_dict()
+    filtered_state: dict[str, torch.Tensor] = {}
+    skipped_shape_keys: list[str] = []
+    for key, value in state_dict.items():
+        target = model_state.get(key)
+        if target is None:
+            continue
+        if target.shape != value.shape:
+            skipped_shape_keys.append(key)
+            continue
+        filtered_state[key] = value
+
+    load_result = model.load_state_dict(filtered_state, strict=False)
+    loaded_keys = len(filtered_state)
     print(
         f"Initialized from checkpoint: {checkpoint_path} | "
         f"loaded_keys={loaded_keys} | missing={len(load_result.missing_keys)} | "
         f"unexpected={len(load_result.unexpected_keys)}",
         flush=True,
     )
+    if skipped_shape_keys:
+        print(f"Skipped shape-mismatched checkpoint keys: {', '.join(skipped_shape_keys[:12])}", flush=True)
     if load_result.missing_keys:
         print(f"Missing checkpoint keys: {', '.join(load_result.missing_keys[:12])}", flush=True)
     if load_result.unexpected_keys:
@@ -424,19 +439,25 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             qnn_depth=config.qnn_depth,
             qnn_init_scale=config.qnn_init_scale,
             quantum_device=config.quantum_device,
+            quantum_use_async=config.quantum_use_async,
             classical_only=config.classical_only,
             use_amp=config.use_amp,
         ),
         device,
     )
     maybe_initialize_from_checkpoint(model, config)
-    classical_params = list(model.classical_parameters())
+    backbone_params = list(model.backbone_parameters())
+    quantum_adapter_params = list(model.quantum_adapter_parameters())
     quantum_params = list(model.quantum_parameters())
     loss_fn = build_loss_fn(config)
 
     optimizer_param_groups = [
-        {"params": classical_params, "lr": config.classical_lr, "weight_decay": config.weight_decay},
+        {"params": backbone_params, "lr": config.classical_lr, "weight_decay": config.weight_decay},
     ]
+    if quantum_adapter_params:
+        optimizer_param_groups.append(
+            {"params": quantum_adapter_params, "lr": config.quantum_lr, "weight_decay": config.weight_decay}
+        )
     if quantum_params:
         optimizer_param_groups.append({"params": quantum_params, "lr": config.quantum_lr, "weight_decay": 0.0})
     optimizer = torch.optim.AdamW(optimizer_param_groups)
@@ -499,7 +520,9 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             pred = model(aux, spectra, enable_quantum=quantum_active, quantum_scale=quantum_scale)
             loss = loss_fn(pred, targets)
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(classical_params, config.gradient_clip_norm)
+            torch.nn.utils.clip_grad_norm_(backbone_params, config.gradient_clip_norm)
+            if quantum_adapter_params:
+                torch.nn.utils.clip_grad_norm_(quantum_adapter_params, config.gradient_clip_norm)
             if quantum_params:
                 torch.nn.utils.clip_grad_norm_(quantum_params, config.gradient_clip_norm)
             optimizer.step()
@@ -532,7 +555,9 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
         epoch_seconds = time.perf_counter() - epoch_start
 
         classical_lr = optimizer.param_groups[0]["lr"]
-        quantum_lr = optimizer.param_groups[1]["lr"] if len(optimizer.param_groups) > 1 else 0.0
+        quantum_adapter_lr = optimizer.param_groups[1]["lr"] if len(quantum_adapter_params) > 0 else 0.0
+        quantum_block_group_index = 2 if len(quantum_adapter_params) > 0 else 1
+        quantum_block_lr = optimizer.param_groups[quantum_block_group_index]["lr"] if quantum_params else 0.0
         history_row = {
             "epoch": epoch + 1,
             "train_loss": float(np.mean(batch_losses)),
@@ -543,7 +568,8 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             "val_mae_mean": float(val_metrics["mae_mean"]),
             "epoch_seconds": epoch_seconds,
             "classical_lr": classical_lr,
-            "quantum_lr": quantum_lr,
+            "quantum_adapter_lr": quantum_adapter_lr,
+            "quantum_block_lr": quantum_block_lr,
             "quantum_active": int(quantum_active),
             "quantum_scale": float(quantum_scale),
             "backbone_frozen": int(backbone_frozen),
@@ -564,7 +590,7 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             f"val_rmse_mean={history_row['val_rmse_mean']:.5f} | "
             f"val_mae_mean={history_row['val_mae_mean']:.5f} | "
             f"time={epoch_seconds:.1f}s | "
-            f"lr=({classical_lr:.2e}, {quantum_lr:.2e}) | "
+            f"lr=({classical_lr:.2e}, {quantum_adapter_lr:.2e}, {quantum_block_lr:.2e}) | "
             f"quantum_active={quantum_active} | quantum_scale={quantum_scale:.2f} | "
             f"backbone_frozen={backbone_frozen}",
             flush=True,
@@ -678,6 +704,7 @@ def run_training_experiment(config: Optional[TrainingConfig] = None) -> dict[str
     print(f"Batch size: {cfg.batch_size}", flush=True)
     print(f"Eval batch size: {cfg.eval_batch_size}", flush=True)
     print(f"Quantum width/depth: {cfg.qnn_qubits}/{cfg.qnn_depth}", flush=True)
+    print(f"Quantum async: {cfg.quantum_use_async}", flush=True)
     print(f"Loss: {cfg.loss_name}", flush=True)
     print(f"Quantum warmup epochs: {0 if cfg.classical_only else cfg.quantum_warmup_epochs}", flush=True)
     print(f"Quantum ramp epochs: {0 if cfg.classical_only else cfg.quantum_ramp_epochs}", flush=True)

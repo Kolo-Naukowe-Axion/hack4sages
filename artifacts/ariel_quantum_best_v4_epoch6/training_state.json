@@ -1,0 +1,8 @@
+{
+  "backbone_frozen": false,
+  "best_epoch": 6,
+  "best_val_rmse_mean": 0.29081112146377563,
+  "current_epoch": 8,
+  "quantum_active": true,
+  "quantum_scale": 0.6666666666666666
+}

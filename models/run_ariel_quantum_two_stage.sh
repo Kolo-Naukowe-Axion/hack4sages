@@ -57,22 +57,22 @@ stage2_cmd=(
   --prepared-cache-dir "${CACHE_DIR}"
   --init-checkpoint-path "${STAGE1_DIR}/best_model.pt"
   --seed 42
-  --batch-size 32
-  --eval-batch-size 128
+  --batch-size 16
+  --eval-batch-size 64
   --max-epochs 30
   --early-stop-patience 8
   --scheduler-patience 3
   --scheduler-factor 0.5
-  --classical-lr 0.0001
-  --quantum-lr 0.0001
+  --classical-lr 0.00005
+  --quantum-lr 0.0002
   --weight-decay 0.0001
   --gradient-clip-norm 5.0
   --dropout 0.05
   --loss-name mse
   --qnn-init-scale 0.1
-  --quantum-warmup-epochs 6
-  --quantum-ramp-epochs 10
-  --quantum-backbone-freeze-epochs 4
+  --quantum-warmup-epochs 0
+  --quantum-ramp-epochs 12
+  --quantum-backbone-freeze-epochs 6
   --qnn-qubits 8
   --qnn-depth 2
   --quantum-device lightning.gpu

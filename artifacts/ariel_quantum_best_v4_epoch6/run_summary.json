@@ -1,0 +1,10 @@
+{
+  "best_epoch": 6,
+  "best_val_rmse_mean": 0.29081112146377563,
+  "checkpoint_path": "/home/iwo/hack4sages-crossgen/outputs/ariel_quantum_stage2_restart_v4_20260311_185231/best_model.pt",
+  "holdout_mae_mean": 0.18392649292945862,
+  "holdout_rmse_mean": 0.2993761897087097,
+  "testdata_rows": 685,
+  "validation_mae_mean": 0.18203386664390564,
+  "validation_rmse_mean": 0.29361358284950256
+}

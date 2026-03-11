@@ -39,6 +39,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--qnn-depth", type=int, default=2)
     parser.add_argument("--qnn-init-scale", type=float, default=0.1)
     parser.add_argument("--quantum-device", default=None)
+    parser.add_argument("--quantum-use-async", action="store_true")
     parser.add_argument("--quantum-warmup-epochs", type=int, default=5)
     parser.add_argument("--quantum-ramp-epochs", type=int, default=4)
     parser.add_argument("--quantum-backbone-freeze-epochs", type=int, default=0)
@@ -82,6 +83,7 @@ def main() -> None:
         qnn_qubits=args.qnn_qubits,
         qnn_depth=args.qnn_depth,
         qnn_init_scale=args.qnn_init_scale,
+        quantum_use_async=args.quantum_use_async,
         classical_only=args.classical_only,
         quantum_warmup_epochs=args.quantum_warmup_epochs,
         quantum_ramp_epochs=args.quantum_ramp_epochs,

@@ -158,7 +158,14 @@ class QuantumProjector(nn.Module):
 
 
 class QuantumBlock(nn.Module):
-    def __init__(self, n_qubits: int, depth: int, quantum_device_name: str, init_scale: float) -> None:
+    def __init__(
+        self,
+        n_qubits: int,
+        depth: int,
+        quantum_device_name: str,
+        init_scale: float,
+        use_async: bool,
+    ) -> None:
         super().__init__()
         if depth % 2 != 0:
             raise ValueError("qnn_depth must be even for the current variational block.")
@@ -170,7 +177,7 @@ class QuantumBlock(nn.Module):
         device_kwargs: dict[str, Any] = {"wires": self.n_qubits}
         if quantum_device_name.startswith("lightning."):
             device_kwargs["c_dtype"] = np.complex64
-        if quantum_device_name == "lightning.gpu":
+        if quantum_device_name == "lightning.gpu" and use_async:
             device_kwargs["use_async"] = True
         self.device = self.qml.device(quantum_device_name, **device_kwargs)
         self.num_blocks = self.depth // 2
@@ -223,6 +230,7 @@ class ModelConfig:
     qnn_depth: int = 2
     qnn_init_scale: float = 0.1
     quantum_device: str = "lightning.qubit"
+    quantum_use_async: bool = False
     classical_only: bool = False
     use_amp: bool = True
 
@@ -249,7 +257,9 @@ class HybridArielRegressor(nn.Module):
         self.projector = projector.to(classical_device) if projector is not None else None
         self.quantum_block = quantum_block.to(classical_device) if quantum_block is not None else None
         self.quantum_head = quantum_head.to(classical_device) if quantum_head is not None else None
-        self.quantum_gate = nn.Parameter(torch.tensor(0.0, dtype=torch.float32, device=classical_device))
+        self.quantum_gate = nn.Parameter(
+            torch.zeros(len(TARGET_COLUMNS), dtype=torch.float32, device=classical_device)
+        )
         self.classical_device = classical_device
         self.amp_dtype = amp_dtype
         self.classical_only = bool(classical_only)
@@ -258,15 +268,10 @@ class HybridArielRegressor(nn.Module):
     def backbone_modules(self) -> tuple[nn.Module, ...]:
         return (self.spectral_encoder, self.aux_encoder, self.fusion_encoder, self.classical_head)
 
-    def classical_parameters(self) -> Iterable[nn.Parameter]:
+    def backbone_parameters(self) -> Iterable[nn.Parameter]:
         modules = [self.spectral_encoder, self.aux_encoder, self.fusion_encoder, self.classical_head]
-        if self.projector is not None:
-            modules.append(self.projector)
-        if self.quantum_head is not None:
-            modules.append(self.quantum_head)
         for module in modules:
             yield from module.parameters()
-        yield self.quantum_gate
 
     def quantum_parameters(self) -> Iterable[nn.Parameter]:
         if self.quantum_block is None:
@@ -318,7 +323,8 @@ class HybridArielRegressor(nn.Module):
         quantum_angles = self.projector(fused)
         quantum_features = self.quantum_block(quantum_angles.float())
         quantum_correction = self.quantum_head(torch.cat([head_context, quantum_features], dim=-1))
-        return classical_pred + float(quantum_scale) * torch.tanh(self.quantum_gate) * quantum_correction.float()
+        gate = torch.tanh(self.quantum_gate).view(1, -1)
+        return classical_pred + float(quantum_scale) * gate * quantum_correction.float()
 
 
 def resolve_amp_dtype(device: torch.device, use_amp: bool) -> Optional[torch.dtype]:
@@ -335,7 +341,13 @@ def build_model(config: ModelConfig, device: torch.device) -> HybridArielRegress
     quantum_head: Optional[RegressionHead] = None
     if not config.classical_only:
         projector = QuantumProjector(config.dropout, config.qnn_qubits)
-        quantum_block = QuantumBlock(config.qnn_qubits, config.qnn_depth, config.quantum_device, config.qnn_init_scale)
+        quantum_block = QuantumBlock(
+            config.qnn_qubits,
+            config.qnn_depth,
+            config.quantum_device,
+            config.qnn_init_scale,
+            config.quantum_use_async,
+        )
         quantum_head = RegressionHead(128 + 96 + 32 + config.qnn_qubits, 192, config.dropout)
 
     return HybridArielRegressor(
