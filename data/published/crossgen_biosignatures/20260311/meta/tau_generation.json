@@ -1,0 +1,14 @@
+{
+  "data_set": "crossgen_biosignatures",
+  "generator": "tau",
+  "poseidon_native_resolution": null,
+  "row_count": 41423,
+  "shard_count": 162,
+  "shard_size": 256,
+  "software_versions": {
+    "taurex": "3.2.4"
+  },
+  "target_resolution": 100.0,
+  "target_wavelength_max_um": 5.2,
+  "target_wavelength_min_um": 0.6
+}

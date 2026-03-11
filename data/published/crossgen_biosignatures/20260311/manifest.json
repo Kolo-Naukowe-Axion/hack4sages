@@ -1,0 +1,111 @@
+{
+  "comparison_summary": {
+    "delta_mean_log10_vmr": {
+      "log10_vmr_ch4": 0.08821993872446043,
+      "log10_vmr_co": 0.1405351287886205,
+      "log10_vmr_co2": -0.08343031773293674,
+      "log10_vmr_h2o": -0.10254721982160842,
+      "log10_vmr_nh3": 0.047971184199115946
+    },
+    "delta_prevalence": {
+      "present_ch4": 0.008199048767117079,
+      "present_co": 0.0245598948783875,
+      "present_co2": -0.00805384927552677,
+      "present_h2o": -0.02679053968924139,
+      "present_nh3": 0.009648893884722565
+    },
+    "delta_std_log10_vmr": {
+      "log10_vmr_ch4": 0.052733045490787944,
+      "log10_vmr_co": -0.04720119020790481,
+      "log10_vmr_co2": 0.08224519505532157,
+      "log10_vmr_h2o": -0.015143979044652589,
+      "log10_vmr_nh3": -0.06041753608680045
+    }
+  },
+  "dataset_name": "crossgen_biosignatures",
+  "generator_counts": {
+    "poseidon": 685,
+    "tau": 41423
+  },
+  "generator_summary": {
+    "poseidon": {
+      "prevalence": {
+        "present_ch4": 0.6087591240875913,
+        "present_co": 0.6233576642335766,
+        "present_co2": 0.5956204379562043,
+        "present_h2o": 0.5766423357664233,
+        "present_nh3": 0.6058394160583942
+      },
+      "row_count": 685,
+      "split_counts": {
+        "test": 685
+      },
+      "target_means": {
+        "log10_vmr_ch4": -6.913423989069946,
+        "log10_vmr_co": -6.8541338407688706,
+        "log10_vmr_co2": -7.066331881091422,
+        "log10_vmr_h2o": -7.086996695951192,
+        "log10_vmr_nh3": -6.96437659434442
+      },
+      "target_stds": {
+        "log10_vmr_ch4": 2.940447022357035,
+        "log10_vmr_co": 2.842727070398437,
+        "log10_vmr_co2": 2.964824304130998,
+        "log10_vmr_h2o": 2.872145411993102,
+        "log10_vmr_nh3": 2.8415563421527312
+      }
+    },
+    "tau": {
+      "prevalence": {
+        "present_ch4": 0.6005600753204742,
+        "present_co": 0.5987977693551891,
+        "present_co2": 0.6036742872317311,
+        "present_h2o": 0.6034328754556647,
+        "present_nh3": 0.5961905221736716
+      },
+      "row_count": 41423,
+      "split_counts": {
+        "train": 37281,
+        "val": 4142
+      },
+      "target_means": {
+        "log10_vmr_ch4": -7.001643927794406,
+        "log10_vmr_co": -6.994668969557491,
+        "log10_vmr_co2": -6.982901563358485,
+        "log10_vmr_h2o": -6.9844494761295834,
+        "log10_vmr_nh3": -7.0123477785435355
+      },
+      "target_stds": {
+        "log10_vmr_ch4": 2.887713976866247,
+        "log10_vmr_co": 2.8899282606063417,
+        "log10_vmr_co2": 2.8825791090756763,
+        "log10_vmr_h2o": 2.8872893910377546,
+        "log10_vmr_nh3": 2.9019738782395317
+      }
+    }
+  },
+  "noise_model": {
+    "per_sample_scalar": true,
+    "sigma_ppm_max": 99.99986515409039,
+    "sigma_ppm_min": 20.000504444986042,
+    "type": "iid_gaussian_white"
+  },
+  "row_count": 42108,
+  "seed": 20260310,
+  "software_versions": {
+    "poseidon": {
+      "poseidon": "1.3.2"
+    },
+    "tau": {
+      "taurex": "3.2.4"
+    }
+  },
+  "wavelength_grid": {
+    "bin_count": 218,
+    "max_um_actual_edge": 5.250621771326985,
+    "max_um_requested": 5.2,
+    "min_um": 0.6,
+    "resolution": 100.0,
+    "type": "constant_resolution"
+  }
+}
