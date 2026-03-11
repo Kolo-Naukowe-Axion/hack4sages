@@ -4,11 +4,15 @@ __MACOSX/
 
 # IDE & tools
 .claude/
+.ipynb_checkpoints/
 
 # Python
 .venv/
+.venv-sbi-mac/
+.venv-train312/
 .venv-prt311/
 .local-prt/
+.codex-venv/
 local_runs/
 __pycache__/
 *.pyc
@@ -16,6 +20,15 @@ __pycache__/
 # Generated runs and logs
 data/generated-data/
 data/local_runs/
+tmp/
+output/
+outputs/
+*.log
+*.pt
+*.pkl
+*.keras
+*.npy
+*.npz
 
 # Curated datasets live on origin/iwosmu/data-artifacts
 data/ariel-ml-dataset/

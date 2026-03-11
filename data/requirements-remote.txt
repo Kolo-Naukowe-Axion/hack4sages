@@ -1,9 +1,11 @@
 h5py
 meson-python
+molmass
 ninja
 numpy
 pandas
 petitRADTRANS==2.6.7
+pyarrow
 scipy
 tables
 taurex
