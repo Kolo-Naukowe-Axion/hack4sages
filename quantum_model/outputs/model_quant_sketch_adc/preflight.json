@@ -1,0 +1,28 @@
+{
+  "feature_count": 8,
+  "inner_train_rows": 33552,
+  "inner_val_rows": 3728,
+  "row_count": 41423,
+  "safe_aux_feature_cols": [
+    "star_mass_kg",
+    "star_radius_m",
+    "star_temperature",
+    "planet_mass_kg",
+    "planet_orbital_period",
+    "planet_distance",
+    "planet_surface_gravity",
+    "log10_noise_mean"
+  ],
+  "target_cols": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ],
+  "target_count": 5,
+  "test_rows": 4143,
+  "wavelength_bins": 52,
+  "wavelength_max_um": 7.275559425354004,
+  "wavelength_min_um": 0.550000011920929
+}

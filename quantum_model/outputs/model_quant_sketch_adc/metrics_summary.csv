@@ -1,0 +1,6 @@
+split,target,rmse
+test,log_H2O,0.6352218
+test,log_CO2,0.52124584
+test,log_CO,0.54262674
+test,log_CH4,0.43973738
+test,log_NH3,0.5705643

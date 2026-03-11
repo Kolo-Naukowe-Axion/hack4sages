@@ -1,0 +1,6 @@
+{
+  "best_epoch": 30,
+  "best_inner_val_loss": 0.17367826402187347,
+  "output_dir": "outputs/model_quant_sketch_adc",
+  "test_rmse_mean": 0.5418792366981506
+}
