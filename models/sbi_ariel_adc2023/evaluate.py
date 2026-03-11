@@ -78,6 +78,7 @@ def _sample_predictions(
     row_indices: np.ndarray,
     progress_label: Optional[str] = None,
     progress_every_batches: int = 0,
+    sampling_seed: Optional[int] = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     mean_predictions: list[np.ndarray] = []
     median_predictions: list[np.ndarray] = []
@@ -90,8 +91,13 @@ def _sample_predictions(
             flush=True,
         )
 
+    fork_devices = [device.index or 0] if device.type == "cuda" else []
     model.network.eval()
-    with torch.no_grad():
+    with torch.random.fork_rng(devices=fork_devices), torch.no_grad():
+        if sampling_seed is not None:
+            torch.manual_seed(int(sampling_seed))
+            if device.type == "cuda":
+                torch.cuda.manual_seed_all(int(sampling_seed))
         for batch_number, start in enumerate(range(0, len(row_indices), context_batch_size), start=1):
             batch_indices = torch.as_tensor(row_indices[start : start + context_batch_size], dtype=torch.long)
             context = context_tensor.index_select(0, batch_indices)
@@ -100,11 +106,18 @@ def _sample_predictions(
                 batch_number % progress_every_batches == 0 or batch_number == total_batches
             ):
                 print(f"{progress_label}: starting batch {batch_number}/{total_batches}", flush=True)
-            samples, _ = model.sample_and_log_prob(context, num_samples=posterior_samples)
+            sampler = getattr(model, "sample", None)
+            if callable(sampler):
+                samples = sampler(context, num_samples=posterior_samples)
+            else:
+                samples, _ = model.sample_and_log_prob(context, num_samples=posterior_samples)
             batch_size = samples.shape[0]
-            samples_np = samples.detach().cpu().numpy().reshape(batch_size * posterior_samples, len(TARGET_COLS))
-            mean_predictions.append(samples_np.reshape(batch_size, posterior_samples, len(TARGET_COLS)).mean(axis=1))
-            median_predictions.append(np.median(samples_np.reshape(batch_size, posterior_samples, len(TARGET_COLS)), axis=1))
+            samples_np = samples.detach().cpu().numpy().reshape(batch_size, posterior_samples, len(TARGET_COLS))
+            mean_predictions.append(samples_np.mean(axis=1))
+            if posterior_samples == 1:
+                median_predictions.append(samples_np[:, 0, :])
+            else:
+                median_predictions.append(np.median(samples_np, axis=1))
             if progress_label is not None and progress_every_batches > 0 and (
                 batch_number % progress_every_batches == 0 or batch_number == total_batches
             ):
@@ -124,6 +137,7 @@ def evaluate_split(
     row_selection_seed: int = 42,
     progress_label: Optional[str] = None,
     progress_every_batches: int = 0,
+    sampling_seed: Optional[int] = None,
 ) -> tuple[dict[str, Any], Optional[pd.DataFrame]]:
     row_indices = select_row_indices(len(dataset), max_rows=max_rows, seed=row_selection_seed)
     pred_mean_norm, pred_median_norm = _sample_predictions(
@@ -135,6 +149,7 @@ def evaluate_split(
         row_indices=row_indices,
         progress_label=progress_label,
         progress_every_batches=progress_every_batches,
+        sampling_seed=sampling_seed,
     )
     pred_mean = dataset.inverse_transform_theta(pred_mean_norm)
     pred_median = dataset.inverse_transform_theta(pred_median_norm)

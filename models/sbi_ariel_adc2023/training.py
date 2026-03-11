@@ -270,6 +270,101 @@ def maybe_run_periodic_rmse(
     return record
 
 
+def run_fast_validation_rmse(
+    model: Any,
+    settings: dict[str, Any],
+    dataset,
+    training_device: torch.device,
+    epoch: int,
+    global_step: int,
+    run_path: Path,
+    wandb_module: Optional[Any],
+) -> Optional[dict[str, Any]]:
+    evaluation_cfg = settings.get("evaluation", {})
+    if not bool(evaluation_cfg.get("fast_validation_metric_enabled", True)):
+        return None
+    every_epochs = int(evaluation_cfg.get("fast_validation_metric_every_epochs", 1) or 0)
+    if every_epochs <= 0 or epoch % every_epochs != 0:
+        return None
+
+    eval_device = resolve_evaluation_device(settings)
+    posterior_samples = int(evaluation_cfg.get("fast_validation_metric_posterior_samples", 1))
+    context_batch_size = int(evaluation_cfg.get("fast_validation_metric_context_batch_size", 256))
+    max_rows = evaluation_cfg.get("fast_validation_metric_max_rows")
+    row_selection_seed = int(evaluation_cfg.get("fast_validation_metric_row_seed", settings.get("seed", 42)))
+    sampling_seed = int(evaluation_cfg.get("fast_validation_metric_sampling_seed", settings.get("seed", 42)))
+    progress_every_batches = int(evaluation_cfg.get("fast_validation_metric_progress_every_batches", 0) or 0)
+
+    original_device = training_device
+    moved = eval_device != original_device
+    if moved:
+        from .dingo_compat import move_model_to_device
+
+        move_model_to_device(model, eval_device)
+
+    try:
+        subset_rows = min(len(dataset), int(max_rows)) if max_rows not in (None, 0) else len(dataset)
+        print(
+            f"Epoch {epoch} fast validation mRMSE | device={eval_device} rows={subset_rows}/{len(dataset)} "
+            f"posterior_samples={posterior_samples}",
+            flush=True,
+        )
+        metrics, _ = evaluate_split(
+            model=model,
+            dataset=dataset,
+            device=eval_device,
+            posterior_samples=posterior_samples,
+            context_batch_size=context_batch_size,
+            include_predictions=False,
+            max_rows=max_rows,
+            row_selection_seed=row_selection_seed,
+            progress_label=f"epoch {epoch} fast validation",
+            progress_every_batches=progress_every_batches,
+            sampling_seed=sampling_seed,
+        )
+    finally:
+        if moved:
+            from .dingo_compat import move_model_to_device
+
+            move_model_to_device(model, original_device)
+        model.network.train()
+
+    record = {
+        "epoch": epoch,
+        "global_step": global_step,
+        "device": str(eval_device),
+        "posterior_samples": posterior_samples,
+        "num_rows": int(metrics["num_rows"]),
+        "full_num_rows": int(metrics["full_num_rows"]),
+        "rmse_mean": float(metrics["mean"]["rmse_mean"]),
+        "rmse": metrics["mean"]["rmse"],
+        "mae_mean": float(metrics["mean"]["mae_mean"]),
+        "mae": metrics["mean"]["mae"],
+    }
+    append_jsonl(run_path / "validation_rmse.jsonl", record)
+    print(
+        "Epoch {epoch} fast validation mRMSE | mean={rmse_mean:.6f} rows={rows} samples={samples} device={device}".format(
+            epoch=record["epoch"],
+            rmse_mean=record["rmse_mean"],
+            rows=record["num_rows"],
+            samples=record["posterior_samples"],
+            device=record["device"],
+        ),
+        flush=True,
+    )
+    if wandb_module is not None:
+        wandb_module.log(
+            {
+                "epoch": epoch,
+                "global_step": global_step,
+                "val_rmse_mean": record["rmse_mean"],
+                "val_mae_mean": record["mae_mean"],
+            },
+            step=global_step,
+        )
+    return record
+
+
 def train_model(
     settings: dict[str, Any],
     run_dir: str | Path,
@@ -419,9 +514,9 @@ def train_model(
                 step=state.global_step,
             )
 
-        rmse_record = None
+        fast_rmse_record = None
         try:
-            rmse_record = maybe_run_periodic_rmse(
+            fast_rmse_record = run_fast_validation_rmse(
                 model=model,
                 settings=settings,
                 dataset=datasets["validation"],
@@ -432,22 +527,12 @@ def train_model(
                 wandb_module=wandb_module,
             )
         except Exception as exc:
-            append_jsonl(
-                run_path / "validation_rmse.jsonl",
-                {
-                    "epoch": state.epoch,
-                    "global_step": state.global_step,
-                    "status": "error",
-                    "error": str(exc),
-                },
-            )
-            print(f"Epoch {state.epoch} RMSE monitor skipped due to error: {exc}", flush=True)
+            append_jsonl(run_path / "validation_rmse.jsonl", {"epoch": state.epoch, "global_step": state.global_step, "status": "error", "error": str(exc)})
+            print(f"Epoch {state.epoch} fast validation mRMSE skipped due to error: {exc}", flush=True)
 
-        if rmse_record is not None:
-            mean_rmse = float(rmse_record["mean_rmse_mean"])
-            median_rmse = float(rmse_record["median_rmse_mean"])
-            monitor_rmse = mean_rmse if mean_rmse <= median_rmse else median_rmse
-            estimator = "mean" if mean_rmse <= median_rmse else "median"
+        if fast_rmse_record is not None:
+            monitor_rmse = float(fast_rmse_record["rmse_mean"])
+            estimator = "single_sample"
             if monitor_rmse < state.best_monitor_rmse_mean:
                 state.best_monitor_rmse_mean = monitor_rmse
                 state.best_monitor_epoch = int(state.epoch)
@@ -459,13 +544,27 @@ def train_model(
                             "epoch": state.best_monitor_epoch,
                             "rmse_mean": state.best_monitor_rmse_mean,
                             "selected_point_estimate": state.best_monitor_estimator,
-                            "record": rmse_record,
+                            "record": fast_rmse_record,
                         },
                         indent=2,
                         sort_keys=True,
                     )
                     + "\n"
                 )
+
+        try:
+            maybe_run_periodic_rmse(
+                model=model,
+                settings=settings,
+                dataset=datasets["validation"],
+                training_device=device,
+                epoch=state.epoch,
+                global_step=state.global_step,
+                run_path=run_path,
+                wandb_module=wandb_module,
+            )
+        except Exception as exc:
+            print(f"Epoch {state.epoch} periodic RMSE monitor skipped due to error: {exc}", flush=True)
 
         if val_loss < state.best_val_loss:
             state.best_val_loss = float(val_loss)
