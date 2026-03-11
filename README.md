@@ -4,18 +4,18 @@ Quantum biosignature detection web app. Built by **Axion** for HACK-4-SAGES 2026
 
 Two design variants:
 
-- **`web/planet-field/`** — Interactive planet orbs in a dark star field, click to explore
-- **`web/notebook/`** — Jupyter notebook aesthetic with code cells and output blocks
+- **`web/planet-map/`** — Interactive planet map with scatter-plot visualization
+- **`web/startup-landing/`** — Modern startup landing page with gradient hero
 
 ## Screenshots
 
-### Planet Field
+### Planet Map
 
-![Planet Field Landing](docs/screenshots/planet-field-landing.png)
+![Planet Map Landing](docs/screenshots/planet-map-landing.png)
 
-### Notebook
+### Startup Landing
 
-![Notebook Landing](docs/screenshots/notebook-landing.png)
+![Startup Landing](docs/screenshots/startup-landing.png)
 
 ## Tech Stack
 
@@ -24,14 +24,14 @@ Next.js 16, React 19, Tailwind CSS v4, Framer Motion, Nivo, TypeScript
 ## Run locally
 
 ```bash
-# Planet Field version
-cd web/planet-field
+# Planet Map version
+cd web/planet-map
 npm install
 npm run dev
 # http://localhost:3000
 
-# Notebook version (separate terminal)
-cd web/notebook
+# Startup Landing version (separate terminal)
+cd web/startup-landing
 npm install
 npm run dev -- --port 3001
 # http://localhost:3001
@@ -40,7 +40,7 @@ npm run dev -- --port 3001
 ## Build
 
 ```bash
-cd web/planet-field  # or web/notebook
+cd web/planet-map  # or web/startup-landing
 npm run build
 npm start
 ```
