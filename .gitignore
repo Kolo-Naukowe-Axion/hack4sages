@@ -3,16 +3,10 @@
 __MACOSX/
 
 # IDE & tools
-.claude/
 .ipynb_checkpoints/
 
 # Python
 .venv/
-.venv-sbi-mac/
-.venv-train312/
-.venv-prt311/
-.local-prt/
-.codex-venv/
 local_runs/
 __pycache__/
 *.pyc
@@ -32,6 +26,7 @@ outputs/
 
 # Curated datasets live on origin/iwosmu/data-artifacts
 data/ariel-ml-dataset/
+data/full-ariel/
 data/petitradtrans-adc2023-validation/
 data/reference_data/
 data/eda/
