@@ -8,25 +8,26 @@ Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
 
 | Branch | What |
 |--------|------|
-| `main` | Project root, EDA, datasets, validation-set generator |
+| `main` | Project code, workflow docs, generators, and validators |
+| `iwosmu/data-artifacts` | Curated datasets and EDA assets |
 | `feat/web` | Web frontend (two design variants) |
 
 ## Quick Start
 
-- **EDA**: see [`data/eda/README.md`](data/eda/README.md)
+- **Datasets and EDA**: see [`data/README.md`](data/README.md)
 - **Validation Set Method**: see [`data/VALIDATION_SET_METHOD.md`](data/VALIDATION_SET_METHOD.md)
 - **Web App**: switch to `feat/web` branch for setup instructions
 
 ## Datasets
 
-- `data/ariel-ml-dataset/`: canonical ADC2023-format challenge dataset, committed with Git LFS.
-- `data/petitradtrans-adc2023-validation/`: generated pRT-based ADC2023 validation dataset, committed with Git LFS.
+- Curated datasets and EDA are published on `origin/iwosmu/data-artifacts`.
+- The current published generated dataset is `data/published/crossgen_biosignatures/20260311/` on that branch.
+- `data/generated-data/` remains the local scratch output root for ignored generation runs on `main`.
 
 ## Data Workflow
 
-- `data/eda/`: exploratory data analysis of the ADC dataset.
 - `data/prt_adc2023_validation/`: generator, physics helpers, empirical prior, and validator.
-- `data/reference_data/adc2023_reference_bundle.npz`: compact empirical reference bundle built from the local ADC dataset.
+- `data/reference_data/adc2023_reference_bundle.npz`: published reference bundle lives on the data branch; rebuild locally with the script below when needed.
 - `data/scripts/build_reference_bundle.py`: rebuild the compact empirical prior bundle.
 - `data/scripts/rebin_prt_opacities.py`: rebin official pRT correlated-k opacities to `R=400`.
 - `data/scripts/generate_validation_set.py`: generate shard outputs and assemble the final dataset.

@@ -17,6 +17,13 @@ __pycache__/
 data/generated-data/
 data/local_runs/
 
+# Curated datasets live on origin/iwosmu/data-artifacts
+data/ariel-ml-dataset/
+data/petitradtrans-adc2023-validation/
+data/reference_data/
+data/eda/
+data/published/
+
 # EDA local assets
 data/eda/data/
 data/eda/.venv/
