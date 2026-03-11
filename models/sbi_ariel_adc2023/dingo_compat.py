@@ -16,9 +16,7 @@ def _import_dingo() -> Any:
         raise ImportError(
             "dingo-gw core is required for FMPE training. Install it with "
             "`python -m pip install --no-deps dingo-gw==0.8.3` and then install "
-            "the platform-specific requirements file for this workflow "
-            "(`models/sbi_ariel_adc2023/requirements-mac.txt` on macOS, "
-            "`models/sbi_ariel_adc2023/requirements-vast.txt` on Vast/Linux). "
+            "the FMPE dependencies used by this workflow's bootstrap commands. "
             f"Original import error: {exc}"
         ) from exc
     return build_model_from_kwargs

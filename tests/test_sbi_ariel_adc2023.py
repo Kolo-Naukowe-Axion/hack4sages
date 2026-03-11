@@ -24,7 +24,7 @@ HAS_H5PY = importlib.util.find_spec("h5py") is not None
 
 class DatasetPreflightTests(unittest.TestCase):
     def test_workflow_folder_is_self_contained(self) -> None:
-        forbidden = ("models.ariel_quantum_regression", "models.sbi_ariel_crossgen")
+        forbidden = ("models.ariel_quantum_regression", "models.old_model", "crossgen_hybrid_training")
         for path in WORKFLOW_ROOT.glob("*.py"):
             text = path.read_text(encoding="utf-8")
             for token in forbidden:

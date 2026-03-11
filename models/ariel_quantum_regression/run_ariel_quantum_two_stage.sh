@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 PYTHON_BIN="${PYTHON_BIN:-$HOME/.venvs/ariel-quantum-regression/bin/python}"
 DATA_ROOT="${1:-${PROJECT_ROOT}/data/ariel-ml-dataset}"
@@ -21,7 +21,7 @@ echo "Python: ${PYTHON_BIN}"
 echo "Started: $(date --iso-8601=seconds)"
 
 stage1_cmd=(
-  "${PYTHON_BIN}" -u "${PROJECT_ROOT}/models/run_ariel_quantum_regression.py"
+  "${PYTHON_BIN}" -u "${PROJECT_ROOT}/models/ariel_quantum_regression/run_ariel_quantum_regression.py"
   --project-root "${PROJECT_ROOT}"
   --data-root "${DATA_ROOT}"
   --output-dir "${STAGE1_DIR}"
@@ -50,7 +50,7 @@ echo "=== Stage 1: classical backbone ==="
 "${stage1_cmd[@]}" 2>&1 | tee "${STAGE1_DIR}/train.log"
 
 stage2_cmd=(
-  "${PYTHON_BIN}" -u "${PROJECT_ROOT}/models/run_ariel_quantum_regression.py"
+  "${PYTHON_BIN}" -u "${PROJECT_ROOT}/models/ariel_quantum_regression/run_ariel_quantum_regression.py"
   --project-root "${PROJECT_ROOT}"
   --data-root "${DATA_ROOT}"
   --output-dir "${STAGE2_DIR}"

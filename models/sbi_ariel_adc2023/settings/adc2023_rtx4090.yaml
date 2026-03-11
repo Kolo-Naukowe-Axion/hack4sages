@@ -55,7 +55,7 @@ evaluation:
   context_batch_size: 32
   progress_every_batches: 0
   run_after_training: true
-  periodic_rmse_every_epochs: 5
+  periodic_rmse_every_epochs: 0
   periodic_posterior_samples: 1
   periodic_context_batch_size: 8
   periodic_rmse_max_rows: 8

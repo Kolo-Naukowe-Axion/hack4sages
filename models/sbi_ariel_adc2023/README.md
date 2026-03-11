@@ -10,7 +10,6 @@ Contents:
 - `runtime.py`: local PyTorch training utilities
 - `training.py`, `train.py`, `evaluate.py`: train, resume, and evaluate the FMPE model
 - `settings/adc2023_rtx4090.yaml`: default 4090-oriented training config
-- `requirements-vast.txt`, `requirements-mac.txt`: platform dependency lists
 - `run_train_ubuntu4090.sh`: end-to-end launcher for Linux/Vast-style machines
 - `adc2023_fmpe_runbook.ipynb`: one notebook with setup, prepare, train, monitor, and evaluate steps
 

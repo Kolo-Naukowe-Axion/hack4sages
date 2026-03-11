@@ -1,13 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${WORKFLOW_DIR}/../.." && pwd)"
 ENV_DIR="${ENV_DIR:-$HOME/.venvs/ariel-quantum-regression}"
 PYTHON_BIN="${PYTHON_BIN:-python3.11}"
 
 "$PYTHON_BIN" -m venv "$ENV_DIR"
 "$ENV_DIR/bin/python" -m pip install --upgrade pip
-"$ENV_DIR/bin/python" -m pip install -r "$REPO_ROOT/models/requirements-ariel-quantum.txt"
+"$ENV_DIR/bin/python" -m pip install \
+  "numpy>=1.26" \
+  "pandas>=2.2" \
+  "h5py>=3.10" \
+  "pyarrow>=17" \
+  "scikit-learn>=1.5" \
+  "torch>=2.3" \
+  "pennylane>=0.44,<0.45" \
+  "pennylane-lightning>=0.44,<0.45"
 "$ENV_DIR/bin/python" - <<'PY'
 import importlib
 
@@ -27,7 +36,7 @@ cat <<EOF
 
 Environment ready.
 Run hybrid training with live progress:
-$ENV_DIR/bin/python -u $REPO_ROOT/models/run_ariel_quantum_regression.py \\
+$ENV_DIR/bin/python -u $REPO_ROOT/models/ariel_quantum_regression/run_ariel_quantum_regression.py \\
   --data-root $REPO_ROOT/data/ariel-ml-dataset \\
   --output-dir $REPO_ROOT/outputs/ariel_quantum_regression_live \\
   --batch-size 64 \\
@@ -36,7 +45,7 @@ $ENV_DIR/bin/python -u $REPO_ROOT/models/run_ariel_quantum_regression.py \\
   --log-every-batches 20
 
 Run a faster Mac baseline first:
-$ENV_DIR/bin/python -u $REPO_ROOT/models/run_ariel_quantum_regression.py \\
+$ENV_DIR/bin/python -u $REPO_ROOT/models/ariel_quantum_regression/run_ariel_quantum_regression.py \\
   --data-root $REPO_ROOT/data/ariel-ml-dataset \\
   --output-dir $REPO_ROOT/outputs/ariel_quantum_regression_classical_mac \\
   --classical-only \\
