@@ -1,0 +1,526 @@
+.page {
+  padding: 2.5rem 0 4rem;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(180, 88, 58, 0.12), transparent 20rem),
+    radial-gradient(circle at 88% 14%, rgba(25, 88, 106, 0.16), transparent 18rem),
+    linear-gradient(180deg, #f4ecda 0%, #ede1c8 100%);
+}
+
+.board {
+  width: min(1400px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.1rem;
+  border-radius: 30px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(252, 245, 232, 0.88)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(24, 35, 42, 0.03) 0,
+      rgba(24, 35, 42, 0.03) 1px,
+      transparent 1px,
+      transparent 180px
+    );
+  border: 1px solid rgba(24, 35, 42, 0.14);
+  box-shadow: 0 30px 90px rgba(48, 39, 18, 0.15);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 1rem;
+  padding: 1.2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(24, 35, 42, 0.12);
+  background:
+    linear-gradient(135deg, rgba(255, 250, 242, 0.96), rgba(239, 230, 212, 0.92)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent);
+}
+
+.headerLead {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.kicker {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(25, 88, 106, 0.09);
+  color: #2d5964;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: clamp(3.6rem, 8vw, 6.6rem);
+  line-height: 0.92;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #132230;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 56ch;
+  color: rgba(19, 34, 48, 0.8);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.headerStats {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.metricTile {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(19, 34, 48, 0.12);
+}
+
+.metricTile span,
+.metricTile small {
+  color: rgba(19, 34, 48, 0.66);
+  font-size: 0.86rem;
+}
+
+.metricTile strong {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 2rem;
+  color: #132230;
+}
+
+.abstractStrip,
+.footerStrip {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.abstractCard,
+.noteCard,
+.panel {
+  border-radius: 22px;
+  border: 1px solid rgba(19, 34, 48, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 247, 237, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.abstractCard,
+.noteCard {
+  padding: 1rem 1.1rem;
+}
+
+.abstractLabel {
+  margin: 0 0 0.5rem;
+  color: #b4583a;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.abstractCard p,
+.noteCard p {
+  margin: 0;
+  line-height: 1.7;
+  color: rgba(19, 34, 48, 0.8);
+}
+
+.posterGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.column {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel {
+  padding: 1rem 1.05rem 1.1rem;
+}
+
+.panelHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(19, 34, 48, 0.1);
+}
+
+.panelHeading h2 {
+  margin: 0;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #132230;
+}
+
+.panelHeading span {
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.8rem;
+  color: rgba(19, 34, 48, 0.55);
+}
+
+.factGrid,
+.resultsGrid,
+.modelRow {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.factGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.fact,
+.resultCard,
+.modelCard {
+  padding: 0.9rem;
+  border-radius: 18px;
+  border: 1px solid rgba(19, 34, 48, 0.11);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.fact small,
+.resultCard small,
+.modelCard small,
+.gasTopline small,
+.archBlock small {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: rgba(19, 34, 48, 0.6);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fact strong,
+.resultCard strong,
+.gasTopline strong,
+.modelCard strong,
+.archBlock strong {
+  color: #132230;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+}
+
+.fact strong {
+  font-size: 1.2rem;
+}
+
+.captionBlock {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-left: 5px solid #b4583a;
+  background: rgba(180, 88, 58, 0.06);
+}
+
+.captionTitle {
+  margin: 0 0 0.25rem;
+  font-weight: 700;
+}
+
+.captionBlock p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.gasList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.gasCard {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 241, 227, 0.92));
+  border: 1px solid rgba(19, 34, 48, 0.12);
+}
+
+.gasTopline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.gasTopline strong {
+  font-size: 1.45rem;
+  letter-spacing: 0.06em;
+}
+
+.gasCard p,
+.gasCard span,
+.pipelineStep p,
+.resultCard,
+.modelCard p,
+.archBlock p,
+.callout p,
+.demoList li {
+  color: rgba(19, 34, 48, 0.77);
+  line-height: 1.55;
+}
+
+.gasCard span {
+  font-size: 0.92rem;
+}
+
+.pipeline {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.pipelineStep {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 0.8rem;
+  align-items: start;
+  padding: 0.8rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(19, 34, 48, 0.1);
+}
+
+.stepIndex {
+  display: grid;
+  place-items: center;
+  height: 54px;
+  border-radius: 16px;
+  background: #19586a;
+  color: white;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.88rem;
+}
+
+.pipelineStep h3 {
+  margin: 0 0 0.25rem;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pipelineStep p {
+  margin: 0;
+}
+
+.figurePanel {
+  overflow: hidden;
+}
+
+.spectrum {
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  border: 1px solid rgba(19, 34, 48, 0.1);
+  background: linear-gradient(180deg, #fffaf1, #f7eedf);
+}
+
+.svgLabel,
+.svgLegend {
+  fill: rgba(19, 34, 48, 0.64);
+  font-size: 12px;
+  font-family: "SF Mono", "Menlo", monospace;
+}
+
+.architecture {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.8rem;
+  align-items: stretch;
+}
+
+.archBlock {
+  padding: 0.95rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(19, 34, 48, 0.12);
+}
+
+.archBlock strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.2rem;
+}
+
+.archBlock p,
+.callout p,
+.modelCard p {
+  margin: 0;
+}
+
+.archConnector {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #b4583a, #19586a);
+  color: white;
+  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+  font-size: 1.8rem;
+}
+
+.callout {
+  margin-top: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: rgba(25, 88, 106, 0.08);
+  border: 1px solid rgba(25, 88, 106, 0.14);
+}
+
+.callout strong {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #19586a;
+}
+
+.resultsGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.resultCard strong {
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+}
+
+.barGroup {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
+.barRow {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.barLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.82rem;
+  color: rgba(19, 34, 48, 0.76);
+}
+
+.barTrack {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(19, 34, 48, 0.1);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #19586a, #b4583a);
+}
+
+.figureCaption {
+  margin: 0.8rem 0 0;
+  color: rgba(19, 34, 48, 0.62);
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.modelRow {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.modelCard {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.modelCard strong {
+  font-size: 1.15rem;
+}
+
+.modelCard span {
+  color: #b4583a;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.demoList {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+@media (max-width: 1180px) {
+  .header,
+  .abstractStrip,
+  .posterGrid,
+  .footerStrip,
+  .architecture {
+    grid-template-columns: 1fr;
+  }
+
+  .archConnector {
+    width: 100%;
+    min-height: 56px;
+  }
+
+  .modelRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: 1.5rem;
+  }
+
+  .board {
+    width: min(100% - 1rem, 1400px);
+    padding: 0.7rem;
+    border-radius: 22px;
+  }
+
+  .header,
+  .abstractCard,
+  .noteCard,
+  .panel {
+    border-radius: 18px;
+  }
+
+  .factGrid,
+  .gasList,
+  .resultsGrid,
+  .modelRow {
+    grid-template-columns: 1fr;
+  }
+
+  .pipelineStep {
+    grid-template-columns: 1fr;
+  }
+
+  .stepIndex {
+    height: 44px;
+  }
+}

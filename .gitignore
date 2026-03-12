@@ -4,9 +4,12 @@ __MACOSX/
 
 # IDE & tools
 .ipynb_checkpoints/
+web/presentation-lab/node_modules/
+web/presentation-lab/.next/
 
 # Python
 .venv/
+.venv-ariel-eval/
 local_runs/
 __pycache__/
 *.pyc

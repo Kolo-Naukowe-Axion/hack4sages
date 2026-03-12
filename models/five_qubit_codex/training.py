@@ -1,4 +1,4 @@
-"""Training loop for the Ariel five-gas hybrid regressor."""
+"""Training loop for the Five-qubit Codex Ariel hybrid regressor."""
 
 from __future__ import annotations
 
@@ -62,7 +62,7 @@ class TrainingConfig:
     gradient_clip_norm: float = 5.0
     dropout: float = 0.1
     loss_name: str = "mse"
-    qnn_qubits: int = 8
+    qnn_qubits: int = 5
     qnn_depth: int = 2
     qnn_init_scale: float = 0.1
     quantum_device: str = default_quantum_device()

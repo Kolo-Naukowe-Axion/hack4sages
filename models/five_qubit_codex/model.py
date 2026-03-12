@@ -1,4 +1,4 @@
-"""Model definition for the Ariel five-gas hybrid regressor."""
+"""Model definition for the Five-qubit Codex Ariel hybrid regressor."""
 
 from __future__ import annotations
 
@@ -226,7 +226,7 @@ class QuantumBlock(nn.Module):
 class ModelConfig:
     spectral_input_channels: int = 4
     dropout: float = 0.1
-    qnn_qubits: int = 8
+    qnn_qubits: int = 5
     qnn_depth: int = 2
     qnn_init_scale: float = 0.1
     quantum_device: str = "lightning.qubit"

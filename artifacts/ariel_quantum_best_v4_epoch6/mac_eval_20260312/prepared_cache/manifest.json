@@ -1,0 +1,71 @@
+{
+  "aux_columns": [
+    "star_distance",
+    "star_mass_kg",
+    "star_radius_m",
+    "star_temperature",
+    "planet_mass_kg",
+    "planet_orbital_period",
+    "planet_distance",
+    "planet_surface_gravity"
+  ],
+  "data_root": "/Users/iwosmura/projects/hack4sages/data/full-ariel",
+  "fixed_spectral_channels": [
+    "instrument_width",
+    "instrument_wlgrid"
+  ],
+  "limits": {
+    "holdout": null,
+    "testdata": null,
+    "train": null,
+    "val": null
+  },
+  "log10_aux_columns": [
+    "star_distance",
+    "star_mass_kg",
+    "star_radius_m",
+    "planet_mass_kg",
+    "planet_orbital_period",
+    "planet_distance",
+    "planet_surface_gravity"
+  ],
+  "model_spectral_channels": [
+    "instrument_spectrum",
+    "instrument_noise",
+    "instrument_width_template",
+    "wavelength_um"
+  ],
+  "presence_threshold_log10_vmr": -8.0,
+  "raw_spectral_channels": [
+    "instrument_spectrum",
+    "instrument_noise",
+    "instrument_width",
+    "instrument_wlgrid"
+  ],
+  "sample_spectral_channels": [
+    "instrument_spectrum",
+    "instrument_noise"
+  ],
+  "sample_spectral_normalization": {
+    "applied_channels": [
+      "instrument_spectrum",
+      "instrument_noise"
+    ],
+    "mode": "divide_by_sample_mean",
+    "reference_channel": "instrument_spectrum"
+  },
+  "seed": 42,
+  "split_fractions": {
+    "holdout": 0.1,
+    "train": 0.8,
+    "val": 0.1
+  },
+  "target_columns": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ],
+  "version": 3
+}

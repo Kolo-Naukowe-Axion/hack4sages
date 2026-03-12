@@ -1,0 +1,17 @@
+{
+  "checkpoint_path": "/Users/iwosmura/projects/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+  "data_root": "/Users/iwosmura/projects/hack4sages/data/full-ariel",
+  "device": "cpu",
+  "evaluation_date": "2026-03-12",
+  "evaluation_host": "Iwos-MacBook-Pro.local",
+  "holdout_mae_mean": 0.18372765183448792,
+  "holdout_rmse_mean": 0.29869264364242554,
+  "platform": "macOS-26.2-arm64-arm-64bit",
+  "prepared_cache_dir": "/Users/iwosmura/projects/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/prepared_cache",
+  "python_version": "3.11.14",
+  "quantum_device": "lightning.qubit",
+  "split_check": "ok",
+  "torch_version": "2.10.0",
+  "validation_mae_mean": 0.1824951469898224,
+  "validation_rmse_mean": 0.29482102394104004
+}

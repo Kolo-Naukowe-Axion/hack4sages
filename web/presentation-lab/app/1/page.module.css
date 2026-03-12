@@ -1,0 +1,479 @@
+.page {
+  position: relative;
+  color: #19272d;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(13, 95, 99, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 95, 99, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at top right, rgba(200, 165, 100, 0.16), transparent 22rem),
+    radial-gradient(circle at left center, rgba(13, 95, 99, 0.08), transparent 20rem);
+  background-size: 28px 28px, 28px 28px, auto, auto;
+  pointer-events: none;
+}
+
+.shell {
+  position: relative;
+  display: grid;
+  gap: 1.4rem;
+}
+
+.hero,
+.overviewGrid,
+.analysisGrid,
+.verificationGrid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hero {
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+}
+
+.overviewGrid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+}
+
+.analysisGrid {
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+}
+
+.verificationGrid {
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 1.05fr);
+}
+
+.masthead,
+.panel,
+.metricCard,
+.quickFacts {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(25, 39, 45, 0.12);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(248, 244, 235, 0.7));
+  box-shadow:
+    0 24px 60px rgba(18, 34, 41, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.masthead,
+.panel {
+  padding: 1.7rem;
+}
+
+.controlStack {
+  display: grid;
+  gap: 1rem;
+}
+
+.masthead::after,
+.panel::after,
+.metricCard::after,
+.quickFacts::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(25, 39, 45, 0.06);
+  pointer-events: none;
+}
+
+.docketRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.kicker,
+.cardLabel,
+.sectionIndex {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: #59727a;
+}
+
+.kicker {
+  font-size: 0.8rem;
+}
+
+.stamp {
+  border: 1px solid rgba(121, 71, 58, 0.24);
+  border-radius: 999px;
+  padding: 0.48rem 0.78rem;
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #7c4437;
+  background: rgba(121, 71, 58, 0.06);
+}
+
+.masthead h1 {
+  margin: 0.7rem 0 0.9rem;
+  font-family: var(--font-display);
+  font-size: clamp(3.4rem, 7vw, 6.6rem);
+  line-height: 0.9;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 55rem;
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  color: rgba(25, 39, 45, 0.84);
+}
+
+.memo {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(25, 39, 45, 0.16);
+}
+
+.memo div,
+.quickFacts div,
+.metricLedger div {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.memo span,
+.quickFacts span,
+.metricLedger span {
+  font-family: var(--font-display);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6f7f83;
+}
+
+.memo strong,
+.quickFacts strong,
+.metricLedger strong {
+  font-size: 1.03rem;
+  line-height: 1.4;
+}
+
+.metricCard,
+.quickFacts {
+  padding: 1.45rem;
+}
+
+.metricCard strong {
+  display: block;
+  margin-top: 0.45rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.metricCard p,
+.sectionIntro,
+.footnote,
+.modelCard p,
+.timelineCard p,
+.quantumCallout p {
+  color: rgba(25, 39, 45, 0.74);
+  line-height: 1.65;
+}
+
+.quickFacts {
+  gap: 1rem;
+  display: grid;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.sectionIndex {
+  font-size: 0.74rem;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.gasGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.gasCard,
+.modelCard,
+.timelineCard {
+  display: grid;
+  gap: 0.6rem;
+  border: 1px solid rgba(25, 39, 45, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.gasCard {
+  padding: 1rem;
+  align-content: start;
+}
+
+.gasCard header {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.formula {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.gasCard strong,
+.modelCard strong,
+.timelineCard h3,
+.quantumCallout strong {
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gasCard p,
+.gasCard small,
+.gasHighlight {
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.gasCard small {
+  color: #577079;
+}
+
+.gasHighlight {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(25, 39, 45, 0.12);
+  color: #7c4437;
+}
+
+.footnote {
+  margin: 1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px dashed rgba(25, 39, 45, 0.14);
+  font-size: 0.94rem;
+}
+
+.modelList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.modelCard {
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  padding: 1rem 1rem 1rem 1.05rem;
+}
+
+.modelMeta {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 3.2rem;
+}
+
+.modelMeta span {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+}
+
+.modelMeta small {
+  color: #6a7c80;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.modelCard h3,
+.timelineCard h3 {
+  margin: 0;
+  font-size: 0.97rem;
+}
+
+.modelCard strong {
+  font-size: 0.82rem;
+  color: #0d5f63;
+}
+
+.spectrumPanel,
+.pipelinePanel {
+  min-height: 100%;
+}
+
+.chartFrame {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(13, 95, 99, 0.04), rgba(255, 255, 255, 0.62)),
+    rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(25, 39, 45, 0.08);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.85rem;
+  color: #5f7177;
+  font-size: 0.92rem;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.legend i {
+  display: inline-block;
+  width: 26px;
+  height: 3px;
+  border-radius: 999px;
+}
+
+.observedSwatch {
+  background: rgba(121, 71, 58, 0.72);
+}
+
+.retrievedSwatch {
+  background: rgba(13, 95, 99, 1);
+}
+
+.timeline {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.timelineCard {
+  grid-template-columns: auto 1fr;
+  padding: 0.95rem 1rem;
+}
+
+.timelineCard span {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.16em;
+  color: #0d5f63;
+}
+
+.quantumCallout {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(13, 95, 99, 0.16);
+  background: linear-gradient(135deg, rgba(13, 95, 99, 0.08), rgba(215, 154, 43, 0.08));
+}
+
+.metricLedger {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.metricLedger div {
+  padding: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(25, 39, 45, 0.12);
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.metricLedger small {
+  color: #627277;
+}
+
+.barList {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.barRow {
+  display: grid;
+  gap: 0.38rem;
+}
+
+.barHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.barTrack {
+  height: 11px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(25, 39, 45, 0.08);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0d5f63, #d6a43f);
+}
+
+@media (max-width: 1100px) {
+  .hero,
+  .overviewGrid,
+  .analysisGrid,
+  .verificationGrid,
+  .gasGrid,
+  .metricLedger,
+  .memo {
+    grid-template-columns: 1fr;
+  }
+
+  .modelCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .masthead,
+  .panel,
+  .metricCard,
+  .quickFacts {
+    padding: 1.2rem;
+    border-radius: 22px;
+  }
+
+  .docketRow,
+  .sectionHeader,
+  .legend {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .chartFrame {
+    padding: 0.45rem;
+    overflow-x: auto;
+  }
+}
