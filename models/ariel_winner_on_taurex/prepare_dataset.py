@@ -34,7 +34,7 @@ from .constants import (
     TRAIN_SPLIT,
     VALIDATION_SPLIT,
 )
-from .preprocessing import PreparedScalers, fit_scalers, transform_targets
+from .preprocessing import fit_scalers
 
 
 REQUIRED_LABEL_COLUMNS = (

@@ -1,0 +1,44 @@
+{
+  "best_model_by_mrmse.pt": {
+    "state": {
+      "epoch": 30,
+      "best_val_nll": -7.145192241668701,
+      "best_val_rmse": 1.615962028503418,
+      "epochs_since_improvement": 0
+    },
+    "poseidon_eval": {
+      "rows": 685,
+      "num_samples": 128,
+      "point_estimate": "median",
+      "rmse_mean": 3.4730594158172607,
+      "rmse": {
+        "log10_vmr_h2o": 3.2603442668914795,
+        "log10_vmr_co2": 4.004432678222656,
+        "log10_vmr_co": 3.4237282276153564,
+        "log10_vmr_ch4": 3.467745065689087,
+        "log10_vmr_nh3": 3.20904803276062
+      }
+    }
+  },
+  "best_model_by_nll.pt": {
+    "state": {
+      "epoch": 49,
+      "best_val_nll": -7.480048179626465,
+      "best_val_rmse": 1.615962028503418,
+      "epochs_since_improvement": 0
+    },
+    "poseidon_eval": {
+      "rows": 685,
+      "num_samples": 128,
+      "point_estimate": "median",
+      "rmse_mean": 3.565753221511841,
+      "rmse": {
+        "log10_vmr_h2o": 3.4175479412078857,
+        "log10_vmr_co2": 3.923393726348877,
+        "log10_vmr_co": 3.6020195484161377,
+        "log10_vmr_ch4": 3.628368377685547,
+        "log10_vmr_nh3": 3.2574360370635986
+      }
+    }
+  }
+}
