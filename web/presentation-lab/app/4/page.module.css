@@ -1,416 +1,594 @@
 .page {
   position: relative;
-  overflow: hidden;
-  color: #ecf6ff;
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  color: #efe2bf;
+  background:
+    radial-gradient(circle at top, rgba(198, 156, 78, 0.18), transparent 28rem),
+    linear-gradient(180deg, #0d0b0a 0%, #13100f 44%, #090807 100%);
+  font-family: "Gill Sans", "Trebuchet MS", sans-serif;
 }
 
-.aurora,
-.gridGlow {
+.constellation {
   position: fixed;
   inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(239, 226, 191, 0.18) 0 1px, transparent 1px 100%),
+    linear-gradient(rgba(239, 226, 191, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 226, 191, 0.04) 1px, transparent 1px);
+  background-size: 160px 160px, 44px 44px, 44px 44px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 90%);
+  opacity: 0.55;
   pointer-events: none;
 }
 
-.aurora {
-  background:
-    radial-gradient(circle at 12% 22%, rgba(143, 228, 255, 0.26), transparent 26rem),
-    radial-gradient(circle at 88% 18%, rgba(255, 220, 177, 0.18), transparent 22rem),
-    radial-gradient(circle at 72% 72%, rgba(113, 164, 255, 0.16), transparent 28rem),
-    linear-gradient(180deg, #0f1f34 0%, #13253f 38%, #1a3153 100%);
-}
-
-.gridGlow {
-  background-image:
-    linear-gradient(rgba(216, 238, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(216, 238, 255, 0.05) 1px, transparent 1px);
-  background-size: 88px 88px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 90%);
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
-  gap: 1.35rem;
-  align-items: stretch;
-}
-
-.leadPanel,
-.glassCard,
-.orbitGlass {
+.frame {
   position: relative;
-  border: 1px solid rgba(220, 240, 255, 0.18);
+  z-index: 1;
+  width: min(1320px, 100%);
+  margin: 0 auto;
+  padding: 1.2rem;
+  border: 1px solid rgba(215, 181, 108, 0.38);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.06)),
-    rgba(6, 18, 34, 0.28);
-  backdrop-filter: blur(18px);
+    linear-gradient(180deg, rgba(26, 21, 18, 0.96), rgba(11, 9, 8, 0.98)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02), transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 28px 80px rgba(2, 8, 19, 0.34);
+    0 32px 90px rgba(0, 0, 0, 0.44),
+    inset 0 0 0 2px rgba(239, 226, 191, 0.06);
 }
 
-.leadPanel {
-  padding: 2rem;
-  border-radius: 34px;
+.frame::before,
+.frame::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(215, 181, 108, 0.18);
+  pointer-events: none;
 }
 
-.kicker,
-.sectionHead span,
-.panelHeading span,
-.factCard span,
-.modelCard span,
-.footnoteBar span {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(222, 241, 255, 0.74);
+.frame::after {
+  inset: 28px;
+  border-color: rgba(239, 226, 191, 0.08);
 }
 
-.title {
-  margin: 0.7rem 0 1rem;
-  max-width: 12ch;
-  font-family: var(--font-display);
-  font-size: clamp(3.2rem, 6vw, 5.4rem);
-  line-height: 0.92;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.summary {
-  max-width: 60ch;
-  margin: 0;
-  color: rgba(233, 245, 255, 0.82);
-  font-size: 1.05rem;
-  line-height: 1.75;
-}
-
-.factRail {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin-top: 1.7rem;
-}
-
-.factCard {
-  padding: 1rem 1.1rem;
-  border-radius: 22px;
-  border: 1px solid rgba(220, 240, 255, 0.16);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-}
-
-.factCard strong {
-  display: block;
-  margin-top: 0.45rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #f7fbff;
-}
-
-.orbitPanel {
-  min-height: 100%;
-}
-
-.orbitGlass {
-  display: grid;
-  gap: 1rem;
-  height: 100%;
-  padding: 1.35rem;
-  border-radius: 34px;
-}
-
-.panelHeading {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.panelHeading strong {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #f4faff;
-}
-
-.orbitStage {
+.marquee,
+.plaque,
+.processionBlock,
+.spectrumPlaque,
+.runbook {
   position: relative;
-  min-height: 305px;
-  border-radius: 28px;
   overflow: hidden;
-  border: 1px solid rgba(220, 240, 255, 0.14);
+  border: 1px solid rgba(215, 181, 108, 0.32);
   background:
-    radial-gradient(circle at center, rgba(162, 230, 255, 0.12), transparent 35%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    linear-gradient(180deg, rgba(34, 27, 23, 0.96), rgba(15, 12, 10, 0.94));
 }
 
-.orbitRing {
+.marquee::before,
+.plaque::before,
+.processionBlock::before,
+.spectrumPlaque::before,
+.runbook::before {
+  content: "";
   position: absolute;
-  inset: 50% auto auto 50%;
-  border: 1px solid;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+  inset: 10px;
+  border: 1px solid rgba(239, 226, 191, 0.1);
+  pointer-events: none;
 }
 
-.orbitCore {
-  position: absolute;
-  inset: 50% auto auto 50%;
-  display: grid;
-  place-items: center;
-  gap: 0.15rem;
-  width: 120px;
-  height: 120px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), transparent 38%),
-    linear-gradient(180deg, rgba(132, 227, 255, 0.32), rgba(255, 208, 145, 0.18));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
-    0 0 30px rgba(131, 221, 255, 0.24);
+.marquee {
+  padding: 2.8rem 2rem 2rem;
   text-align: center;
 }
 
-.orbitCore span {
-  font-family: var(--font-display);
-  letter-spacing: 0.18em;
+.pretitle,
+.plaqueLabel,
+.metricPanel span,
+.factRow dt,
+.modelBand span,
+.apparatusStep span,
+.runbookItem span {
+  font-family: var(--font-mono);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  color: rgba(236, 246, 255, 0.86);
 }
 
-.orbitCore strong {
-  width: 70%;
-  font-size: 0.92rem;
-  line-height: 1.2;
-}
-
-.metricNode {
-  position: absolute;
-  left: var(--x);
-  top: var(--y);
-  display: grid;
-  gap: 0.22rem;
-  min-width: 142px;
-  padding: 0.75rem 0.8rem;
-  border-radius: 18px;
-  border: 1px solid rgba(220, 240, 255, 0.16);
-  background: rgba(10, 20, 37, 0.5);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 18px 32px rgba(1, 6, 15, 0.28);
-}
-
-.metricNode span,
-.modelIndex,
-.storyIndex {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(221, 241, 255, 0.62);
-}
-
-.metricNode strong {
-  font-size: 1.05rem;
-  color: #f8fbff;
-}
-
-.metricNode small,
-.gasCard p,
-.modelCard p,
-.modelCard small,
-.storyCard p,
-.footnoteBar p {
-  color: rgba(230, 243, 255, 0.72);
-  line-height: 1.55;
-}
-
-.spectrumShell {
-  display: grid;
-  gap: 0.7rem;
-}
-
-.spectrumPlot {
-  width: 100%;
-  height: auto;
-  border-radius: 24px;
-}
-
-.plotLabel {
-  fill: rgba(227, 242, 255, 0.66);
-  font-size: 11px;
-}
-
-.contentGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
-  gap: 1.35rem;
-  margin-top: 1.35rem;
-}
-
-.glassCard {
-  padding: 1.4rem;
-  border-radius: 30px;
-}
-
-.sectionHead {
-  display: grid;
-  gap: 0.35rem;
-  margin-bottom: 1rem;
-}
-
-.sectionHead h2 {
+.pretitle {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(1.65rem, 3vw, 2.5rem);
-  line-height: 1;
+  color: rgba(239, 226, 191, 0.64);
+  font-size: 0.76rem;
+}
+
+.titleBlock {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.3rem;
+}
+
+.titleBlock h1,
+.plaque h2,
+.processionBlock h2,
+.spectrumPlaque h2,
+.runbook h2 {
+  margin: 0;
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  color: #fff6dc;
 }
 
-.gasGrid {
+.titleBlock h1 {
+  font-size: clamp(3.2rem, 7vw, 6.7rem);
+  line-height: 0.92;
+}
+
+.sideLabel {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.85rem 0;
+  color: rgba(239, 226, 191, 0.72);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.sideLabel::before,
+.sideLabel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 70%;
+  height: 1px;
+  background: rgba(215, 181, 108, 0.36);
+  transform: translateX(-50%);
+}
+
+.sideLabel::before {
+  top: 0;
+}
+
+.sideLabel::after {
+  bottom: 0;
+}
+
+.subtitle {
+  width: min(72ch, 100%);
+  margin: 1.25rem auto 0;
+  color: rgba(239, 226, 191, 0.8);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.metricTriptych {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.8rem;
 }
 
-.gasCard,
-.modelCard,
-.storyCard {
-  border-radius: 22px;
-  border: 1px solid rgba(220, 240, 255, 0.14);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+.metricPanel {
+  padding: 1.1rem 1rem;
+  text-align: center;
+  border: 1px solid rgba(215, 181, 108, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 225, 0.03), rgba(255, 248, 225, 0)),
+    linear-gradient(90deg, rgba(215, 181, 108, 0.08), transparent 50%, rgba(215, 181, 108, 0.08));
 }
 
-.gasCard {
-  padding: 1rem;
-}
-
-.gasHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.gasHeader strong {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  letter-spacing: 0.09em;
-}
-
-.gasHeader span {
-  color: rgba(231, 243, 255, 0.66);
-}
-
-.gasCard small {
+.metricPanel strong {
   display: block;
-  margin-top: 0.75rem;
-  color: rgba(255, 225, 180, 0.8);
-  line-height: 1.45;
+  margin-top: 0.35rem;
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-size: 2rem;
+  color: #f7ddb1;
 }
 
-.modelStack {
+.metricPanel small {
+  display: block;
+  margin-top: 0.35rem;
+  color: rgba(239, 226, 191, 0.66);
+}
+
+.divider {
+  position: relative;
+  height: 34px;
+  margin: 1rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 38px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(215, 181, 108, 0.52));
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+.axis,
+.procession,
+.finale {
   display: grid;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
-.modelCard {
+.axis {
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.9fr) minmax(0, 0.9fr);
+  align-items: stretch;
+}
+
+.plaque,
+.processionBlock,
+.spectrumPlaque,
+.runbook {
+  padding: 1.5rem;
+}
+
+.plaqueLabel {
+  margin: 0;
+  color: rgba(247, 221, 177, 0.66);
+  font-size: 0.74rem;
+}
+
+.plaque h2,
+.processionBlock h2,
+.spectrumPlaque h2,
+.runbook h2 {
+  margin-top: 0.5rem;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 1;
+}
+
+.bodyCopy {
+  margin: 0.95rem 0 0;
+  color: rgba(239, 226, 191, 0.78);
+  line-height: 1.8;
+}
+
+.factList {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.95rem 1rem;
-  align-items: start;
-  padding: 1rem 1.05rem;
+  gap: 0.75rem;
+  margin: 1.25rem 0 0;
 }
 
-.modelIndex {
+.factRow {
+  display: grid;
+  gap: 0.18rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(215, 181, 108, 0.18);
+}
+
+.factRow dt {
+  color: rgba(239, 226, 191, 0.56);
+  font-size: 0.68rem;
+}
+
+.factRow dd {
+  margin: 0;
+  color: #fff4da;
+  font-size: 1rem;
+}
+
+.celestialPlate {
+  position: relative;
+  min-height: 430px;
+  border: 1px solid rgba(215, 181, 108, 0.34);
+  background:
+    radial-gradient(circle at center, rgba(215, 181, 108, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(36, 29, 24, 0.98), rgba(14, 12, 10, 0.96));
+}
+
+.celestialPlate::before,
+.celestialPlate::after,
+.innerRing {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.celestialPlate::before {
+  width: 78%;
+  height: 78%;
+  border: 1px solid rgba(215, 181, 108, 0.28);
+}
+
+.celestialPlate::after {
+  width: 56%;
+  height: 56%;
+  border: 1px solid rgba(239, 226, 191, 0.18);
+}
+
+.innerRing {
+  width: 35%;
+  height: 35%;
+  border: 1px solid rgba(215, 181, 108, 0.5);
+}
+
+.coreSeal {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 180px;
+  height: 180px;
+  padding: 1.2rem;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(153, 231, 255, 0.18), rgba(255, 213, 151, 0.12));
-}
-
-.modelCard h3,
-.storyCard h3 {
-  margin: 0.15rem 0 0.3rem;
-  font-size: 1.12rem;
-}
-
-.modelCard small {
-  grid-column: 1 / -1;
-}
-
-.architectureSection {
-  margin-top: 1.35rem;
-  padding: 1.45rem;
-  border-radius: 32px;
-  border: 1px solid rgba(220, 240, 255, 0.18);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05)),
-    rgba(5, 15, 30, 0.24);
-  backdrop-filter: blur(18px);
+    radial-gradient(circle at top, rgba(247, 221, 177, 0.18), transparent 56%),
+    linear-gradient(180deg, rgba(52, 40, 32, 0.98), rgba(19, 16, 13, 0.98));
+  border: 1px solid rgba(215, 181, 108, 0.42);
+  box-shadow: 0 0 28px rgba(215, 181, 108, 0.12);
 }
 
-.storyline {
+.coreSeal span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(239, 226, 191, 0.6);
+}
+
+.coreSeal strong {
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: #fff4da;
+}
+
+.gasMarker {
+  --angle: calc((var(--marker-index) * 72deg) - 54deg);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  text-align: center;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--angle))
+    translateY(-168px)
+    rotate(calc(-1 * var(--angle)));
+}
+
+.gasMarker strong {
+  display: block;
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-size: 1.35rem;
+  color: #f7ddb1;
+}
+
+.gasMarker span {
+  display: block;
+  margin-top: 0.18rem;
+  color: rgba(239, 226, 191, 0.7);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.emphasis {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(215, 181, 108, 0.18);
+}
+
+.emphasis span {
+  display: block;
+  color: rgba(247, 221, 177, 0.68);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.74rem;
+}
+
+.emphasis p {
+  margin: 0.55rem 0 0;
+  line-height: 1.8;
+  color: rgba(239, 226, 191, 0.78);
+}
+
+.emphasis strong {
+  color: #fff2d3;
+}
+
+.procession {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modelBands,
+.apparatusSteps,
+.runbookList {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.9rem;
+  gap: 0.8rem;
+  margin-top: 1.1rem;
 }
 
-.storyCard {
-  padding: 1rem;
-}
-
-.storyIndex {
-  margin-bottom: 0.7rem;
-}
-
-.footnoteBar {
+.modelBand,
+.apparatusStep,
+.runbookItem {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem 1rem;
+  align-items: start;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(215, 181, 108, 0.18);
+  background:
+    linear-gradient(90deg, rgba(215, 181, 108, 0.08), transparent 18%, transparent 82%, rgba(215, 181, 108, 0.08));
+}
+
+.modelBand {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.modelBand span,
+.apparatusStep span,
+.runbookItem span {
+  color: rgba(247, 221, 177, 0.7);
+  font-size: 0.72rem;
+}
+
+.modelBand strong,
+.apparatusStep strong {
+  display: block;
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-size: 1.2rem;
+  color: #fff3d6;
+}
+
+.modelBand p,
+.modelBand small,
+.apparatusStep p,
+.runbookItem p {
+  margin: 0.18rem 0 0;
+  color: rgba(239, 226, 191, 0.76);
+  line-height: 1.65;
+}
+
+.apparatus {
+  display: grid;
+  gap: 1.2rem;
+  margin-top: 1.1rem;
+}
+
+.quantumSeal {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  padding: 1.15rem 1rem;
+  border: 1px solid rgba(215, 181, 108, 0.24);
+  background:
+    radial-gradient(circle at center, rgba(215, 181, 108, 0.12), transparent 48%),
+    linear-gradient(180deg, rgba(247, 221, 177, 0.04), transparent);
+}
+
+.quantumSeal span {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(247, 221, 177, 0.68);
+}
+
+.quantumSeal strong {
+  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: #fff4da;
+}
+
+.finale {
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+}
+
+.spectrumPlaque text {
+  fill: rgba(239, 226, 191, 0.64);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.spectrum {
+  width: 100%;
+  height: auto;
   margin-top: 1rem;
-  padding: 1rem 1.1rem;
-  border-radius: 22px;
-  border: 1px solid rgba(220, 240, 255, 0.16);
-  background: rgba(9, 22, 40, 0.42);
 }
 
-@media (max-width: 1100px) {
-  .hero,
-  .contentGrid,
-  .storyline {
+.spectrumFrame {
+  fill: rgba(17, 14, 12, 0.92);
+  stroke: rgba(215, 181, 108, 0.22);
+}
+
+.spectrumGrid {
+  stroke: rgba(239, 226, 191, 0.12);
+  stroke-dasharray: 4 7;
+}
+
+.observedLine,
+.retrievedLine {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.observedLine {
+  stroke: #f7ddb1;
+}
+
+.retrievedLine {
+  stroke: #fff8ea;
+}
+
+@media (max-width: 1120px) {
+  .axis,
+  .procession,
+  .finale,
+  .titleBlock,
+  .metricTriptych {
     grid-template-columns: 1fr;
   }
 
-  .title {
-    max-width: none;
+  .titleBlock {
+    text-align: center;
+  }
+
+  .sideLabel {
+    padding: 0.35rem 0;
+  }
+
+  .celestialPlate {
+    min-height: 520px;
   }
 }
 
-@media (max-width: 760px) {
-  .factRail,
-  .gasGrid {
-    grid-template-columns: 1fr;
+@media (max-width: 720px) {
+  .page {
+    padding-inline: 0.6rem;
   }
 
-  .leadPanel,
-  .glassCard,
-  .orbitGlass,
-  .architectureSection {
-    border-radius: 26px;
+  .frame {
+    padding: 0.8rem;
   }
 
-  .leadPanel,
-  .glassCard,
-  .orbitGlass,
-  .architectureSection {
-    padding: 1.15rem;
+  .marquee,
+  .plaque,
+  .processionBlock,
+  .spectrumPlaque,
+  .runbook {
+    padding: 1.1rem;
   }
 
-  .metricNode {
-    min-width: 132px;
+  .titleBlock h1 {
+    font-size: 2.6rem;
   }
 
-  .orbitStage {
-    min-height: 360px;
+  .celestialPlate {
+    min-height: 480px;
+  }
+
+  .gasMarker {
+    width: 92px;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translateY(-148px)
+      rotate(calc(-1 * var(--angle)));
+  }
+
+  .coreSeal {
+    width: 150px;
+    height: 150px;
   }
 }

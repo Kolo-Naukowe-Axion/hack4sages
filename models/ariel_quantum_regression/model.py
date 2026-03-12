@@ -179,7 +179,14 @@ class QuantumBlock(nn.Module):
             device_kwargs["c_dtype"] = np.complex64
         if quantum_device_name == "lightning.gpu" and use_async:
             device_kwargs["use_async"] = True
-        self.device = self.qml.device(quantum_device_name, **device_kwargs)
+        try:
+            self.device = self.qml.device(quantum_device_name, **device_kwargs)
+        except TypeError as exc:
+            if quantum_device_name == "lightning.gpu" and "use_async" in device_kwargs and "use_async" in str(exc):
+                device_kwargs.pop("use_async", None)
+                self.device = self.qml.device(quantum_device_name, **device_kwargs)
+            else:
+                raise
         self.num_blocks = self.depth // 2
         self.weights = nn.Parameter(
             float(init_scale) * torch.randn(3 * self.n_qubits * self.num_blocks, dtype=torch.float32)

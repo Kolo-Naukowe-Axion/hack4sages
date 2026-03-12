@@ -1,657 +1,484 @@
 .page {
-  color: #151c20;
+  padding: 1.6rem 0 4rem;
+  color: #15110d;
   background:
-    radial-gradient(circle at 0% 0%, rgba(30, 91, 99, 0.08), transparent 28rem),
-    radial-gradient(circle at 100% 0%, rgba(126, 82, 51, 0.12), transparent 25rem),
-    linear-gradient(180deg, #f7f1e7 0%, #fbf7f0 38%, #f0e7d9 100%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), transparent 10rem),
+    linear-gradient(180deg, #d9d3c8 0%, #ccc4b6 100%);
 }
 
-.editorial {
-  display: grid;
-  gap: 1.5rem;
-  font-family: "Baskerville", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-}
-
-.masthead,
-.openingSpread,
-.middleGrid,
-.gasSpread,
-.modelSpread,
-.architectureSpread,
-.closingSpread {
-  border: 1px solid rgba(21, 28, 32, 0.12);
+.sheet {
+  width: min(1360px, calc(100% - 1rem));
+  margin: 0 auto;
+  padding: 1rem 1.1rem 2rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(250, 245, 236, 0.9)),
     repeating-linear-gradient(
-      90deg,
-      rgba(21, 28, 32, 0.025) 0,
-      rgba(21, 28, 32, 0.025) 1px,
+      0deg,
+      rgba(21, 17, 13, 0.02) 0,
+      rgba(21, 17, 13, 0.02) 1px,
       transparent 1px,
-      transparent 11px
-    );
-  box-shadow: 0 28px 70px rgba(43, 37, 28, 0.1);
+      transparent 6px
+    ),
+    linear-gradient(180deg, #fbf7ef 0%, #f1ece3 100%);
+  border: 1px solid rgba(21, 17, 13, 0.18);
+  box-shadow: 0 30px 90px rgba(17, 13, 10, 0.18);
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
 .masthead,
-.gasSpread,
-.modelSpread,
-.architectureSpread {
-  border-radius: 34px;
-  padding: 1.4rem;
+.leadGrid,
+.bodyGrid,
+.comparisonSection,
+.footer {
+  border-top: 2px solid #15110d;
 }
 
-.openingSpread,
-.middleGrid,
-.closingSpread {
-  border-radius: 30px;
-  padding: 1.35rem;
+.masthead {
+  padding-top: 0.5rem;
 }
 
-.issueStrip {
+.rail,
+.label,
+.sectionHead,
+.byline,
+.table thead th,
+.volume {
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rail {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.7rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid rgba(21, 28, 32, 0.12);
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: rgba(21, 28, 32, 0.62);
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  font-size: 0.72rem;
+  color: rgba(21, 17, 13, 0.72);
 }
 
-.heroGrid {
+.nameplate {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-  gap: 1.4rem;
-  align-items: end;
-  padding-top: 1.1rem;
-}
-
-.heroCopy h1,
-.sectionIntro h2,
-.figureHeading h2,
-.metricInset h2,
-.architectureNarrative h2 {
-  margin: 0;
-  font-family: "Didot", "Bodoni 72", "Times New Roman", serif;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.heroCopy h1 {
-  font-size: clamp(3.15rem, 6vw, 6.3rem);
-  line-height: 0.92;
-  max-width: 10ch;
-  text-wrap: balance;
-}
-
-.overline,
-.kicker {
-  display: inline-block;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #6b655b;
-}
-
-.lede {
-  max-width: 54ch;
-  margin-top: 1rem;
-  font-size: 1.08rem;
-  line-height: 1.8;
-  color: rgba(21, 28, 32, 0.83);
-}
-
-.scoreCard {
-  position: relative;
-  overflow: hidden;
-  padding: 1.35rem;
-  border-radius: 24px;
-  border: 1px solid rgba(30, 91, 99, 0.17);
-  background:
-    radial-gradient(circle at top right, rgba(30, 91, 99, 0.12), transparent 12rem),
-    linear-gradient(180deg, rgba(244, 248, 247, 0.98), rgba(248, 243, 235, 0.94));
-}
-
-.scoreCard::after {
-  content: "";
-  position: absolute;
-  right: -2rem;
-  top: -2rem;
-  width: 8rem;
-  height: 8rem;
-  border-radius: 50%;
-  border: 1px solid rgba(30, 91, 99, 0.15);
-}
-
-.scoreLabel {
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: #1e5b63;
-}
-
-.scoreValue {
-  display: block;
-  margin-top: 0.5rem;
-  font-family: "Didot", "Bodoni 72", serif;
-  font-size: clamp(3.6rem, 8vw, 6.4rem);
-  line-height: 0.95;
-  color: #1e5b63;
-}
-
-.scoreCard p {
-  margin: 0.7rem 0 0;
-  line-height: 1.7;
-  color: rgba(21, 28, 32, 0.8);
-}
-
-.scoreMeta {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
-  margin-top: 1rem;
-}
-
-.scoreMeta div {
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(21, 28, 32, 0.12);
-}
-
-.scoreMeta span,
-.scoreMeta strong {
-  display: block;
-}
-
-.scoreMeta span {
-  font-size: 0.82rem;
-  color: #6b655b;
-}
-
-.scoreMeta strong {
-  margin-top: 0.25rem;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 1rem;
-}
-
-.openingSpread {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
-  gap: 1.1rem;
-}
-
-.dropCapBlock {
-  padding: 1rem 1.2rem 1rem 0.2rem;
-}
-
-.dropCapBlock p {
-  margin: 0;
-  font-size: 1.22rem;
-  line-height: 1.85;
-}
-
-.dropCap {
-  float: left;
-  margin: 0.16rem 0.7rem 0 0;
-  font-family: "Didot", "Bodoni 72", serif;
-  font-size: 5rem;
-  line-height: 0.8;
-  color: #7e5233;
-}
-
-.sidebarNote {
-  padding: 1.15rem;
-  border-radius: 22px;
-  background: rgba(126, 82, 51, 0.07);
-  border: 1px solid rgba(126, 82, 51, 0.12);
-}
-
-.sidebarNote ul {
-  margin: 0.8rem 0 0;
-  padding-left: 1.1rem;
-  display: grid;
-  gap: 0.75rem;
-  line-height: 1.6;
-}
-
-.chapterBand {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 110px 1fr 110px;
+  align-items: center;
   gap: 1rem;
+  padding: 0.95rem 0;
+  border-top: 1px solid rgba(21, 17, 13, 0.24);
+  border-bottom: 1px solid rgba(21, 17, 13, 0.24);
 }
 
-.chapterCard {
-  position: relative;
-  min-height: 14rem;
-  padding: 1.25rem;
-  border-radius: 28px;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(247, 239, 225, 0.88));
-  overflow: hidden;
-}
-
-.chapterCard::after {
-  content: "";
-  position: absolute;
-  left: 1.2rem;
-  right: 1.2rem;
-  bottom: 1.1rem;
-  height: 1px;
-  background: linear-gradient(90deg, #1e5b63, transparent);
-}
-
-.chapterCard h2 {
-  margin: 0.6rem 0 0.55rem;
-  font-family: "Didot", "Bodoni 72", serif;
-  font-size: 1.7rem;
-}
-
-.chapterCard p {
+.nameplate h1 {
   margin: 0;
-  color: rgba(21, 28, 32, 0.8);
-  line-height: 1.65;
-}
-
-.chapterNumber,
-.modelIndex {
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.9rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #1e5b63;
-}
-
-.middleGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(310px, 0.55fr);
-  gap: 1.15rem;
-}
-
-.figureFeature,
-.resultsColumn,
-.metricInset,
-.figurePanel,
-.gasCard,
-.modelCard,
-.architectureNarrative,
-.architectureDiagram,
-.quoteBlock,
-.talkTrack {
-  border-radius: 26px;
-}
-
-.figureFeature {
-  display: grid;
-  gap: 1rem;
-}
-
-.figureHeading {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 1.2rem;
-  align-items: end;
-}
-
-.figureHeading h2,
-.sectionIntro h2,
-.metricInset h2,
-.architectureNarrative h2 {
-  font-size: clamp(2rem, 3vw, 3.4rem);
+  text-align: center;
+  font-family: "Times New Roman", "Baskerville", serif;
+  font-size: clamp(2.9rem, 5vw, 5rem);
   line-height: 0.98;
-}
-
-.figureHeading p,
-.sectionIntro p,
-.modelCard p,
-.architectureNarrative p,
-.talkTrack li {
-  margin: 0;
-  line-height: 1.7;
-  color: rgba(21, 28, 32, 0.82);
-}
-
-.figurePanel {
-  padding: 1rem;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(247, 240, 231, 0.96));
-}
-
-.resultsColumn {
-  display: grid;
-  gap: 1rem;
-}
-
-.metricInset {
-  padding: 1.2rem;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.metricList {
-  margin: 1rem 0 0;
-  display: grid;
-  gap: 0.9rem;
-}
-
-.metricList div {
-  display: grid;
-  gap: 0.15rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid rgba(21, 28, 32, 0.08);
-}
-
-.metricList dt {
-  font-size: 0.84rem;
-  color: #6b655b;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
 }
 
-.metricList dd {
-  margin: 0;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 1.26rem;
-  color: #1e5b63;
+.volume {
+  font-size: 0.74rem;
+  text-align: center;
 }
 
-.barStack {
+.leadGrid {
   display: grid;
-  gap: 0.85rem;
-  margin-top: 1rem;
-}
-
-.barRow {
-  display: grid;
-  gap: 0.3rem;
-}
-
-.barHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 0.9rem;
-}
-
-.barTrack {
-  height: 0.62rem;
-  border-radius: 999px;
-  background: rgba(21, 28, 32, 0.08);
-  overflow: hidden;
-}
-
-.barFill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #1e5b63, #7e5233);
-}
-
-.sectionIntro {
-  display: grid;
-  gap: 0.5rem;
-  max-width: 50rem;
-}
-
-.gasSpread,
-.modelSpread {
-  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 260px;
   gap: 1.1rem;
+  padding: 1rem 0;
 }
 
-.gasGrid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.95rem;
+.editionBox,
+.scoreboard,
+.sidebarBlock {
+  padding: 0.9rem 0;
 }
 
-.gasCard {
-  display: grid;
-  gap: 0.65rem;
-  padding: 1.15rem;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(247, 239, 225, 0.92));
+.editionBox,
+.mainStory,
+.scoreboard {
+  min-height: 100%;
 }
 
-.gasCard:nth-child(2n) {
-  transform: translateY(0.85rem);
+.editionBox,
+.scoreboard {
+  border-right: 1px solid rgba(21, 17, 13, 0.16);
 }
 
-.gasKey {
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+.scoreboard {
+  border-right: 0;
+  border-left: 1px solid rgba(21, 17, 13, 0.16);
+  padding-left: 1rem;
+}
+
+.label {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  color: #7a2c22;
+}
+
+.editionBox strong {
+  display: block;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
   font-size: 1rem;
-  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #1e5b63;
 }
 
-.gasCard h3,
-.modelCard h3 {
-  margin: 0;
-  font-family: "Didot", "Bodoni 72", serif;
-  font-size: 1.5rem;
-}
-
-.gasCard p {
-  margin: 0;
+.editionBox p {
   line-height: 1.65;
-  color: rgba(21, 28, 32, 0.82);
 }
 
-.gasMeta {
+.bulletList {
+  margin: 0.8rem 0 0;
+  padding-left: 1rem;
   display: grid;
-  gap: 0.45rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(21, 28, 32, 0.1);
-}
-
-.gasMeta span {
-  color: #6b655b;
-  font-size: 0.95rem;
-}
-
-.gasMeta strong {
-  font-size: 1rem;
+  gap: 0.55rem;
   line-height: 1.45;
 }
 
-.modelRail {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+.mainStory {
+  padding: 0 0.4rem;
 }
 
-.modelCard {
-  display: grid;
-  gap: 0.75rem;
-  padding: 1.15rem;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background:
-    radial-gradient(circle at top right, rgba(30, 91, 99, 0.08), transparent 10rem),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(247, 240, 231, 0.96));
-}
-
-.modelClass {
-  color: #6b655b;
-  font-size: 0.94rem;
-}
-
-.modelCard strong {
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
+.kicker {
+  margin: 0 0 0.55rem;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1e5b63;
+  color: #7a2c22;
 }
 
-.architectureSpread {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 1rem;
+.mainStory h2 {
+  margin: 0;
+  max-width: 12ch;
+  font-family: "Times New Roman", "Baskerville", serif;
+  font-size: clamp(3rem, 7vw, 5.8rem);
+  line-height: 0.92;
 }
 
-.architectureNarrative,
-.architectureDiagram,
-.quoteBlock,
-.talkTrack {
-  padding: 1.2rem;
-  border: 1px solid rgba(21, 28, 32, 0.12);
-  background: rgba(255, 255, 255, 0.68);
+.dek {
+  margin: 0.85rem 0 0;
+  max-width: 52ch;
+  font-size: 1.13rem;
+  line-height: 1.68;
 }
 
-.architectureList {
+.byline {
   margin: 1rem 0 0;
-  padding-left: 1rem;
+  font-size: 0.74rem;
+  color: rgba(21, 17, 13, 0.66);
+}
+
+.scoreValue {
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: clamp(2.9rem, 6vw, 4.8rem);
+  line-height: 0.9;
+  font-weight: 700;
+}
+
+.scoreCaption {
+  margin: 0.35rem 0 0.9rem;
+  font-size: 0.95rem;
+}
+
+.metricList,
+.factList {
   display: grid;
   gap: 0.7rem;
-  line-height: 1.6;
+  margin: 0;
 }
 
-.architectureDiagram {
-  display: grid;
-  gap: 0.95rem;
-  align-content: start;
+.metricList div,
+.factList div {
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(21, 17, 13, 0.14);
 }
 
-.track {
+.metricList dt,
+.factList dt {
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(21, 17, 13, 0.68);
+}
+
+.metricList dd,
+.factList dd {
+  margin: 0.2rem 0 0;
+  font-weight: 700;
+}
+
+.bodyGrid {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.7fr) 320px;
+  gap: 1.1rem;
+  padding: 1rem 0;
+}
+
+.mainColumn {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.storySection,
+.figureSection {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(21, 17, 13, 0.16);
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.72rem;
+  color: rgba(21, 17, 13, 0.64);
+}
+
+.columns {
+  column-count: 2;
+  column-gap: 1.5rem;
+}
+
+.columns p {
+  margin: 0 0 1rem;
+  line-height: 1.75;
+  font-size: 1.04rem;
+}
+
+.pullQuote {
+  margin: 0;
+  padding: 0.9rem 0 0.9rem 1.1rem;
+  border-left: 4px solid #7a2c22;
+  font-family: "Times New Roman", "Baskerville", serif;
+  font-size: clamp(1.4rem, 2.6vw, 2.3rem);
+  line-height: 1.32;
+  font-style: italic;
+}
+
+.figureSection h3,
+.comparisonSection h3,
+.sidebarBlock h3 {
+  margin: 0 0 0.75rem;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.figure {
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(21, 17, 13, 0.16);
+  background: #f8f4ed;
+}
+
+.figure text {
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: 12px;
+  fill: rgba(21, 17, 13, 0.72);
+}
+
+.figureFrame {
+  fill: #f8f4ed;
+}
+
+.gridLine {
+  stroke: rgba(21, 17, 13, 0.12);
+  stroke-dasharray: 5 7;
+}
+
+.observedLine,
+.retrievedLine {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.observedLine {
+  stroke: #141414;
+}
+
+.retrievedLine {
+  stroke: #7a2c22;
+}
+
+.caption {
+  margin: 0.45rem 0 0;
+  font-size: 0.92rem;
+  color: rgba(21, 17, 13, 0.68);
+}
+
+.gasTable {
+  display: grid;
+  border-top: 1px solid rgba(21, 17, 13, 0.16);
+}
+
+.gasRow {
+  display: grid;
+  grid-template-columns: 72px 140px 1fr;
   gap: 0.8rem;
-  align-items: center;
+  align-items: start;
+  padding: 0.72rem 0;
+  border-bottom: 1px solid rgba(21, 17, 13, 0.16);
 }
 
-.track span,
-.mergeNode,
-.outputNode,
-.branchCard strong {
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  letter-spacing: 0.18em;
+.gasRow strong,
+.gasRow span {
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
   text-transform: uppercase;
 }
 
-.track div {
-  position: relative;
-  height: 1px;
-  background: rgba(21, 28, 32, 0.14);
+.gasRow strong {
+  font-size: 1rem;
 }
 
-.track div::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: -4px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #1e5b63;
+.gasRow span {
+  font-size: 0.84rem;
+  color: rgba(21, 17, 13, 0.78);
 }
 
-.mergeNode,
-.outputNode {
-  padding: 0.95rem 1rem;
-  border-radius: 18px;
-  border: 1px solid rgba(30, 91, 99, 0.16);
-  background: rgba(30, 91, 99, 0.08);
-  color: #1e5b63;
-  text-align: center;
-  font-size: 0.82rem;
-}
-
-.branchGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.branchCard {
-  padding: 1rem;
-  border-radius: 18px;
-  border: 1px solid rgba(126, 82, 51, 0.14);
-  background: rgba(126, 82, 51, 0.06);
-}
-
-.branchCard strong {
-  display: block;
-  font-size: 0.78rem;
-  color: #7e5233;
-}
-
-.branchCard p {
-  margin: 0.55rem 0 0;
+.gasRow p {
+  margin: 0;
   line-height: 1.55;
 }
 
-.closingSpread {
+.sidebar {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-content: start;
   gap: 1rem;
+  border-left: 1px solid rgba(21, 17, 13, 0.16);
+  padding-left: 1rem;
 }
 
-.quoteBlock {
-  display: flex;
-  align-items: center;
-  background:
-    radial-gradient(circle at top left, rgba(30, 91, 99, 0.12), transparent 14rem),
-    rgba(255, 255, 255, 0.72);
+.sidebarBlock {
+  border-bottom: 1px solid rgba(21, 17, 13, 0.16);
 }
 
-.quoteBlock p {
+.noteList,
+.talkTrack {
   margin: 0;
-  font-family: "Didot", "Bodoni 72", serif;
-  font-size: clamp(1.8rem, 3vw, 3rem);
-  line-height: 1.12;
-}
-
-.talkTrack ol {
-  margin: 0.9rem 0 0;
-  padding-left: 1.15rem;
+  padding-left: 1.1rem;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.8rem;
 }
 
-@media (max-width: 1120px) {
-  .heroGrid,
-  .openingSpread,
-  .middleGrid,
-  .architectureSpread,
-  .closingSpread,
-  .figureHeading,
-  .modelRail,
-  .chapterBand,
-  .gasGrid {
+.noteList li,
+.talkTrack li {
+  line-height: 1.55;
+}
+
+.noteList strong {
+  display: block;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: 0.84rem;
+}
+
+.noteList p {
+  margin: 0.2rem 0 0;
+}
+
+.comparisonSection {
+  padding: 1rem 0;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead th {
+  padding: 0.7rem 0.55rem;
+  border-top: 1px solid #15110d;
+  border-bottom: 1px solid #15110d;
+  text-align: left;
+  font-size: 0.72rem;
+}
+
+.table tbody th,
+.table tbody td {
+  padding: 0.8rem 0.55rem;
+  border-bottom: 1px solid rgba(21, 17, 13, 0.16);
+  vertical-align: top;
+  text-align: left;
+}
+
+.table tbody th {
+  width: 220px;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: 0.84rem;
+}
+
+.footer {
+  display: grid;
+  gap: 0.85rem;
+  padding-top: 1rem;
+}
+
+.footer p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.rosterLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.1rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(21, 17, 13, 0.16);
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+  .leadGrid,
+  .bodyGrid {
     grid-template-columns: 1fr;
   }
 
-  .gasCard:nth-child(2n) {
-    transform: none;
+  .editionBox,
+  .scoreboard,
+  .sidebar {
+    border: 0;
+    padding-left: 0;
+  }
+
+  .sidebar {
+    border-top: 1px solid rgba(21, 17, 13, 0.16);
+    padding-top: 1rem;
   }
 }
 
-@media (max-width: 720px) {
-  .masthead,
-  .openingSpread,
-  .middleGrid,
-  .gasSpread,
-  .modelSpread,
-  .architectureSpread,
-  .closingSpread {
-    padding: 1rem;
-    border-radius: 24px;
-  }
-
-  .dropCapBlock p {
-    font-size: 1.05rem;
-  }
-
-  .track {
+@media (max-width: 760px) {
+  .nameplate {
     grid-template-columns: 1fr;
   }
 
-  .branchGrid,
-  .scoreMeta {
+  .nameplate h1 {
+    text-align: left;
+  }
+
+  .volume {
+    text-align: left;
+  }
+
+  .columns {
+    column-count: 1;
+  }
+
+  .gasRow {
     grid-template-columns: 1fr;
   }
 }

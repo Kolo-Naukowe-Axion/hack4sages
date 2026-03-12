@@ -1,526 +1,429 @@
 .page {
-  padding: 2.5rem 0 4rem;
+  min-height: 100vh;
+  padding: 2.25rem 0 4rem;
+  color: #16293a;
   background:
-    radial-gradient(circle at 12% 18%, rgba(180, 88, 58, 0.12), transparent 20rem),
-    radial-gradient(circle at 88% 14%, rgba(25, 88, 106, 0.16), transparent 18rem),
-    linear-gradient(180deg, #f4ecda 0%, #ede1c8 100%);
+    radial-gradient(circle at 50% 14%, rgba(189, 93, 59, 0.16), transparent 16rem),
+    radial-gradient(circle at 18% 72%, rgba(24, 73, 107, 0.14), transparent 18rem),
+    linear-gradient(180deg, #efe3c8 0%, #f5ecd9 40%, #e9dbc0 100%);
 }
 
-.board {
-  width: min(1400px, calc(100% - 2rem));
+.sheet {
+  width: min(1420px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 1.1rem;
-  border-radius: 30px;
+  padding: 1.3rem 1.3rem 1.6rem;
+  border-radius: 36px;
+  border: 1px solid rgba(22, 41, 58, 0.14);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(252, 245, 232, 0.88)),
+    linear-gradient(180deg, rgba(255, 252, 245, 0.82), rgba(246, 235, 209, 0.9)),
     repeating-linear-gradient(
-      90deg,
-      rgba(24, 35, 42, 0.03) 0,
-      rgba(24, 35, 42, 0.03) 1px,
+      0deg,
+      rgba(22, 41, 58, 0.026) 0,
+      rgba(22, 41, 58, 0.026) 1px,
       transparent 1px,
-      transparent 180px
+      transparent 88px
     );
-  border: 1px solid rgba(24, 35, 42, 0.14);
-  box-shadow: 0 30px 90px rgba(48, 39, 18, 0.15);
+  box-shadow: 0 32px 90px rgba(72, 49, 19, 0.14);
 }
 
-.header {
+.topline {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   gap: 1rem;
-  padding: 1.2rem;
-  border-radius: 24px;
-  border: 1px solid rgba(24, 35, 42, 0.12);
-  background:
-    linear-gradient(135deg, rgba(255, 250, 242, 0.96), rgba(239, 230, 212, 0.92)),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.02), transparent);
+  align-items: end;
+  margin-bottom: 1.3rem;
 }
 
-.headerLead {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.kicker {
-  display: inline-flex;
-  width: fit-content;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(25, 88, 106, 0.09);
-  color: #2d5964;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
+.kicker,
+.noteId,
+.bandId {
+  margin: 0;
+  color: #8f533d;
+  font-family: "Gill Sans", "Trebuchet MS", sans-serif;
   font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
-.header h1 {
-  margin: 0;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: clamp(3.6rem, 8vw, 6.6rem);
+.topline h1 {
+  margin: 0.45rem 0 0;
+  max-width: 11ch;
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(3.1rem, 7vw, 6.8rem);
   line-height: 0.92;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #132230;
+  letter-spacing: 0.02em;
 }
 
-.subtitle {
+.standfirst {
   margin: 0;
-  max-width: 56ch;
-  color: rgba(19, 34, 48, 0.8);
-  font-size: 1.05rem;
-  line-height: 1.7;
+  max-width: 40ch;
+  font-size: 1.04rem;
+  line-height: 1.8;
+  color: rgba(22, 41, 58, 0.8);
 }
 
-.headerStats {
-  display: grid;
-  gap: 0.9rem;
-}
-
-.metricTile {
-  display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1.1rem;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(19, 34, 48, 0.12);
-}
-
-.metricTile span,
-.metricTile small {
-  color: rgba(19, 34, 48, 0.66);
-  font-size: 0.86rem;
-}
-
-.metricTile strong {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 2rem;
-  color: #132230;
-}
-
-.abstractStrip,
-.footerStrip {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.abstractCard,
-.noteCard,
-.panel {
-  border-radius: 22px;
-  border: 1px solid rgba(19, 34, 48, 0.12);
+.plate {
+  position: relative;
+  min-height: 980px;
+  border-radius: 30px;
+  border: 1px solid rgba(22, 41, 58, 0.12);
   background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 247, 237, 0.92));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    radial-gradient(circle at center, rgba(255, 249, 236, 0.96), rgba(237, 224, 191, 0.88)),
+    linear-gradient(90deg, rgba(22, 41, 58, 0.04), transparent 14%, transparent 86%, rgba(22, 41, 58, 0.04));
+  overflow: hidden;
 }
 
-.abstractCard,
-.noteCard {
-  padding: 1rem 1.1rem;
+.plate::before {
+  content: "";
+  position: absolute;
+  inset: 1.4rem;
+  border: 1px solid rgba(22, 41, 58, 0.12);
+  border-radius: 24px;
+  pointer-events: none;
 }
 
-.abstractLabel {
-  margin: 0 0 0.5rem;
-  color: #b4583a;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+.atlasFigure {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: min(58vw, 760px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(22, 41, 58, 0.16);
+  background:
+    radial-gradient(circle at center, rgba(24, 73, 107, 0.08), rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at center, rgba(189, 93, 59, 0.1), rgba(255, 255, 255, 0) 62%);
+}
+
+.outerRing,
+.innerRing {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.outerRing {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(22, 41, 58, 0.18);
+}
+
+.innerRing {
+  width: 62%;
+  height: 62%;
+  border: 1px solid rgba(22, 41, 58, 0.18);
+}
+
+.equator,
+.meridian {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  background: rgba(22, 41, 58, 0.14);
+  transform: translate(-50%, -50%);
+}
+
+.equator {
+  width: 82%;
+  height: 1px;
+}
+
+.meridian {
+  width: 1px;
+  height: 82%;
+}
+
+.centerMedallion {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 214px;
+  height: 214px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid rgba(22, 41, 58, 0.18);
+  background:
+    radial-gradient(circle at top, rgba(189, 93, 59, 0.15), transparent 70%),
+    linear-gradient(180deg, rgba(255, 250, 240, 0.92), rgba(240, 227, 195, 0.96));
+  transform: translate(-50%, -50%);
+  box-shadow: 0 18px 40px rgba(72, 49, 19, 0.1);
+}
+
+.centerMedallion span,
+.centerMedallion small,
+.spectrumBand text {
+  font-family: "Gill Sans", "Trebuchet MS", sans-serif;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.abstractCard p,
-.noteCard p {
+.centerMedallion span {
+  font-size: 0.72rem;
+  color: #8f533d;
+}
+
+.centerMedallion strong {
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.centerMedallion small {
+  font-size: 0.66rem;
+  color: rgba(22, 41, 58, 0.68);
+}
+
+.compass {
+  position: absolute;
+  inset: 0;
+  font-family: "Gill Sans", "Trebuchet MS", sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(22, 41, 58, 0.48);
+}
+
+.compass span:nth-child(1) {
+  position: absolute;
+  left: 50%;
+  top: 1.1rem;
+  transform: translateX(-50%);
+}
+
+.compass span:nth-child(2) {
+  position: absolute;
+  right: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.compass span:nth-child(3) {
+  position: absolute;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+}
+
+.compass span:nth-child(4) {
+  position: absolute;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.spectrumBand {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 68%;
+  transform: translateX(-50%);
+}
+
+.spectrumBand svg {
+  width: 100%;
+  height: auto;
+}
+
+.spectrumFrame {
+  fill: rgba(255, 249, 236, 0.92);
+  stroke: rgba(22, 41, 58, 0.14);
+}
+
+.observedLine,
+.retrievedLine {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.observedLine {
+  stroke: #bc5d3a;
+}
+
+.retrievedLine {
+  stroke: #1f5979;
+}
+
+.gasMarker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  gap: 0.12rem;
+  justify-items: center;
+  text-align: center;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--angle))
+    translateY(-46%)
+    rotate(calc(-1 * var(--angle)))
+    translateY(-228px);
+}
+
+.gasMarker::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  margin-bottom: 0.35rem;
+  border-radius: 50%;
+  background: #8f533d;
+  box-shadow: 0 0 0 5px rgba(143, 83, 61, 0.12);
+}
+
+.gasMarker strong {
+  font-family: "Gill Sans", "Trebuchet MS", sans-serif;
+  font-size: 0.86rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.gasMarker span {
+  max-width: 10ch;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: rgba(22, 41, 58, 0.72);
+}
+
+.marginNote {
+  position: absolute;
+  width: min(26vw, 310px);
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  border: 1px solid rgba(22, 41, 58, 0.12);
+  background: rgba(255, 250, 240, 0.76);
+  box-shadow: 0 16px 34px rgba(72, 49, 19, 0.08);
+}
+
+.marginNote h2 {
+  margin: 0;
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 1.3rem;
+}
+
+.noteBody {
   margin: 0;
   line-height: 1.7;
-  color: rgba(19, 34, 48, 0.8);
+  color: rgba(22, 41, 58, 0.82);
 }
 
-.posterGrid {
+.marginNote ul {
+  margin: 0;
+  padding-left: 1rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  color: rgba(22, 41, 58, 0.74);
+}
+
+.northwest {
+  left: 3.4%;
+  top: 6.5%;
+}
+
+.northeast {
+  right: 3.4%;
+  top: 8%;
+}
+
+.southwest {
+  left: 5%;
+  bottom: 9%;
+}
+
+.southeast {
+  right: 4.8%;
+  bottom: 8%;
+}
+
+.captionBand {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 1rem;
-}
-
-.column {
-  display: grid;
-  gap: 1rem;
-}
-
-.panel {
-  padding: 1rem 1.05rem 1.1rem;
-}
-
-.panelHeading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-bottom: 0.9rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(19, 34, 48, 0.1);
-}
-
-.panelHeading h2 {
-  margin: 0;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 1.4rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #132230;
-}
-
-.panelHeading span {
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 0.8rem;
-  color: rgba(19, 34, 48, 0.55);
-}
-
-.factGrid,
-.resultsGrid,
-.modelRow {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.factGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.fact,
-.resultCard,
-.modelCard {
-  padding: 0.9rem;
-  border-radius: 18px;
-  border: 1px solid rgba(19, 34, 48, 0.11);
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.fact small,
-.resultCard small,
-.modelCard small,
-.gasTopline small,
-.archBlock small {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: rgba(19, 34, 48, 0.6);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.fact strong,
-.resultCard strong,
-.gasTopline strong,
-.modelCard strong,
-.archBlock strong {
-  color: #132230;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-}
-
-.fact strong {
-  font-size: 1.2rem;
 }
 
 .captionBlock {
-  margin-top: 1rem;
-  padding: 0.9rem 1rem;
-  border-left: 5px solid #b4583a;
-  background: rgba(180, 88, 58, 0.06);
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(22, 41, 58, 0.18);
 }
 
-.captionTitle {
-  margin: 0 0 0.25rem;
-  font-weight: 700;
-}
-
-.captionBlock p {
-  margin: 0;
-  line-height: 1.6;
-}
-
-.gasList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
-}
-
-.gasCard {
-  display: grid;
-  gap: 0.5rem;
-  padding: 0.9rem;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(248, 241, 227, 0.92));
-  border: 1px solid rgba(19, 34, 48, 0.12);
-}
-
-.gasTopline {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.gasTopline strong {
-  font-size: 1.45rem;
-  letter-spacing: 0.06em;
-}
-
-.gasCard p,
-.gasCard span,
-.pipelineStep p,
-.resultCard,
-.modelCard p,
-.archBlock p,
-.callout p,
-.demoList li {
-  color: rgba(19, 34, 48, 0.77);
-  line-height: 1.55;
-}
-
-.gasCard span {
-  font-size: 0.92rem;
-}
-
-.pipeline {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.pipelineStep {
-  display: grid;
-  grid-template-columns: 54px 1fr;
-  gap: 0.8rem;
-  align-items: start;
-  padding: 0.8rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.66);
-  border: 1px solid rgba(19, 34, 48, 0.1);
-}
-
-.stepIndex {
-  display: grid;
-  place-items: center;
-  height: 54px;
-  border-radius: 16px;
-  background: #19586a;
-  color: white;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 0.88rem;
-}
-
-.pipelineStep h3 {
-  margin: 0 0 0.25rem;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.pipelineStep p {
-  margin: 0;
-}
-
-.figurePanel {
-  overflow: hidden;
-}
-
-.spectrum {
-  width: 100%;
-  height: auto;
-  border-radius: 22px;
-  border: 1px solid rgba(19, 34, 48, 0.1);
-  background: linear-gradient(180deg, #fffaf1, #f7eedf);
-}
-
-.svgLabel,
-.svgLegend {
-  fill: rgba(19, 34, 48, 0.64);
-  font-size: 12px;
-  font-family: "SF Mono", "Menlo", monospace;
-}
-
-.architecture {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0.8rem;
-  align-items: stretch;
-}
-
-.archBlock {
-  padding: 0.95rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(19, 34, 48, 0.12);
-}
-
-.archBlock strong {
-  display: block;
-  margin-bottom: 0.35rem;
-  font-size: 1.2rem;
-}
-
-.archBlock p,
-.callout p,
-.modelCard p {
-  margin: 0;
-}
-
-.archConnector {
-  display: grid;
-  place-items: center;
-  width: 54px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #b4583a, #19586a);
-  color: white;
-  font-family: "Avenir Next Condensed", "Gill Sans", sans-serif;
-  font-size: 1.8rem;
-}
-
-.callout {
-  margin-top: 0.85rem;
-  padding: 0.9rem 1rem;
-  border-radius: 18px;
-  background: rgba(25, 88, 106, 0.08);
-  border: 1px solid rgba(25, 88, 106, 0.14);
-}
-
-.callout strong {
-  display: block;
-  margin-bottom: 0.3rem;
-  color: #19586a;
-}
-
-.resultsGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.resultCard strong {
-  font-size: 1.5rem;
-  letter-spacing: 0.03em;
-}
-
-.barGroup {
-  display: grid;
-  gap: 0.7rem;
-  margin-top: 0.9rem;
-}
-
-.barRow {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.barLabel {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 0.82rem;
-  color: rgba(19, 34, 48, 0.76);
-}
-
-.barTrack {
-  height: 10px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(19, 34, 48, 0.1);
-}
-
-.barFill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #19586a, #b4583a);
-}
-
-.figureCaption {
-  margin: 0.8rem 0 0;
-  color: rgba(19, 34, 48, 0.62);
-  font-size: 0.88rem;
-  font-style: italic;
-  line-height: 1.5;
-}
-
-.modelRow {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.modelCard {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.modelCard strong {
-  font-size: 1.15rem;
-}
-
-.modelCard span {
-  color: #b4583a;
-  font-family: "SF Mono", "Menlo", monospace;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.demoList {
-  margin: 0;
-  padding-left: 1.2rem;
-  display: grid;
-  gap: 0.65rem;
+.captionBlock p:last-child {
+  margin: 0.45rem 0 0;
+  line-height: 1.7;
+  color: rgba(22, 41, 58, 0.78);
 }
 
 @media (max-width: 1180px) {
-  .header,
-  .abstractStrip,
-  .posterGrid,
-  .footerStrip,
-  .architecture {
+  .topline,
+  .captionBand {
     grid-template-columns: 1fr;
   }
 
-  .archConnector {
-    width: 100%;
-    min-height: 56px;
+  .plate {
+    min-height: auto;
+    padding: 1.1rem;
+    display: grid;
+    gap: 1rem;
   }
 
-  .modelRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .atlasFigure,
+  .marginNote {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    transform: none;
+  }
+
+  .atlasFigure {
+    order: 1;
+    margin: 0 auto;
+    width: min(92vw, 760px);
+  }
+
+  .northwest,
+  .northeast,
+  .southwest,
+  .southeast {
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 860px) {
   .page {
     padding-top: 1.5rem;
   }
 
-  .board {
-    width: min(100% - 1rem, 1400px);
-    padding: 0.7rem;
-    border-radius: 22px;
+  .sheet {
+    padding: 1rem;
   }
 
-  .header,
-  .abstractCard,
-  .noteCard,
-  .panel {
-    border-radius: 18px;
+  .atlasFigure {
+    width: min(96vw, 620px);
   }
 
-  .factGrid,
-  .gasList,
-  .resultsGrid,
-  .modelRow {
-    grid-template-columns: 1fr;
+  .centerMedallion {
+    width: 170px;
+    height: 170px;
   }
 
-  .pipelineStep {
-    grid-template-columns: 1fr;
+  .centerMedallion strong {
+    font-size: 2.2rem;
   }
 
-  .stepIndex {
-    height: 44px;
+  .gasMarker {
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--angle))
+      translateY(-40%)
+      rotate(calc(-1 * var(--angle)))
+      translateY(-184px);
   }
 }

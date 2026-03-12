@@ -1,596 +1,260 @@
 .page {
-  --bg: #081013;
-  --panel: rgba(12, 27, 31, 0.82);
-  --panel-strong: rgba(10, 22, 27, 0.94);
-  --line: rgba(197, 236, 224, 0.16);
-  --line-strong: rgba(197, 236, 224, 0.34);
-  --text: #f1eedf;
-  --muted: rgba(231, 240, 231, 0.72);
-  --highlight: #c2b36e;
-  --teal: #7bd3c5;
-  --rose: #df8f7b;
-  position: relative;
-  overflow: hidden;
-  padding: 3rem clamp(1rem, 2vw, 1.6rem) 5rem;
+  min-height: 100vh;
+  padding: 1rem 0 2.5rem;
+  color: #28231e;
   background:
-    radial-gradient(circle at 15% 20%, rgba(223, 143, 123, 0.15), transparent 26rem),
-    radial-gradient(circle at 82% 10%, rgba(123, 211, 197, 0.14), transparent 30rem),
-    linear-gradient(180deg, #071013 0%, #0a1417 40%, #091114 100%);
-  color: var(--text);
-  isolation: isolate;
+    radial-gradient(circle at 16% 10%, rgba(131, 107, 67, 0.10), transparent 22rem),
+    linear-gradient(180deg, #e8dcc8 0%, #d8c7ad 100%);
 }
 
-.atmosphere,
-.grain {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.atmosphere {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(194, 179, 110, 0.15), transparent 28rem),
-    radial-gradient(circle at 50% 100%, rgba(123, 211, 197, 0.07), transparent 34rem);
-  opacity: 0.9;
-}
-
-.grain {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 16px 16px, 16px 16px;
-  mix-blend-mode: soft-light;
-  opacity: 0.18;
-}
-
-.hero,
-.galleryRow,
-.architectureWing,
-.guideSection {
-  position: relative;
-  z-index: 1;
-  width: min(1320px, 100%);
-  margin: 0 auto 1.6rem;
-}
-
-.hero,
-.galleryRow {
+.archive {
+  width: min(1480px, calc(100% - 1rem));
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
-  gap: 1.25rem;
+  grid-template-columns: 64px minmax(0, 1fr);
+  border: 1px solid rgba(40, 35, 30, 0.18);
+  background: rgba(246, 239, 228, 0.78);
+  box-shadow: 0 20px 60px rgba(78, 58, 36, 0.12);
 }
 
-.heroText,
-.heroPanel,
-.vitrine,
+.spine {
+  display: grid;
+  align-content: start;
+  gap: 1.2rem;
+  padding: 1rem 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  border-right: 1px solid rgba(40, 35, 30, 0.18);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(40, 35, 30, 0.62);
+}
+
+.content {
+  padding: 1rem;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) 300px;
+  gap: 1rem;
+}
+
 .plaque,
-.spectrumRoom,
-.rmsePanel,
-.architectureWing,
-.guideSection {
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(17, 31, 36, 0.88), rgba(8, 17, 21, 0.92));
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+.score,
+.drawer,
+.centerpiece,
+.block {
+  border: 1px solid rgba(40, 35, 30, 0.16);
+  background: linear-gradient(180deg, rgba(255, 251, 244, 0.92), rgba(242, 232, 214, 0.92));
 }
 
-.heroText,
-.heroPanel,
-.vitrine,
 .plaque,
-.spectrumRoom,
-.rmsePanel,
-.architectureWing,
-.guideSection {
-  border-radius: 34px;
-}
-
-.heroText {
-  padding: 2.5rem;
+.score,
+.block {
+  padding: 1.2rem;
 }
 
 .kicker,
-.panelLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: "Optima", "Palatino Linotype", serif;
-  font-size: 0.76rem;
-  letter-spacing: 0.24em;
+.centerLabel,
+.tab,
+.slipRow span,
+.score span {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(194, 179, 110, 0.84);
+  color: rgba(40, 35, 30, 0.66);
 }
 
-.heroText h1,
-.vitrineHead h2,
-.roomHeader h2,
-.wingHeading h2,
-.guideHeader h2,
-.heroPanelInner h2 {
-  margin: 0;
-  font-family: "Baskerville", "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: 0.02em;
+.plaque h1 {
+  margin: 0.45rem 0 0.7rem;
+  max-width: 12ch;
+  font-family: "Rockwell", "Georgia", serif;
+  font-size: clamp(3rem, 6vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
 }
 
-.heroText h1 {
-  margin-top: 0.9rem;
-  font-size: clamp(3.3rem, 7vw, 6.6rem);
-  line-height: 0.92;
-}
-
-.lead {
-  max-width: 54rem;
-  margin-top: 1rem;
-  font-size: 1.07rem;
+.lead,
+.score p,
+.drawer p,
+.drawer small,
+.modelShelf p,
+.note,
+.slipRow p {
   line-height: 1.75;
-  color: var(--muted);
+  color: rgba(40, 35, 30, 0.82);
 }
 
-.factRibbon {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.85rem;
-  margin-top: 2rem;
-}
-
-.factTile,
-.metricCard,
-.gasCard,
-.modelItem,
-.storyCard,
-.guideCard,
-.plaque,
-.rmsePanel,
-.architecturePlaque {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-  border: 1px solid rgba(197, 236, 224, 0.1);
-}
-
-.factTile {
-  padding: 0.95rem 1rem;
-  border-radius: 20px;
-}
-
-.factTile span,
-.metricCard span,
-.modelItem span,
-.guideCard span,
-.storyIndex,
-.axisText {
-  display: block;
-  font-family: "Menlo", "Consolas", monospace;
-  font-size: 0.74rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(231, 240, 231, 0.62);
-}
-
-.factTile strong {
+.score strong {
   display: block;
   margin-top: 0.45rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.heroPanel {
-  padding: 1.2rem;
-}
-
-.heroPanelInner {
-  height: 100%;
-  padding: 1.6rem;
-  border-radius: 26px;
-  border: 1px solid var(--line-strong);
-  background:
-    radial-gradient(circle at top right, rgba(194, 179, 110, 0.14), transparent 14rem),
-    linear-gradient(180deg, rgba(19, 34, 39, 0.9), rgba(9, 17, 21, 0.9));
-}
-
-.heroPanelInner h2 {
-  margin-top: 0.8rem;
+  font-family: "Courier New", monospace;
   font-size: 2rem;
+  color: #5e4228;
 }
 
-.heroPanelInner p,
-.vitrineHead p,
-.plaque p,
-.roomHeader p,
-.wingHeading p,
-.storyCard p,
-.architecturePlaque p,
-.guideCard p {
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.metricStack {
+.cabinet {
   display: grid;
-  gap: 0.8rem;
-  margin-top: 1.4rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 1rem;
+  border: 1px solid rgba(40, 35, 30, 0.18);
 }
 
-.metricCard {
-  padding: 1rem 1.1rem;
-  border-radius: 18px;
-}
-
-.metricCard strong {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 2rem;
-  font-family: "Baskerville", "Times New Roman", serif;
-  color: var(--highlight);
-}
-
-.metricCard small {
-  color: rgba(231, 240, 231, 0.58);
-}
-
-.vitrine {
-  padding: 1.7rem;
-}
-
-.vitrineHead,
-.roomHeader,
-.wingHeading,
-.guideHeader {
-  max-width: 48rem;
-}
-
-.vitrineHead h2,
-.roomHeader h2,
-.wingHeading h2,
-.guideHeader h2 {
-  margin-top: 0.8rem;
-  font-size: clamp(2rem, 4vw, 3.2rem);
-}
-
-.gasConstellation {
+.drawer,
+.centerpiece {
   position: relative;
-  margin-top: 1.5rem;
-  min-height: 31rem;
-  overflow: hidden;
-  border-radius: 28px;
-  border: 1px solid rgba(194, 179, 110, 0.18);
-  background:
-    radial-gradient(circle at center, rgba(123, 211, 197, 0.1), transparent 17rem),
-    linear-gradient(180deg, rgba(8, 17, 20, 0.84), rgba(11, 23, 28, 0.92));
+  min-height: 220px;
+  padding: 1.1rem;
+  border-left: 1px solid rgba(40, 35, 30, 0.14);
+  border-top: 1px solid rgba(40, 35, 30, 0.14);
 }
 
-.planetHalo {
-  position: absolute;
-  inset: 0;
+.drawer:nth-child(1),
+.drawer:nth-child(2),
+.drawer:nth-child(3),
+.centerpiece {
+  border-top: 0;
+}
+
+.drawer:nth-child(1),
+.drawer:nth-child(4),
+.centerpiece {
+  border-left: 0;
+}
+
+.tab {
+  display: inline-block;
+  padding: 0.28rem 0.45rem;
+  border: 1px solid rgba(40, 35, 30, 0.16);
+  background: rgba(94, 66, 40, 0.06);
+}
+
+.drawer h2,
+.centerpiece h2,
+.modelShelf strong,
+.slipRow strong {
+  margin: 0.8rem 0 0.4rem;
+  font-family: "Rockwell", "Georgia", serif;
+}
+
+.centerpiece {
   display: grid;
-  place-items: center;
-}
-
-.coreGlow,
-.orbitRingOne,
-.orbitRingTwo {
-  position: absolute;
-  border-radius: 50%;
-}
-
-.coreGlow {
-  width: 8.5rem;
-  height: 8.5rem;
+  place-content: center;
+  text-align: center;
   background:
-    radial-gradient(circle, rgba(194, 179, 110, 0.58), rgba(223, 143, 123, 0.18) 48%, transparent 70%);
-  filter: blur(4px);
+    radial-gradient(circle at center, rgba(131, 107, 67, 0.08), transparent 55%),
+    linear-gradient(180deg, rgba(255, 251, 244, 0.95), rgba(242, 232, 214, 0.95));
 }
 
-.orbitRingOne,
-.orbitRingTwo {
-  border: 1px solid rgba(123, 211, 197, 0.26);
-}
-
-.orbitRingOne {
-  width: 18rem;
-  height: 18rem;
-}
-
-.orbitRingTwo {
-  width: 25rem;
-  height: 25rem;
-  transform: rotate(18deg);
-}
-
-.gasGrid {
-  position: relative;
-  z-index: 1;
+.lower {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1rem;
-  padding: 1.5rem;
-}
-
-.gasCard {
-  min-height: 11rem;
-  padding: 1.2rem;
-  border-radius: 22px;
-  backdrop-filter: blur(12px);
-}
-
-.gasCard:nth-child(3) {
-  transform: translateX(5%);
-}
-
-.gasCard:nth-child(5) {
-  grid-column: span 2;
-}
-
-.gasFormula {
-  display: inline-flex;
-  margin-bottom: 0.5rem;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid rgba(194, 179, 110, 0.22);
-  background: rgba(194, 179, 110, 0.08);
-  font-family: "Menlo", "Consolas", monospace;
-  letter-spacing: 0.12em;
-  color: var(--highlight);
-}
-
-.gasCard strong,
-.plaque h3,
-.rmsePanel h3,
-.architecturePlaque h3 {
-  display: block;
-  font-family: "Baskerville", "Times New Roman", serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-}
-
-.gasCard p,
-.modelItem p {
-  margin: 0.7rem 0 0;
-  color: var(--muted);
-  line-height: 1.65;
-}
-
-.gasCard small {
-  display: block;
-  margin-top: 0.85rem;
-  color: rgba(194, 179, 110, 0.84);
-}
-
-.sideColumn {
-  display: grid;
-  gap: 1.25rem;
-}
-
-.plaque {
-  padding: 1.35rem;
-  border-radius: 28px;
-}
-
-.plaque h3 {
-  margin: 0.7rem 0 0.45rem;
-}
-
-.modelList {
-  display: grid;
-  gap: 0.8rem;
   margin-top: 1rem;
 }
 
-.modelItem {
-  padding: 0.95rem 1rem;
-  border-radius: 18px;
+.column {
+  display: grid;
+  gap: 1rem;
 }
 
-.modelItem strong {
+.modelShelf {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.modelShelf li {
+  padding: 0.9rem 0;
+  border-top: 1px solid rgba(40, 35, 30, 0.12);
+}
+
+.modelShelf li:first-child {
+  border-top: 0;
+}
+
+.modelShelf span {
   display: block;
-  margin-bottom: 0.35rem;
-  font-size: 1.05rem;
+  color: #7a5937;
+  font-family: "Courier New", monospace;
+  font-size: 0.86rem;
 }
 
-.spectrumRoom {
-  padding: 1.55rem;
+.slip {
+  margin-top: 0.8rem;
+  border: 1px dashed rgba(40, 35, 30, 0.28);
+  background: rgba(255, 251, 244, 0.56);
 }
 
-.spectrumFrame {
-  margin-top: 1.3rem;
-  padding: 1rem;
-  border-radius: 28px;
-  border: 1px solid rgba(194, 179, 110, 0.16);
-  background:
-    linear-gradient(180deg, rgba(3, 10, 12, 0.82), rgba(14, 26, 31, 0.72));
+.slipRow {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  gap: 0.8rem;
+  padding: 0.85rem 0.95rem;
+  border-top: 1px dashed rgba(40, 35, 30, 0.18);
 }
 
-.spectrumBackdrop {
-  fill: rgba(255, 255, 255, 0.02);
-  stroke: rgba(197, 236, 224, 0.12);
+.slipRow:first-child {
+  border-top: 0;
 }
 
-.gridLine {
-  stroke: rgba(197, 236, 224, 0.14);
-  stroke-dasharray: 4 8;
+.spectrum {
+  width: 100%;
+  height: auto;
+  margin-top: 0.8rem;
 }
 
-.observedLine,
-.retrievedLine {
+.spectrum text {
+  fill: rgba(40, 35, 30, 0.68);
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+}
+
+.frame {
+  fill: rgba(255, 251, 244, 0.8);
+  stroke: rgba(40, 35, 30, 0.16);
+}
+
+.observed,
+.retrieved {
   fill: none;
+  stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 4;
 }
 
-.observedLine {
-  stroke: rgba(223, 143, 123, 0.82);
+.observed {
+  stroke: #7e5c3c;
 }
 
-.retrievedLine {
-  stroke: rgba(123, 211, 197, 0.9);
+.retrieved {
+  stroke: #2f5d67;
 }
 
-.rmsePanel {
-  padding: 1.45rem;
-}
-
-.rmsePanel h3 {
-  margin: 0.8rem 0 1rem;
-}
-
-.rmseList {
-  display: grid;
-  gap: 1rem;
-}
-
-.rmseRow {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.rmseMeta {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: baseline;
-}
-
-.rmseMeta strong,
-.rmseMeta span {
-  font-family: "Menlo", "Consolas", monospace;
-}
-
-.rmseTrack {
-  overflow: hidden;
-  height: 0.65rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.rmseFill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--teal), var(--highlight));
-}
-
-.architectureWing,
-.guideSection {
-  padding: 1.8rem;
-}
-
-.storyGrid,
-.guideGrid {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1.35rem;
-}
-
-.storyGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.storyCard,
-.guideCard {
-  padding: 1.2rem;
-  border-radius: 24px;
-}
-
-.storyCard strong {
-  display: block;
-  margin-top: 0.65rem;
-  font-size: 1.1rem;
-}
-
-.storyIndex {
-  color: var(--highlight);
-}
-
-.architecturePlaque {
-  display: grid;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
-  gap: 1rem;
-  align-items: start;
-  margin-top: 1.2rem;
-  padding: 1.25rem;
-  border-radius: 28px;
-}
-
-.architecturePlaque h3 {
-  margin: 0.7rem 0 0;
-}
-
-.guideGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.guideCard {
-  min-height: 11rem;
-}
-
-.guideCard p {
-  margin-top: 0.7rem;
-}
-
-@media (max-width: 1180px) {
-  .hero,
-  .galleryRow,
-  .storyGrid,
-  .guideGrid,
-  .architecturePlaque,
-  .factRibbon {
+@media (max-width: 1100px) {
+  .archive,
+  .header,
+  .cabinet,
+  .lower {
     grid-template-columns: 1fr;
   }
 
-  .gasGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .gasCard:nth-child(3),
-  .gasCard:nth-child(5) {
+  .spine {
+    writing-mode: horizontal-tb;
     transform: none;
-    grid-column: auto;
-  }
-}
-
-@media (max-width: 720px) {
-  .page {
-    padding-top: 1.6rem;
+    grid-auto-flow: column;
+    justify-content: start;
+    border-right: 0;
+    border-bottom: 1px solid rgba(40, 35, 30, 0.18);
   }
 
-  .heroText,
-  .heroPanel,
-  .vitrine,
-  .plaque,
-  .spectrumRoom,
-  .rmsePanel,
-  .architectureWing,
-  .guideSection {
-    border-radius: 24px;
-  }
-
-  .heroText,
-  .vitrine,
-  .spectrumRoom,
-  .architectureWing,
-  .guideSection {
-    padding: 1.2rem;
-  }
-
-  .heroPanel {
-    padding: 0.9rem;
-  }
-
-  .heroText h1 {
-    font-size: 3rem;
-  }
-
-  .gasConstellation {
-    min-height: auto;
-  }
-
-  .orbitRingOne {
-    width: 13rem;
-    height: 13rem;
-  }
-
-  .orbitRingTwo {
-    width: 18rem;
-    height: 18rem;
+  .drawer,
+  .centerpiece {
+    border-left: 0;
   }
 }

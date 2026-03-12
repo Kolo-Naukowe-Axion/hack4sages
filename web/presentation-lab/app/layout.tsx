@@ -17,9 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <header className="topbar">
-          <div className="shell topbar-inner">
+          <div className="topbar-inner">
             <div className="brand">
-              <span className="eyebrow">HACK-4-SAGES 2026 • ETH Zurich orbit</span>
+              <span className="eyebrow">ExoBiome • HACK-4-SAGES 2026</span>
               <strong>ExoBiome Presentation Lab</strong>
             </div>
             <DemoNav />

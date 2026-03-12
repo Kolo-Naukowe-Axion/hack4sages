@@ -1,335 +1,297 @@
 import styles from "./page.module.css";
-import { gases, modelRoster, performance, spectrumSeries, storyline } from "@/app/lib/project-data";
+import { gases, modelRoster, performance, projectFacts, spectrumSeries, storyline } from "@/app/lib/project-data";
 
-const architecturePillars = [
-  "Residual 1D spectral encoder",
-  "Attention pooling over the transmission signal",
-  "Classical regression head for the baseline prediction",
-  "8-qubit quantum correction branch with per-target gating",
-  "Joint abundance output for H2O, CO2, CO, CH4, and NH3"
-];
+const width = 860;
+const height = 220;
+const paddingX = 34;
+const paddingY = 26;
 
-const spectralMarkers = [
-  { label: "H2O", wavelength: 1.4 },
-  { label: "CH4", wavelength: 2.7 },
-  { label: "CO2", wavelength: 4.3 }
-];
+const values = spectrumSeries.flatMap((point) => [point.observed, point.retrieved]);
+const minX = spectrumSeries[0]?.wavelength ?? 0.5;
+const maxX = spectrumSeries[spectrumSeries.length - 1]?.wavelength ?? 5.0;
+const minY = Math.min(...values) - 0.02;
+const maxY = Math.max(...values) + 0.02;
 
 function buildPath(field: "observed" | "retrieved") {
-  const width = 900;
-  const height = 260;
-  const paddingX = 36;
-  const paddingY = 28;
-  const minX = spectrumSeries[0]?.wavelength ?? 0.5;
-  const maxX = spectrumSeries[spectrumSeries.length - 1]?.wavelength ?? 5.0;
-  const values = spectrumSeries.flatMap((point) => [point.observed, point.retrieved]);
-  const minY = Math.min(...values) - 0.02;
-  const maxY = Math.max(...values) + 0.02;
-
   return spectrumSeries
     .map((point) => {
       const x = paddingX + ((point.wavelength - minX) / (maxX - minX)) * (width - paddingX * 2);
       const y = height - paddingY - ((point[field] - minY) / (maxY - minY)) * (height - paddingY * 2);
-      return `${x.toFixed(2)},${y.toFixed(2)}`;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
 }
 
+const comparisonRows = [
+  {
+    system: "Organizer baseline CNN",
+    family: "Classical convolutional baseline",
+    role: "reference point",
+    note: "Fast canonical starting line from the challenge ecosystem."
+  },
+  {
+    system: "Random Forest",
+    family: "Classical ensemble",
+    role: "robust baseline",
+    note: "Useful reality check against overclaiming neural or quantum novelty."
+  },
+  {
+    system: "Winner-style NSF",
+    family: "Challenge-winning family",
+    role: "state-of-the-art reference",
+    note: "Shows the project is benchmarked against a serious retrieval lineage."
+  },
+  {
+    system: "Hybrid quantum residual",
+    family: "Custom quantum ML",
+    role: "team highlight",
+    note: "Residual encoder plus 8-qubit correction branch, best verified holdout mRMSE 0.299376."
+  }
+];
+
+const observedPath = buildPath("observed");
+const retrievedPath = buildPath("retrieved");
+
 export default function VariantFivePage() {
   return (
-    <main className={`page ${styles.page}`}>
-      <div className={`shell ${styles.editorial}`}>
-        <section className={styles.masthead}>
-          <div className={styles.issueStrip}>
-            <span>Axion research notes</span>
-            <span>Hackathon field edition</span>
-            <span>ETH Zurich orbit</span>
+    <main className={styles.page}>
+      <article className={styles.sheet}>
+        <header className={styles.masthead}>
+          <div className={styles.rail}>
+            <span>AXION SCIENCE WEEKLY</span>
+            <span>HACK-4-SAGES SPECIAL ISSUE</span>
+            <span>ETH ZURICH ORBIT</span>
           </div>
-          <div className={styles.heroGrid}>
-            <article className={styles.heroCopy}>
-              <p className={styles.overline}>Data editorial / biosignature feature</p>
-              <h1>Turning Ariel spectra into a five-gas biosignature story.</h1>
-              <p className={styles.lede}>
-                In two minutes, this route frames the project as a scientific feature piece: the Ariel
-                Data Challenge 2023 provides the transmission spectroscopy backbone, the hybrid model
-                estimates abundances for H2O, CO2, CO, CH4, and NH3, and the result is a cleaner way
-                to talk about biosignature evidence as a joint atmospheric pattern instead of a single
-                dramatic gas.
-              </p>
-            </article>
-
-            <aside className={styles.scoreCard}>
-              <span className={styles.scoreLabel}>Verified holdout mRMSE</span>
-              <strong className={styles.scoreValue}>{performance.holdout.toFixed(4)}</strong>
-              <p>
-                Best confirmed checkpoint in this repo, re-evaluated on {performance.rows.toLocaleString()} holdout
-                planets from the same Ariel-derived pipeline.
-              </p>
-              <div className={styles.scoreMeta}>
-                <div>
-                  <span>Training val</span>
-                  <strong>{performance.bestTrainingVal.toFixed(6)}</strong>
-                </div>
-                <div>
-                  <span>Validation</span>
-                  <strong>{performance.validation.toFixed(6)}</strong>
-                </div>
-              </div>
-            </aside>
+          <div className={styles.nameplate}>
+            <span className={styles.volume}>Vol. 01</span>
+            <h1>The Biosignature Review</h1>
+            <span className={styles.volume}>Route 05</span>
           </div>
-        </section>
+          <div className={styles.rail}>
+            <span>Transmission Spectroscopy Desk</span>
+            <span>Five-Gas Abundance Edition</span>
+            <span>Scientific Weekly Format</span>
+          </div>
+        </header>
 
-        <section className={styles.openingSpread}>
-          <article className={styles.dropCapBlock}>
+        <section className={styles.leadGrid}>
+          <aside className={styles.editionBox}>
+            <p className={styles.label}>Dateline</p>
+            <strong>Ariel Data Challenge 2023</strong>
             <p>
-              <span className={styles.dropCap}>T</span>he editorial angle here is clarity. The judges do
-              not need a sprawling website; they need a coherent scientific argument. Start with the
-              dataset, move through the model family, land on the hybrid quantum residual, and end on
-              the fact that biosignature reasoning is stronger when the atmosphere is discussed as a
-              system. This design is built to let someone speak over the page without fighting it.
+              The project begins with transmission spectra and auxiliary planetary context, then treats
+              biosignature analysis as a five-abundance estimation problem.
             </p>
-          </article>
-          <aside className={styles.sidebarNote}>
-            <span className={styles.kicker}>What matters</span>
-            <ul>
-              <li>ADC2023 is the core experimental benchmark.</li>
-              <li>The model predicts five abundances, not a binary label.</li>
-              <li>The quantum path is a correction branch, not a gimmick bottleneck.</li>
+            <ul className={styles.bulletList}>
+              <li>Targets: H2O, CO2, CO, CH4, NH3</li>
+              <li>Benchmark split: 33,138 / 4,142 / 4,143</li>
+              <li>Talkable in two minutes</li>
             </ul>
+          </aside>
+
+          <div className={styles.mainStory}>
+            <p className={styles.kicker}>Front Page Science</p>
+            <h2>From one transmission spectrum to a five-gas atmospheric argument.</h2>
+            <p className={styles.dek}>
+              This route is written like a broadsheet lead story: establish the dataset, frame the
+              chemistry, show the benchmark lineup, and land on the one number the judges will
+              remember. The result is serious, typographic, and intentionally unslick.
+            </p>
+            <p className={styles.byline}>By the ExoBiome desk, with emphasis on scientific restraint.</p>
+          </div>
+
+          <aside className={styles.scoreboard}>
+            <p className={styles.label}>Verified checkpoint</p>
+            <div className={styles.scoreValue}>{performance.holdout.toFixed(6)}</div>
+            <p className={styles.scoreCaption}>Re-evaluated holdout mRMSE</p>
+            <dl className={styles.metricList}>
+              <div>
+                <dt>Training best</dt>
+                <dd>{performance.bestTrainingVal.toFixed(6)}</dd>
+              </div>
+              <div>
+                <dt>Validation</dt>
+                <dd>{performance.validation.toFixed(6)}</dd>
+              </div>
+              <div>
+                <dt>Holdout rows</dt>
+                <dd>{performance.rows.toLocaleString()}</dd>
+              </div>
+            </dl>
           </aside>
         </section>
 
-        <section className={styles.chapterBand}>
-          {storyline.map((step, index) => (
-            <article key={step.title} className={styles.chapterCard}>
-              <span className={styles.chapterNumber}>0{index + 1}</span>
-              <h2>{step.title}</h2>
-              <p>{step.detail}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className={styles.middleGrid}>
-          <article className={styles.figureFeature}>
-            <div className={styles.figureHeading}>
-              <div>
-                <span className={styles.kicker}>Feature figure</span>
-                <h2>Observed transmission structure versus retrieved trend</h2>
+        <section className={styles.bodyGrid}>
+          <div className={styles.mainColumn}>
+            <section className={styles.storySection}>
+              <div className={styles.sectionHead}>
+                <span>Lead analysis</span>
+                <span>Page A1</span>
               </div>
-              <p>
-                The purpose of the model is not to display a flashy chart. It is to convert a physically
-                constrained transmission spectrum into five abundance estimates with enough stability to
-                compare model families and support a biosignature narrative.
-              </p>
-            </div>
+              <div className={styles.columns}>
+                <p>
+                  The central move in this project is conceptual before it is technical: stop treating
+                  biosignatures as a single dramatic gas and start treating them as a joint atmospheric
+                  pattern. That is why the model predicts <strong>H2O</strong>, <strong>CO2</strong>,{" "}
+                  <strong>CO</strong>, <strong>CH4</strong>, and <strong>NH3</strong> together, then
+                  presents their co-presence as evidence to inspect rather than a headline to oversell.
+                </p>
+                <p>
+                  The model story is equally disciplined. The classical backbone does most of the heavy
+                  lifting: residual 1D spectral encoding, attention pooling, and a regression head that
+                  already knows how to read the transmission signal. The quantum path is not a gimmick
+                  replacement. It is an <strong>8-qubit correction branch</strong> that nudges the final
+                  abundance vector where the classical system still leaves signal on the table.
+                </p>
+              </div>
+            </section>
 
-            <div className={styles.figurePanel}>
-              <svg viewBox="0 0 900 260" role="img" aria-label="Transmission spectrum feature">
-                <rect x="0" y="0" width="900" height="260" rx="26" fill="rgba(252,249,242,0.84)" />
+            <blockquote className={styles.pullQuote}>
+              “The quantum block is presented as a correction layer, not as a theatrical bottleneck.
+              That framing makes the whole story more credible.”
+            </blockquote>
+
+            <section className={styles.figureSection}>
+              <div className={styles.sectionHead}>
+                <span>Spectrum desk</span>
+                <span>Page A2</span>
+              </div>
+              <h3>Observed transmission structure against the retrieved trend.</h3>
+              <svg viewBox={`0 0 ${width} ${height}`} className={styles.figure} role="img" aria-label="Transmission spectrum">
+                <rect x="0" y="0" width={width} height={height} className={styles.figureFrame} />
                 {[0, 1, 2, 3].map((step) => {
-                  const y = 28 + step * 68;
+                  const y = paddingY + step * ((height - paddingY * 2) / 3);
                   return (
                     <line
                       key={step}
-                      x1="36"
-                      x2="864"
+                      x1={paddingX}
+                      x2={width - paddingX}
                       y1={y}
                       y2={y}
-                      stroke="rgba(21, 28, 32, 0.09)"
-                      strokeDasharray="6 7"
+                      className={styles.gridLine}
                     />
                   );
                 })}
-                {spectralMarkers.map((marker) => {
-                  const x = 36 + ((marker.wavelength - 0.5) / (5.0 - 0.5)) * (900 - 72);
-                  return (
-                    <g key={marker.label}>
-                      <line x1={x} x2={x} y1="28" y2="232" stroke="rgba(126, 82, 51, 0.28)" />
-                      <text x={x + 8} y="48" fontSize="12" fill="rgba(126, 82, 51, 0.82)">
-                        {marker.label}
-                      </text>
-                    </g>
-                  );
-                })}
-                <polyline
-                  fill="none"
-                  stroke="#7e5233"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildPath("observed")}
-                />
-                <polyline
-                  fill="none"
-                  stroke="#1e5b63"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  points={buildPath("retrieved")}
-                />
-                <text x="36" y="250" fontSize="13" fill="rgba(21,28,32,0.56)">
-                  0.5 μm
-                </text>
-                <text x="816" y="250" fontSize="13" fill="rgba(21,28,32,0.56)">
-                  5.0 μm
-                </text>
-                <text x="36" y="20" fontSize="13" fill="rgba(21,28,32,0.56)">
+                <polyline points={observedPath} className={styles.observedLine} />
+                <polyline points={retrievedPath} className={styles.retrievedLine} />
+                <text x={paddingX} y={18}>
                   normalized transit depth
                 </text>
+                <text x={paddingX} y={height - 6}>
+                  0.5 um
+                </text>
+                <text x={width - 70} y={height - 6}>
+                  5.0 um
+                </text>
               </svg>
-            </div>
-          </article>
+              <p className={styles.caption}>
+                Feature graphic. The page keeps a single figure and lets the typography carry the rest
+                of the argument, as a newspaper would.
+              </p>
+            </section>
 
-          <article className={styles.resultsColumn}>
-            <div className={styles.metricInset}>
-              <span className={styles.kicker}>Performance snapshot</span>
-              <h2>Three numbers that anchor the whole pitch.</h2>
-              <dl className={styles.metricList}>
-                <div>
-                  <dt>Training-phase best</dt>
-                  <dd>{performance.bestTrainingVal.toFixed(6)}</dd>
-                </div>
-                <div>
-                  <dt>Post-stop validation</dt>
-                  <dd>{performance.validation.toFixed(6)}</dd>
-                </div>
-                <div>
-                  <dt>Holdout</dt>
-                  <dd>{performance.holdout.toFixed(6)}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <div className={styles.metricInset}>
-              <span className={styles.kicker}>Per-gas error</span>
-              <div className={styles.barStack}>
-                {performance.perGasRmse.map((entry) => (
-                  <div key={entry.gas} className={styles.barRow}>
-                    <div className={styles.barHeader}>
-                      <span>{entry.gas}</span>
-                      <span>{entry.value.toFixed(3)}</span>
-                    </div>
-                    <div className={styles.barTrack}>
-                      <div
-                        className={styles.barFill}
-                        style={{ width: `${(entry.value / 0.42) * 100}%` }}
-                      />
-                    </div>
+            <section className={styles.storySection}>
+              <div className={styles.sectionHead}>
+                <span>Chemistry briefing</span>
+                <span>Page A3</span>
+              </div>
+              <div className={styles.gasTable}>
+                {gases.map((gas) => (
+                  <div key={gas.key} className={styles.gasRow}>
+                    <strong>{gas.key}</strong>
+                    <span>{gas.label}</span>
+                    <p>{gas.highlight}</p>
                   </div>
                 ))}
               </div>
-            </div>
-          </article>
+            </section>
+          </div>
+
+          <aside className={styles.sidebar}>
+            <section className={styles.sidebarBlock}>
+              <p className={styles.label}>Notebook</p>
+              <h3>Architecture in four desk notes.</h3>
+              <ol className={styles.noteList}>
+                {storyline.map((step) => (
+                  <li key={step.title}>
+                    <strong>{step.title}</strong>
+                    <p>{step.detail}</p>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <section className={styles.sidebarBlock}>
+              <p className={styles.label}>Field facts</p>
+              <dl className={styles.factList}>
+                {projectFacts.map((fact) => (
+                  <div key={fact.label}>
+                    <dt>{fact.label}</dt>
+                    <dd>{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section className={styles.sidebarBlock}>
+              <p className={styles.label}>Talk order</p>
+              <ol className={styles.talkTrack}>
+                <li>Open on the benchmark: Ariel Data Challenge 2023.</li>
+                <li>Name the five gases and say why joint context matters.</li>
+                <li>Show the model lineup to establish credibility.</li>
+                <li>Land on the verified `0.299376` holdout mRMSE.</li>
+              </ol>
+            </section>
+          </aside>
         </section>
 
-        <section className={styles.gasSpread}>
-          <div className={styles.sectionIntro}>
-            <span className={styles.kicker}>Gas roster</span>
-            <h2>The page keeps the chemistry explicit.</h2>
-            <p>
-              Every variant in this app has to keep the same scientific backbone, but this one treats the
-              gases as editorial characters with specific jobs in the atmospheric interpretation.
-            </p>
+        <section className={styles.comparisonSection}>
+          <div className={styles.sectionHead}>
+            <span>Comparative review</span>
+            <span>Page A4</span>
           </div>
-          <div className={styles.gasGrid}>
-            {gases.map((gas) => (
-              <article key={gas.key} className={styles.gasCard}>
-                <span className={styles.gasKey}>{gas.key}</span>
-                <h3>{gas.label}</h3>
-                <p>{gas.note}</p>
-                <div className={styles.gasMeta}>
-                  <span>{gas.role}</span>
-                  <strong>{gas.highlight}</strong>
-                </div>
-              </article>
+          <h3>The benchmark lineup in one full-width table.</h3>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>System</th>
+                  <th>Family</th>
+                  <th>Role</th>
+                  <th>What the judges should hear</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row) => (
+                  <tr key={row.system}>
+                    <th>{row.system}</th>
+                    <td>{row.family}</td>
+                    <td>{row.role}</td>
+                    <td>{row.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className={styles.caption}>
+            The table is the key broadsheet device here: one sober comparison surface instead of four
+            decorative feature cards.
+          </p>
+        </section>
+
+        <footer className={styles.footer}>
+          <p>
+            Broadsheet review framing: dense by design, high on hierarchy, low on interface theatrics.
+            That makes it fundamentally different from the other routes, which lean on spectacle,
+            stagecraft, atlas composition, or instrument metaphors.
+          </p>
+          <div className={styles.rosterLine}>
+            {modelRoster.map((model) => (
+              <span key={model.name}>{model.name}</span>
             ))}
           </div>
-        </section>
-
-        <section className={styles.modelSpread}>
-          <div className={styles.sectionIntro}>
-            <span className={styles.kicker}>Model lineup</span>
-            <h2>Four routes, one benchmark frame.</h2>
-            <p>
-              The point of showing the lineup is not to drown the judges in ablation detail. It is to show
-              that the custom quantum model is presented beside sensible reference models: the organizer
-              baseline CNN, a Random Forest, a winner-style NSF implementation, and finally the hybrid
-              quantum residual that the team is foregrounding.
-            </p>
-          </div>
-          <div className={styles.modelRail}>
-            {modelRoster.map((model, index) => (
-              <article key={model.name} className={styles.modelCard}>
-                <span className={styles.modelIndex}>0{index + 1}</span>
-                <div>
-                  <h3>{model.name}</h3>
-                  <p className={styles.modelClass}>{model.className}</p>
-                </div>
-                <p>{model.summary}</p>
-                <strong>{model.position}</strong>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.architectureSpread}>
-          <article className={styles.architectureNarrative}>
-            <span className={styles.kicker}>Architecture note</span>
-            <h2>A classical backbone with a quantum correction, not the other way around.</h2>
-            <p>
-              That sentence matters. The project reads as more scientifically mature when the quantum
-              branch is described as a targeted residual mechanism layered onto a solid residual 1D encoder,
-              rather than as a fragile end-to-end quantum stunt. The editorial framing makes that hierarchy
-              legible fast.
-            </p>
-            <ul className={styles.architectureList}>
-              {architecturePillars.map((pillar) => (
-                <li key={pillar}>{pillar}</li>
-              ))}
-            </ul>
-          </article>
-
-          <div className={styles.architectureDiagram}>
-            <div className={styles.track}>
-              <span>Transmission spectra</span>
-              <div />
-            </div>
-            <div className={styles.track}>
-              <span>8 aux features</span>
-              <div />
-            </div>
-            <div className={styles.mergeNode}>Residual encoder + fusion</div>
-            <div className={styles.branchGrid}>
-              <div className={styles.branchCard}>
-                <strong>Classical head</strong>
-                <p>Primary five-gas regression signal.</p>
-              </div>
-              <div className={styles.branchCard}>
-                <strong>8-qubit branch</strong>
-                <p>Per-target gated correction to the classical prediction.</p>
-              </div>
-            </div>
-            <div className={styles.outputNode}>Final abundance vector: H2O / CO2 / CO / CH4 / NH3</div>
-          </div>
-        </section>
-
-        <section className={styles.closingSpread}>
-          <div className={styles.quoteBlock}>
-            <p>
-              “If the judges remember one thing, it should be that we framed biosignature detection as a
-              systems problem, not a single-gas headline.”
-            </p>
-          </div>
-          <div className={styles.talkTrack}>
-            <span className={styles.kicker}>Two-minute talk track</span>
-            <ol>
-              <li>Lead with ADC2023 and the five-gas biosignature framing.</li>
-              <li>Show the four-model ladder and the verified holdout number.</li>
-              <li>Close on the hybrid quantum residual as the differentiator worth discussing.</li>
-            </ol>
-          </div>
-        </section>
-      </div>
+        </footer>
+      </article>
     </main>
   );
 }

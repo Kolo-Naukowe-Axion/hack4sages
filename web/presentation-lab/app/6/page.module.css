@@ -1,312 +1,204 @@
-.stagePage {
-  color: #f3ead5;
+.page {
   background:
-    radial-gradient(circle at 18% 12%, rgba(255, 171, 78, 0.24), transparent 23rem),
-    radial-gradient(circle at 84% 18%, rgba(195, 66, 63, 0.22), transparent 21rem),
-    linear-gradient(160deg, #0f1015 0%, #11151f 42%, #17131d 100%);
+    radial-gradient(circle at 18% 12%, rgba(255, 120, 36, 0.18), transparent 24rem),
+    linear-gradient(180deg, #090a0d 0%, #0b0c10 48%, #07080b 100%);
+  color: #f3efe7;
+  font-family: "Helvetica Neue", "Arial Narrow", Arial, sans-serif;
 }
 
-.stagePage :global(.shell) {
-  position: relative;
-  z-index: 1;
+.frame {
+  width: min(1500px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.hero,
+.band,
+.gases,
+.spectrumBand,
+.metricBand,
+.lineupBand,
+.architectureBand,
+.close {
+  min-height: calc(100svh - 3.4rem);
+  display: grid;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.8fr);
-  gap: 1.2rem;
-  min-height: calc(100vh - 8rem);
-  align-items: stretch;
+  min-height: calc(100svh - 2.8rem);
+  border-top: 0;
 }
 
-.heroBackdrop {
-  position: absolute;
-  inset: 8% 24% auto auto;
-  width: 18rem;
-  height: 18rem;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(255, 186, 92, 0.68), rgba(255, 186, 92, 0.08) 58%, transparent 72%);
-  filter: blur(12px);
-  pointer-events: none;
-}
-
-.heroLead,
-.heroBoard,
-.spectrumPanel,
-.architecturePanel,
-.metricCard,
-.lineupCard {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 239, 203, 0.14);
-  background: linear-gradient(180deg, rgba(18, 19, 25, 0.92), rgba(12, 13, 18, 0.88));
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
-}
-
-.heroLead,
-.heroBoard,
-.spectrumPanel,
-.architecturePanel {
-  border-radius: 34px;
-}
-
-.heroLead::before,
-.heroBoard::before,
-.spectrumPanel::before,
-.architecturePanel::before,
-.metricCard::before,
-.lineupCard::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 248, 224, 0.03) 48%, transparent 100%);
-  pointer-events: none;
-}
-
-.heroLead {
-  padding: 3.3rem 3rem 2.5rem;
-  display: grid;
-  align-content: space-between;
-}
-
-.kicker,
-.contextLine,
-.panelHeader span,
-.sectionLead span,
-.lineupCard span,
-.factTile span,
-.metricCard span,
-.boardTop span {
+.eyebrow,
+.leadTag,
+.sectionLabel,
+.factRun strong,
+.metricColumn span,
+.lineupItem span,
+.lineupItem em,
+.storyStep span {
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-family: var(--font-display);
+  letter-spacing: 0.18em;
 }
 
-.kicker {
-  display: inline-flex;
-  width: fit-content;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  color: #20160f;
-  background: linear-gradient(135deg, #ffcc73, #f09248);
-  box-shadow: 0 0 0 1px rgba(255, 220, 162, 0.24);
-  font-size: 0.8rem;
+.eyebrow,
+.sectionLabel,
+.metricColumn span,
+.lineupItem em,
+.storyStep span {
+  color: rgba(243, 239, 231, 0.56);
+  font-size: 0.78rem;
 }
 
-.contextLine {
-  margin: 1.25rem 0 0;
-  color: rgba(243, 234, 213, 0.58);
-  font-size: 0.82rem;
-}
-
-.heroLead h1 {
-  margin: 1rem 0 0;
-  font-family: var(--font-display);
-  font-size: clamp(4rem, 9vw, 7.8rem);
-  line-height: 0.9;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.heroLead h1 span {
-  color: #ffb358;
-}
-
-.summary {
-  max-width: 62ch;
-  margin: 1.5rem 0 0;
-  font-size: 1.08rem;
-  line-height: 1.75;
-  color: rgba(243, 234, 213, 0.84);
-}
-
-.gasRail {
-  margin-top: 2.1rem;
+.heroGrid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.7rem;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 2rem;
+  align-items: end;
 }
 
-.gasCard {
-  padding: 0.95rem 0.85rem;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 239, 203, 0.12);
-  background: linear-gradient(180deg, rgba(255, 181, 94, 0.14), rgba(255, 181, 94, 0.03));
-}
-
-.gasCard strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  letter-spacing: 0.08em;
-}
-
-.gasCard span {
-  color: rgba(243, 234, 213, 0.68);
+.leadTag {
+  margin: 0 0 1rem;
+  color: #ff8f4d;
   font-size: 0.92rem;
 }
 
-.heroBoard {
-  padding: 2rem 1.7rem;
-  display: grid;
-  gap: 1.2rem;
-  align-content: start;
-}
-
-.boardTop {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.boardTop strong,
-.panelHeader strong,
-.sectionLead h2,
-.lineupCard h3 {
-  font-family: var(--font-display);
-  letter-spacing: 0.08em;
+.hero h1 {
+  margin: 0;
+  max-width: 8ch;
+  font-size: clamp(4.5rem, 13vw, 10.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  font-weight: 800;
   text-transform: uppercase;
 }
 
-.boardTop strong {
-  font-size: 1.5rem;
+.heroMetric {
+  padding-bottom: 1rem;
 }
 
-.beatList {
+.heroMetric span {
+  display: block;
+  color: rgba(243, 239, 231, 0.52);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.82rem;
+}
+
+.heroMetric strong {
+  display: block;
+  margin: 0.45rem 0 0.8rem;
+  font-size: clamp(4.6rem, 10vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  color: #ff8f4d;
+  font-weight: 800;
+}
+
+.heroMetric p,
+.bandBody p,
+.gasRow p,
+.metricColumn p,
+.lineupItem p,
+.storyStep p,
+.closeNote,
+.cueList li {
   margin: 0;
-  padding: 0;
-  list-style: none;
+  max-width: 56ch;
+  color: rgba(243, 239, 231, 0.78);
+  line-height: 1.65;
+}
+
+.bandBody {
   display: grid;
-  gap: 0.9rem;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.beatList li {
-  padding: 1rem 1rem 1rem 3.2rem;
-  position: relative;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 239, 203, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  line-height: 1.6;
-  color: rgba(243, 234, 213, 0.82);
+.bandIndex {
+  font-size: clamp(4rem, 9vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.12);
 }
 
-.beatList li::before {
-  content: counter(item, decimal-leading-zero);
-  counter-increment: item;
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  font-family: var(--font-display);
-  letter-spacing: 0.1em;
-  color: #ffb358;
+.bandBody h2,
+.spectrumHeader h2,
+.architectureHeader h2,
+.close h2 {
+  margin: 0 0 1rem;
+  max-width: 12ch;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.beatList {
-  counter-reset: item;
-}
-
-.factStrip {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.factTile {
-  padding: 0.9rem 1rem;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 239, 203, 0.08);
-}
-
-.factTile strong {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 1.08rem;
-}
-
-.metricsSection {
+.factRun {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.4rem;
   margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(243, 239, 231, 0.7);
+  font-size: 0.95rem;
+}
+
+.gasStack {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
 }
 
-.metricCard {
-  padding: 1.5rem 1.4rem;
-  border-radius: 24px;
+.gasRow {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.45fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: end;
+  padding: 1.1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.metricCard strong {
+.gasRow strong {
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  line-height: 0.9;
+  letter-spacing: -0.08em;
+  font-weight: 800;
+  color: #ff8f4d;
+}
+
+.gasRow span,
+.storyStep strong,
+.lineupItem strong {
   display: block;
-  margin-top: 0.4rem;
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 0.95;
-  letter-spacing: 0.06em;
+  margin-bottom: 0.25rem;
+  font-size: clamp(1.1rem, 2vw, 1.7rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
 }
 
-.metricCard p {
-  margin: 0.7rem 0 0;
-  color: rgba(243, 234, 213, 0.72);
-  line-height: 1.55;
+.spectrumHeader {
+  margin-bottom: 1.4rem;
 }
 
-.metricCard i {
-  position: absolute;
-  right: 1.3rem;
-  bottom: 1rem;
-  font-style: normal;
-  font-family: var(--font-display);
-  font-size: 3.5rem;
-  color: rgba(255, 179, 88, 0.12);
-}
-
-.storyGrid {
-  margin-top: 1.1rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 1rem;
-}
-
-.spectrumPanel,
-.architecturePanel {
-  padding: 1.8rem;
-}
-
-.panelHeader {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.panelHeader strong {
-  font-size: 1.95rem;
-}
-
-.chartWrap {
-  margin-top: 1.4rem;
-  padding: 1rem;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 239, 203, 0.08);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
-    radial-gradient(circle at 20% 0%, rgba(255, 179, 88, 0.12), transparent 48%);
-}
-
-.chart {
+.spectrum {
   width: 100%;
   height: auto;
 }
 
-.chart text {
-  fill: rgba(243, 234, 213, 0.54);
-  font-size: 12px;
-  font-family: var(--font-mono);
+.spectrum text {
+  fill: rgba(243, 239, 231, 0.58);
+  font-size: 18px;
+  font-family: "SF Mono", Menlo, monospace;
 }
 
 .gridLine {
-  stroke: rgba(243, 234, 213, 0.08);
-  stroke-dasharray: 4 8;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-dasharray: 4 10;
 }
 
 .observed,
@@ -314,196 +206,140 @@
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 4;
+  stroke-width: 5;
 }
 
 .observed {
-  stroke: rgba(255, 179, 88, 0.58);
+  stroke: rgba(243, 239, 231, 0.88);
 }
 
 .retrieved {
-  stroke: #6ee0d6;
+  stroke: #ff8f4d;
 }
 
-.panelNarrative {
-  margin-top: 1rem;
+.metricStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+
+.metricColumn {
+  padding: 1rem 0;
+}
+
+.metricColumn strong {
+  display: block;
+  margin: 0.35rem 0 0.6rem;
+  font-size: clamp(3.6rem, 8vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+  font-weight: 800;
+}
+
+.lineupList {
+  display: grid;
+}
+
+.lineupItem {
+  display: grid;
+  grid-template-columns: 90px minmax(240px, 0.7fr) minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.lineupItem span {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.9;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.lineupItem em {
+  font-style: normal;
+  display: block;
+  margin-top: 0.3rem;
+}
+
+.architectureHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.75fr);
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.storyline {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.storyStep {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.storyStep span {
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 0.9;
+  font-weight: 800;
+  color: #ff8f4d;
+}
+
+.wireField {
   display: grid;
   gap: 0.8rem;
+  margin-top: 2rem;
 }
 
-.panelNarrative p,
-.pipelineCard p,
-.quantumRibbon p,
-.lineupCard p {
-  margin: 0;
-  line-height: 1.65;
-  color: rgba(243, 234, 213, 0.76);
-}
-
-.pipeline {
-  margin-top: 1.2rem;
-  display: grid;
-  gap: 0.9rem;
-}
-
-.pipelineCard {
-  display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1rem 1rem 3.4rem;
-  position: relative;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 239, 203, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.pipelineCard i {
-  position: absolute;
-  left: 1rem;
-  top: 1rem;
-  font-style: normal;
-  color: #ffb358;
-  font-family: var(--font-display);
-}
-
-.pipelineCard h2 {
-  margin: 0;
-  font-size: 1.1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-family: var(--font-display);
-}
-
-.quantumRibbon {
-  margin-top: 1rem;
-  padding: 1.1rem 1rem 1rem;
-  border-radius: 22px;
-  border: 1px solid rgba(110, 224, 214, 0.18);
-  background: linear-gradient(180deg, rgba(110, 224, 214, 0.09), rgba(110, 224, 214, 0.02));
-}
-
-.ribbonTag {
-  display: inline-flex;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(110, 224, 214, 0.14);
-  color: #9df1ea;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-family: var(--font-display);
-}
-
-.wires {
-  margin: 0.9rem 0 0.8rem;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.wires span {
+.wireField span {
   display: block;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(157, 241, 234, 0.16), rgba(157, 241, 234, 0.82), rgba(157, 241, 234, 0.16));
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 143, 77, 0.92), rgba(255, 143, 77, 0.14));
 }
 
-.lineupSection {
-  margin-top: 1.2rem;
-  padding-bottom: 1rem;
-}
-
-.sectionLead {
+.close .frame {
   display: grid;
-  gap: 0.35rem;
+  gap: 1.5rem;
 }
 
-.sectionLead h2 {
+.cueList {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 0.95;
-}
-
-.lineupGrid {
-  margin-top: 1rem;
+  padding-left: 1.25rem;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.lineupCard {
-  min-height: 100%;
-  padding: 1.35rem 1.2rem 1.2rem;
-  border-radius: 26px;
-  display: grid;
-  gap: 0.9rem;
-}
-
-.lineupCardAccent {
-  background:
-    radial-gradient(circle at top, rgba(255, 179, 88, 0.2), transparent 48%),
-    linear-gradient(180deg, rgba(38, 28, 20, 0.98), rgba(15, 17, 23, 0.96));
-  border-color: rgba(255, 179, 88, 0.24);
-}
-
-.lineupIndex {
-  width: fit-content;
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 239, 203, 0.12);
-  color: rgba(243, 234, 213, 0.62);
-  font-family: var(--font-display);
-  letter-spacing: 0.14em;
-}
-
-.lineupCard h3 {
-  margin: 0.25rem 0 0;
-  font-size: 1.4rem;
-}
-
-.lineupCard strong {
-  color: #ffb358;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.78rem;
+  gap: 0.8rem;
+  max-width: 60rem;
 }
 
 @media (max-width: 1100px) {
-  .hero,
-  .storyGrid,
-  .lineupGrid,
-  .metricsSection,
-  .gasRail {
+  .heroGrid,
+  .bandBody,
+  .metricStrip,
+  .architectureHeader,
+  .lineupItem,
+  .storyStep,
+  .gasRow {
     grid-template-columns: 1fr;
   }
 
-  .hero {
+  .hero,
+  .band,
+  .gases,
+  .spectrumBand,
+  .metricBand,
+  .lineupBand,
+  .architectureBand,
+  .close {
     min-height: auto;
-  }
-}
-
-@media (max-width: 720px) {
-  .heroLead,
-  .heroBoard,
-  .spectrumPanel,
-  .architecturePanel {
-    padding: 1.4rem;
-    border-radius: 24px;
+    padding: 4rem 0;
   }
 
-  .metricCard,
-  .lineupCard {
-    border-radius: 22px;
-  }
-
-  .heroLead h1 {
-    font-size: 3rem;
-  }
-
-  .summary {
-    font-size: 1rem;
-  }
-
-  .sectionLead h2,
-  .panelHeader strong {
-    font-size: 1.6rem;
+  .lineupItem span,
+  .storyStep span,
+  .bandIndex {
+    margin-bottom: 0.6rem;
   }
 }

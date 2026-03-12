@@ -1,270 +1,136 @@
-import {
-  gases,
-  modelRoster,
-  performance,
-  projectFacts,
-  spectrumSeries,
-  storyline
-} from "@/app/lib/project-data";
 import styles from "./page.module.css";
+import { gases, modelRoster, performance, spectrumSeries, storyline } from "@/app/lib/project-data";
 
-function buildPath(field: "observed" | "retrieved", width: number, height: number, padding: number) {
-  const minX = spectrumSeries[0]?.wavelength ?? 0;
-  const maxX = spectrumSeries[spectrumSeries.length - 1]?.wavelength ?? 1;
+function curve(field: "observed" | "retrieved") {
+  const width = 560;
+  const height = 190;
+  const paddingX = 22;
+  const paddingY = 20;
+  const minX = spectrumSeries[0]?.wavelength ?? 0.5;
+  const maxX = spectrumSeries[spectrumSeries.length - 1]?.wavelength ?? 5;
   const values = spectrumSeries.flatMap((entry) => [entry.observed, entry.retrieved]);
-  const minY = Math.min(...values) - 0.015;
-  const maxY = Math.max(...values) + 0.015;
+  const minY = Math.min(...values) - 0.02;
+  const maxY = Math.max(...values) + 0.02;
 
   return spectrumSeries
-    .map((entry, index) => {
-      const x = padding + ((entry.wavelength - minX) / (maxX - minX)) * (width - padding * 2);
-      const y = height - padding - ((entry[field] - minY) / (maxY - minY)) * (height - padding * 2);
-      return `${index === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    .map((entry) => {
+      const x = paddingX + ((entry.wavelength - minX) / (maxX - minX)) * (width - paddingX * 2);
+      const y =
+        height - paddingY - ((entry[field] - minY) / (maxY - minY)) * (height - paddingY * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
 }
 
-const spectrumWidth = 620;
-const spectrumHeight = 320;
-const spectrumPadding = 34;
-const observedPath = buildPath("observed", spectrumWidth, spectrumHeight, spectrumPadding);
-const retrievedPath = buildPath("retrieved", spectrumWidth, spectrumHeight, spectrumPadding);
-const maxPerGasRmse = Math.max(...performance.perGasRmse.map((entry) => entry.value));
-
-const guideSteps = [
-  "Open with the problem: one gas is a hint, five gases together are a stronger biosignature context signal.",
-  "Show the dataset and pipeline: Ariel transmission spectra, 52 bins, 4 channels, 8 auxiliary features.",
-  "Land the result fast: 0.2908 best training validation and 0.2994 verified holdout mRMSE.",
-  "Close on novelty: the classical encoder stays in charge while the 8-qubit branch adds a gated residual correction."
-];
+const observed = curve("observed");
+const retrieved = curve("retrieved");
 
 export default function VariantEightPage() {
   return (
     <main className={styles.page}>
-      <div className={styles.atmosphere} aria-hidden="true" />
-      <div className={styles.grain} aria-hidden="true" />
+      <div className={styles.archive}>
+        <aside className={styles.spine}>
+          <span>Archive</span>
+          <span>Biosignatures</span>
+          <span>Route 08</span>
+        </aside>
 
-      <section className={styles.hero}>
-        <div className={styles.heroText}>
-          <span className={styles.kicker}>Exhibit 08 · Science-center installation for HACK-4-SAGES 2026</span>
-          <h1>The Biosignature Hall</h1>
-          <p className={styles.lead}>
-            An immersive route for presenting <strong>ExoBiome</strong> as a scientific artifact: Ariel
-            transmission spectra enter the gallery, a hybrid quantum regressor interprets them, and five
-            atmospheric molecules leave as a disciplined biosignature story for judges who care about rigor.
-          </p>
+        <div className={styles.content}>
+          <header className={styles.header}>
+            <div className={styles.plaque}>
+              <p className={styles.kicker}>Cabinet of Specimens / Judge Edition</p>
+              <h1>Five Gases in One Archive Drawer</h1>
+              <p className={styles.lead}>
+                This route treats the project like a natural-history cabinet: measured labels,
+                specimen drawers, and one central curator note about what the model actually does and
+                what it does not claim.
+              </p>
+            </div>
+            <div className={styles.score}>
+              <span>Verified holdout checkpoint</span>
+              <strong>{performance.holdout.toFixed(6)}</strong>
+              <p>with validation snapshots at {performance.bestTrainingVal.toFixed(6)} and {performance.validation.toFixed(6)}</p>
+            </div>
+          </header>
 
-          <div className={styles.factRibbon}>
-            {projectFacts.map((fact) => (
-              <div key={fact.label} className={styles.factTile}>
-                <span>{fact.label}</span>
-                <strong>{fact.value}</strong>
-              </div>
+          <section className={styles.cabinet}>
+            {gases.map((gas) => (
+              <article key={gas.key} className={styles.drawer}>
+                <div className={styles.tab}>{gas.key}</div>
+                <h2>{gas.label}</h2>
+                <p>{gas.note}</p>
+                <small>{gas.highlight}</small>
+              </article>
             ))}
-          </div>
-        </div>
 
-        <aside className={styles.heroPanel}>
-          <div className={styles.heroPanelInner}>
-            <span className={styles.panelLabel}>Curator placard</span>
-            <h2>Why this route works for a two-minute demo</h2>
-            <p>
-              It feels memorable and atmospheric like a museum installation, but every large gesture is
-              tied to a concrete scientific fact already verified in the repository.
-            </p>
+            <article className={styles.centerpiece}>
+              <span className={styles.centerLabel}>Specimen label</span>
+              <h2>Ariel Data Challenge 2023</h2>
+              <p>
+                The cabinet holds a single retrieval problem: infer H2O, CO2, CO, CH4, and NH3 from
+                transmission spectroscopy plus auxiliary context, then discuss co-presence as
+                biosignature evidence instead of a single-gas headline.
+              </p>
+            </article>
+          </section>
 
-            <div className={styles.metricStack}>
-              <article className={styles.metricCard}>
-                <span>Training val mRMSE</span>
-                <strong>{performance.bestTrainingVal.toFixed(4)}</strong>
-                <small>best recorded during stage-two training</small>
-              </article>
-              <article className={styles.metricCard}>
-                <span>Validation mRMSE</span>
-                <strong>{performance.validation.toFixed(4)}</strong>
-                <small>re-evaluated checkpoint metric</small>
-              </article>
-              <article className={styles.metricCard}>
-                <span>Holdout mRMSE</span>
-                <strong>{performance.holdout.toFixed(4)}</strong>
-                <small>{performance.rows.toLocaleString()} rows from `best_model.pt`</small>
-              </article>
-            </div>
-          </div>
-        </aside>
-      </section>
+          <section className={styles.lower}>
+            <article className={styles.column}>
+              <div className={styles.block}>
+                <p className={styles.kicker}>Lineage shelf</p>
+                <ul className={styles.modelShelf}>
+                  {modelRoster.map((model) => (
+                    <li key={model.name}>
+                      <strong>{model.name}</strong>
+                      <span>{model.className}</span>
+                      <p>{model.summary}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-      <section className={styles.galleryRow}>
-        <article className={styles.vitrine}>
-          <div className={styles.vitrineHead}>
-            <span className={styles.panelLabel}>Gallery centerpiece</span>
-            <h2>Five molecules under glass</h2>
-            <p>
-              The exhibit never oversells a single gas. It frames H2O, CO2, CO, CH4, and NH3 as a joint
-              atmospheric context that becomes meaningful in combination.
-            </p>
-          </div>
+              <div className={styles.block}>
+                <p className={styles.kicker}>Curator note</p>
+                <p className={styles.note}>
+                  The hybrid quantum residual is the featured object here because it preserves a strong
+                  classical spine and uses the 8-qubit branch as a correction layer, which is a much
+                  more defensible scientific story than pretending the quantum block does everything.
+                </p>
+              </div>
+            </article>
 
-          <div className={styles.gasConstellation}>
-            <div className={styles.planetHalo} aria-hidden="true">
-              <div className={styles.coreGlow} />
-              <div className={styles.orbitRingOne} />
-              <div className={styles.orbitRingTwo} />
-            </div>
-
-            <div className={styles.gasGrid}>
-              {gases.map((gas) => (
-                <article key={gas.key} className={styles.gasCard}>
-                  <span className={styles.gasFormula}>{gas.key}</span>
-                  <strong>{gas.label}</strong>
-                  <p>{gas.note}</p>
-                  <small>{gas.highlight}</small>
-                </article>
-              ))}
-            </div>
-          </div>
-        </article>
-
-        <aside className={styles.sideColumn}>
-          <article className={styles.plaque}>
-            <span className={styles.panelLabel}>Core dataset</span>
-            <h3>Ariel Data Challenge 2023</h3>
-            <p>
-              The majority of the project converged on the Ariel challenge data, so this exhibit treats it
-              as the single authoritative demonstration substrate.
-            </p>
-          </article>
-
-          <article className={styles.plaque}>
-            <span className={styles.panelLabel}>Model family line-up</span>
-            <div className={styles.modelList}>
-              {modelRoster.map((model) => (
-                <div key={model.name} className={styles.modelItem}>
-                  <strong>{model.name}</strong>
-                  <span>
-                    {model.className} · {model.position}
-                  </span>
-                  <p>{model.summary}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-        </aside>
-      </section>
-
-      <section className={styles.galleryRow}>
-        <article className={styles.spectrumRoom}>
-          <div className={styles.roomHeader}>
-            <span className={styles.panelLabel}>Observation chamber</span>
-            <h2>From transmission trace to retrieved abundances</h2>
-            <p>
-              The spectral display is intentionally positioned like a museum vitrine: a reconstructed
-              measurement on top, the model&apos;s retrieval beneath it, and enough captioning to satisfy
-              scientific judges without slowing the live talk.
-            </p>
-          </div>
-
-          <div className={styles.spectrumFrame}>
-            <svg viewBox={`0 0 ${spectrumWidth} ${spectrumHeight}`} role="img" aria-label="Transmission spectrum exhibit">
-              <rect x="0" y="0" width={spectrumWidth} height={spectrumHeight} rx="28" className={styles.spectrumBackdrop} />
-              {Array.from({ length: 5 }, (_, index) => {
-                const y = spectrumPadding + index * ((spectrumHeight - spectrumPadding * 2) / 4);
-                return (
-                  <line
-                    key={index}
-                    x1={spectrumPadding}
-                    x2={spectrumWidth - spectrumPadding}
-                    y1={y}
-                    y2={y}
-                    className={styles.gridLine}
-                  />
-                );
-              })}
-              <path d={observedPath} className={styles.observedLine} />
-              <path d={retrievedPath} className={styles.retrievedLine} />
-              <text x={spectrumPadding} y="24" className={styles.axisText}>
-                normalized transit depth
-              </text>
-              <text x={spectrumPadding} y={spectrumHeight - 10} className={styles.axisText}>
-                0.5 μm
-              </text>
-              <text x={spectrumWidth - spectrumPadding - 34} y={spectrumHeight - 10} className={styles.axisText}>
-                5.0 μm
-              </text>
-            </svg>
-          </div>
-        </article>
-
-        <aside className={styles.rmsePanel}>
-          <span className={styles.panelLabel}>Specimen labels</span>
-          <h3>Per-gas holdout RMSE</h3>
-          <div className={styles.rmseList}>
-            {performance.perGasRmse.map((entry) => (
-              <div key={entry.gas} className={styles.rmseRow}>
-                <div className={styles.rmseMeta}>
-                  <strong>{entry.gas}</strong>
-                  <span>{entry.value.toFixed(3)}</span>
-                </div>
-                <div className={styles.rmseTrack}>
-                  <div
-                    className={styles.rmseFill}
-                    style={{ width: `${(entry.value / maxPerGasRmse) * 100}%` }}
-                  />
+            <article className={styles.column}>
+              <div className={styles.block}>
+                <p className={styles.kicker}>Retrieval slip</p>
+                <div className={styles.slip}>
+                  {storyline.map((step, index) => (
+                    <div key={step.title} className={styles.slipRow}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <div>
+                        <strong>{step.title}</strong>
+                        <p>{step.detail}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        </aside>
-      </section>
 
-      <section className={styles.architectureWing}>
-        <div className={styles.wingHeading}>
-          <span className={styles.panelLabel}>Behind the glass</span>
-          <h2>Architecture corridor</h2>
-          <p>
-            The exhibit walks visitors through the model as if they were moving room to room: the
-            classical retrieval backbone remains dominant, while the quantum branch acts as a carefully
-            gated residual correction rather than a gimmicky bottleneck.
-          </p>
-        </div>
-
-        <div className={styles.storyGrid}>
-          {storyline.map((step, index) => (
-            <article key={step.title} className={styles.storyCard}>
-              <span className={styles.storyIndex}>0{index + 1}</span>
-              <strong>{step.title}</strong>
-              <p>{step.detail}</p>
+              <div className={styles.block}>
+                <p className={styles.kicker}>Observation strip</p>
+                <svg viewBox="0 0 560 190" className={styles.spectrum} role="img" aria-label="Transmission spectrum strip">
+                  <rect x="0" y="0" width="560" height="190" className={styles.frame} />
+                  <polyline points={observed} className={styles.observed} />
+                  <polyline points={retrieved} className={styles.retrieved} />
+                  <text x="22" y="26">observed</text>
+                  <text x="96" y="26">retrieved</text>
+                  <text x="22" y="174">0.5 um</text>
+                  <text x="492" y="174">5.0 um</text>
+                </svg>
+              </div>
             </article>
-          ))}
+          </section>
         </div>
-
-        <div className={styles.architecturePlaque}>
-          <div>
-            <span className={styles.panelLabel}>Interpretation</span>
-            <h3>Residual 1D encoder + 8-qubit quantum correction branch</h3>
-          </div>
-          <p>
-            The presentation language stays plain: residual convolutional encoder, attention pooling,
-            classical regression head, then an 8-qubit gated correction branch that fine-tunes the
-            five-gas output vector instead of replacing the classical signal path.
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.guideSection}>
-        <div className={styles.guideHeader}>
-          <span className={styles.panelLabel}>Curator script</span>
-          <h2>A clean two-minute walkthrough</h2>
-        </div>
-        <div className={styles.guideGrid}>
-          {guideSteps.map((step, index) => (
-            <article key={step} className={styles.guideCard}>
-              <span>Step {index + 1}</span>
-              <p>{step}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      </div>
     </main>
   );
 }

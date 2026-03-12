@@ -25,10 +25,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(13, 95, 99, 0.12), transparent 28rem),
-    linear-gradient(180deg, #ece8de 0%, #f7f4ee 42%, #efeadc 100%);
-  color: var(--ink);
+  background: #0f1115;
+  color: #f3f1eb;
   font-family: var(--font-body);
 }
 
@@ -56,26 +54,28 @@ select {
 .topbar {
   position: sticky;
   top: 0;
-  z-index: 20;
-  backdrop-filter: blur(16px);
-  background: linear-gradient(180deg, rgba(244, 241, 232, 0.92), rgba(244, 241, 232, 0.7));
-  border-bottom: 1px solid var(--line);
+  z-index: 50;
+  backdrop-filter: blur(18px);
+  background: linear-gradient(180deg, rgba(12, 14, 18, 0.92), rgba(12, 14, 18, 0.58));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .topbar-inner {
+  width: min(1400px, calc(100% - 1rem));
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 0;
+  padding: 0.8rem 0;
 }
 
 .eyebrow {
   font-family: var(--font-display);
-  font-size: 0.82rem;
-  letter-spacing: 0.24em;
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(243, 241, 235, 0.58);
 }
 
 .brand {
@@ -85,9 +85,10 @@ select {
 
 .brand strong {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.02rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #f6f4ef;
 }
 
 .topnav {
@@ -98,17 +99,20 @@ select {
 }
 
 .topnav a {
-  border: 1px solid var(--line);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  padding: 0.55rem 0.9rem;
-  background: rgba(255, 255, 255, 0.52);
+  padding: 0.42rem 0.74rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(243, 241, 235, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
 .topnav a:hover {
   transform: translateY(-1px);
-  border-color: rgba(17, 17, 17, 0.3);
-  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .page {

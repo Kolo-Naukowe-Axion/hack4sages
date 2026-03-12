@@ -135,51 +135,51 @@ export const modelRoster = [
 export const routeVariants: RouteVariant[] = [
   {
     slug: "1",
-    title: "Mission Ledger",
-    framing: "white-paper control room",
-    description: "A scientific briefing deck with restrained color, confident typography, and committee-friendly credibility."
+    title: "Swiss Control Sheet",
+    framing: "annual-report discipline",
+    description: "A bright, controlled presentation sheet driven by alignment, rules, and hard editorial hierarchy."
   },
   {
     slug: "2",
-    title: "Orbital Console",
-    framing: "deep-space dashboard",
-    description: "A darker route emphasizing live diagnostics, spectral telemetry, and a more cinematic hackathon energy."
+    title: "CRT Spectrograph",
+    framing: "instrument terminal",
+    description: "A monochrome phosphor observatory display that reads like a live terminal transcript."
   },
   {
     slug: "3",
-    title: "Poster Session",
-    framing: "conference poster",
-    description: "A layout that feels like a polished research poster compressed into a single presentation flow."
+    title: "Solar Atlas",
+    framing: "scientific map plate",
+    description: "A radial atlas composition that organizes the whole story around one annotated celestial figure."
   },
   {
     slug: "4",
-    title: "Glass Observatory",
-    framing: "lab architecture",
-    description: "Translucent panels, orbital geometry, and a cleaner, future-facing institutional style."
+    title: "Art Deco Observatory",
+    framing: "ceremonial observatory program",
+    description: "A symmetrical black-and-gold presentation with marquee framing and formal scientific pageantry."
   },
   {
     slug: "5",
-    title: "Data Editorial",
-    framing: "scientific magazine",
-    description: "More narrative, more typographic, useful if the judges respond to story over dashboard density."
+    title: "Broadsheet Review",
+    framing: "scientific weekly",
+    description: "A newspaper-driven layout built from columns, pull quotes, lead stories, and one decisive comparison table."
   },
   {
     slug: "6",
-    title: "Stage Demo",
-    framing: "two-minute keynote",
-    description: "Purpose-built for a punchy spoken demo with large numbers and a single visual argument per fold."
+    title: "Monolith Keynote",
+    framing: "live talk deck",
+    description: "A sequence of giant full-height statements for a two-minute pitch with almost no small-component language."
   },
   {
     slug: "7",
-    title: "Blueprint Archive",
-    framing: "engineering dossier",
-    description: "An instrument-and-architecture route with diagrammatic emphasis and technical gravitas."
+    title: "Blueprint Roll",
+    framing: "engineering drawing",
+    description: "A cyan-on-blue technical sheet that explains the system as one continuous mechanism."
   },
   {
     slug: "8",
-    title: "Exhibit Mode",
-    framing: "museum installation",
-    description: "A slower, immersive narrative that frames the model as a scientific artifact worth exploring."
+    title: "Cabinet of Specimens",
+    framing: "archive drawers",
+    description: "A warm natural-history archive that presents the gases and models as labeled scientific specimens."
   }
 ];
 

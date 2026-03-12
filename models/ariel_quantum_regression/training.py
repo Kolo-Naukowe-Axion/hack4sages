@@ -35,8 +35,14 @@ def default_quantum_device() -> str:
     try:
         import importlib.util
 
-        if importlib.util.find_spec("pennylane_lightning_gpu") is not None:
-            return "lightning.gpu"
+        candidate_modules = (
+            "pennylane_lightning.lightning_gpu",
+            "lightning_gpu_ops",
+            "pennylane_lightning_gpu",
+        )
+        for module_name in candidate_modules:
+            if importlib.util.find_spec(module_name) is not None:
+                return "lightning.gpu"
     except Exception:
         pass
     return "lightning.qubit"

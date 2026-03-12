@@ -6,6 +6,7 @@ __MACOSX/
 .ipynb_checkpoints/
 web/presentation-lab/node_modules/
 web/presentation-lab/.next/
+web/presentation-lab/tsconfig.tsbuildinfo
 
 # Python
 .venv/
