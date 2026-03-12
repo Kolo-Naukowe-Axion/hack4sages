@@ -43,6 +43,7 @@ data/petitradtrans-adc2023-validation/
 data/reference_data/
 data/eda/
 data/published/
+data/TauREx set/
 
 # EDA local assets
 data/eda/data/
