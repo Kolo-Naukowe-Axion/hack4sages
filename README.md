@@ -8,7 +8,6 @@ The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignatu
 
 - [models](/Users/iwosmura/projects/hack4sages/models): active training and evaluation packages.
 - [data](/Users/iwosmura/projects/hack4sages/data): dataset generators, validators, and benchmark preparation code.
-- [website](/Users/iwosmura/projects/hack4sages/website): the polished presentation site for the project story.
 - [reports](/Users/iwosmura/projects/hack4sages/reports): generated evaluation summaries and audit notes.
 - [archive](/Users/iwosmura/projects/hack4sages/archive): preserved exploratory notebooks and the deduped pre-cleanup snapshot imported from `/Users/iwosmura/Downloads/hack4sages`.
 
@@ -36,9 +35,8 @@ The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignatu
 - Read [archive/early_prototype_snapshot/README.md](/Users/iwosmura/projects/hack4sages/archive/early_prototype_snapshot/README.md) if you want the notebook-era prototype history.
 - Read [archive/hack4sages_2_snapshot/README.md](/Users/iwosmura/projects/hack4sages/archive/hack4sages_2_snapshot/README.md) if you want the later mixed snapshot with web prototypes, audit docs, and presentation assets.
 - Read the package README nearest the model family you care about in [models](/Users/iwosmura/projects/hack4sages/models).
-- Open [website](/Users/iwosmura/projects/hack4sages/website) if you want the judge-facing presentation artifact.
 - Open [data/README.md](/Users/iwosmura/projects/hack4sages/data/README.md) if you want the dataset-generation pipeline.
 
 ## Verified result snapshot
 
-The current website copy and saved reports point to the same central claim: the best verified hybrid checkpoint is the epoch-6 model with validation `mRMSE` about `0.2936` and holdout `mRMSE` about `0.2994`. Cross-model comparison tables elsewhere in the repo still mix verified numbers with placeholder presentation values, so treat those sections accordingly.
+The current reports and saved artifacts point to the same central claim: the best verified hybrid checkpoint is the epoch-6 model with validation `mRMSE` about `0.2936` and holdout `mRMSE` about `0.2994`. Cross-model comparison tables elsewhere in the repo still mix verified numbers with placeholder presentation values, so treat those sections accordingly.
