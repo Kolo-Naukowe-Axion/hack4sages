@@ -1,0 +1,83 @@
+No VQC Ablation Test Guideline
+
+Goal
+Check whether the VQC contributes meaningful predictive value beyond the classical encoders and head.
+
+Keep these fixed across all tests
+- Same train/val/test split
+- Same random seed policy
+- Same optimizer, scheduler, and learning rates where applicable
+- Same batch sizes
+- Same early stopping settings
+- Same number of epochs or same stopping criterion
+- Same evaluation metrics, especially per-target RMSE and mean RMSE
+
+Test 1: Identity ablation
+Description:
+Replace the VQC transformation with an identity mapping from the fused latent to the quantum branch.
+
+Implementation idea:
+- Keep aux encoder, spectral encoder, fusion encoder, and prediction head unchanged
+- Set quantum_feat = latent
+- Keep the same concatenation into the head
+- Keep the same residual path into the head
+
+Question answered:
+Does the VQC outperform doing nothing at all to the fused 12-dimensional latent?
+
+Interpretation:
+- If VQC clearly beats identity, the quantum block is adding useful transformation
+- If results are nearly identical, the VQC is likely not helping much
+
+Test 2: Small classical replacement
+Description:
+Replace the VQC with a small classical block that maps 12 -> 12.
+
+Implementation idea:
+- Use a simple Linear(12, 12), or a small MLP such as Linear -> GELU -> Linear
+- Keep the rest of the model unchanged
+- Keep the head input shape and residual usage the same
+
+Question answered:
+Is any gain coming from a special quantum effect, or just from adding another nonlinear transformation branch?
+
+Interpretation:
+- If VQC and small classical replacement are similar, the benefit is probably from added capacity rather than specifically quantum behavior
+- If VQC clearly beats the classical replacement, that is stronger evidence the VQC is doing something distinctive
+
+Test 3: Remove duplicate branch
+Description:
+Remove the separate quantum branch entirely and feed only the classical features into the head.
+
+Implementation idea:
+- Use latent, aux_feat, and spec_feat only
+- Remove both the concatenated quantum branch and the residual-from-quantum path
+- Adjust the head input dimension accordingly
+
+Question answered:
+Is performance improved just because the model has an extra branch, regardless of whether that branch is quantum?
+
+Interpretation:
+- If the full model beats this version, the extra branch likely helps
+- If this simpler model matches the full model, the VQC branch may be unnecessary
+
+Recommended comparison protocol
+- Run all three tests with the same code path and data split
+- Compare validation mean RMSE and per-target RMSE
+- Also compare final test RMSE
+- Record training time per epoch, since the VQC may be more expensive
+- Prefer multiple seeds, such as 3 to 5 runs per model, before drawing conclusions
+
+Suggested conclusion logic
+- VQC better than identity: the quantum block is more than a pass-through
+- VQC similar to identity: weak evidence for VQC usefulness
+- VQC similar to small classical replacement: likely no uniquely quantum advantage
+- VQC better than both classical baselines: strongest evidence the VQC is helping
+
+Minimum viable study
+If compute is limited, start with:
+1. Full hybrid model
+2. Identity ablation
+3. Small classical replacement
+
+That gives the clearest answer with the least extra work.

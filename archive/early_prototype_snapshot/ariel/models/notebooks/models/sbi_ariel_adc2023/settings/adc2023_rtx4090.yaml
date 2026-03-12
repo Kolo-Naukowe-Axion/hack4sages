@@ -1,0 +1,70 @@
+seed: 42
+task:
+  name: adc2023_fivegas_fmpe_rtx4090
+dataset:
+  type: ADC2023FiveGasFMPEPreparedDataset
+  path: data/generated-data/adc2023_fivegas_fmpe_prepared
+  train_split: train
+  validation_split: validation
+  holdout_split: holdout
+model:
+  posterior_model_type: flow_matching
+  prior:
+    type: StandardNormal
+  posterior_kwargs:
+    type: DenseResidualNet
+    activation: gelu
+    batch_norm: true
+    context_with_glu: false
+    dropout: 0.0
+    hidden_dims_layers:
+      - 128
+      - 256
+      - 512
+      - 1024
+      - 512
+      - 256
+      - 128
+    multiplicative_factor_layers: 2
+    sigma_min: 0.001
+    theta_with_glu: true
+    time_prior_exponent: -0.5
+training:
+  device: cuda
+  batch_size: 2048
+  eval_batch_size: 4096
+  epochs: 300
+  patience: 50
+  checkpoint_every_batches: 25
+  num_workers: 4
+  pin_memory: true
+  persistent_workers: true
+  prefetch_factor: 4
+  optimizer:
+    type: adam
+    lr: 0.0005
+  scheduler:
+    type: cosine
+    T_max: 150
+  max_steps: null
+evaluation:
+  device: cuda
+  checkpoint: null
+  point_estimate: auto
+  posterior_samples: 256
+  context_batch_size: 32
+  progress_every_batches: 0
+  run_after_training: true
+  periodic_rmse_every_epochs: 5
+  periodic_posterior_samples: 64
+  periodic_context_batch_size: 32
+  periodic_rmse_max_rows: 0
+  periodic_rmse_seed: 42
+logging:
+  use_wandb: false
+  project: hack4sages-adc2023-fmpe
+  tags:
+    - adc2023
+    - fmpe
+    - five-gas
+    - rtx4090

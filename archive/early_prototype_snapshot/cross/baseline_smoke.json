@@ -1,0 +1,41 @@
+{
+  "feature_dim": 219,
+  "target_columns": [
+    "log10_vmr_h2o",
+    "log10_vmr_co2",
+    "log10_vmr_co",
+    "log10_vmr_ch4",
+    "log10_vmr_nh3"
+  ],
+  "test_binary_accuracy": {
+    "present_ch4": 0.6087591240875913,
+    "present_co": 0.6233576642335766,
+    "present_co2": 0.5956204379562043,
+    "present_h2o": 0.5766423357664233,
+    "present_nh3": 0.6058394160583942
+  },
+  "test_rmse": {
+    "log10_vmr_ch4": 2.947728132659312,
+    "log10_vmr_co": 2.848212567692463,
+    "log10_vmr_co2": 2.96607867301126,
+    "log10_vmr_h2o": 2.8738372456788213,
+    "log10_vmr_nh3": 2.8410349275133107
+  },
+  "test_rows": 685,
+  "train_rows": 37281,
+  "val_binary_accuracy": {
+    "present_ch4": 0.6564461612747465,
+    "present_co": 0.5987445678416224,
+    "present_co2": 0.6463061323032352,
+    "present_h2o": 0.6356832448092709,
+    "present_nh3": 0.6393046837276678
+  },
+  "val_rmse": {
+    "log10_vmr_ch4": 2.529390359697249,
+    "log10_vmr_co": 2.7875355545891307,
+    "log10_vmr_co2": 2.559763462079074,
+    "log10_vmr_h2o": 2.6040562018598266,
+    "log10_vmr_nh3": 2.592587034955373
+  },
+  "val_rows": 4142
+}

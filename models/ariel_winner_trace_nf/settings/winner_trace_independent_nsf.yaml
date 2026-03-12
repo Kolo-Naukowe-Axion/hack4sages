@@ -1,0 +1,21 @@
+seed: 42
+model:
+  context_dim: 118
+  hidden_features: 152
+  transforms: 18
+  bins: 19
+  hidden_layers: 5
+training:
+  device: auto
+  learning_rate: 0.001
+  batch_size: 16
+  eval_batch_size: 16
+  epochs: 60
+  patience: 12
+  scheduler_factor: 0.5
+  scheduler_patience: 4
+  gradient_clip_norm: 5.0
+evaluation:
+  final_num_samples: 256
+  point_estimate: median
+  trace_seed: 42

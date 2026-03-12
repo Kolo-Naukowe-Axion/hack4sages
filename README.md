@@ -1,69 +1,44 @@
 # ExoBiome
 
-Quantum biosignature detection in exoplanet atmospheres using QELM on real quantum hardware.
+ExoBiome is Axion's Hack4SAGES 2026 project on biosignature retrieval from exoplanet transmission spectra. The core idea is a hybrid quantum/classical regression stack for estimating five atmospheric gases (`H2O`, `CO2`, `CO`, `CH4`, `NH3`) from Ariel-style spectra, with classical baselines and winner-model ports alongside it.
 
-Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
+The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignature Identification in Transmission Spectroscopy](https://youtu.be/3fCZmm0QsE4?si=l1vFH72Xhi8hS9G2). The YouTube metadata identifies this as the Axion Hack4SAGES submission by Iwo Wojtakajtis, Iwo Smura, Maria Platek, and Michal Szczesny.
 
-## Structure
+## Current repo shape
 
-| Branch | What |
-|--------|------|
-| `main` | Project code, workflow docs, generators, validators, and model training paths |
-| `iwosmu/data-artifacts` | Curated datasets and EDA assets |
-| `website/` on `main` | Current presentation website |
+- [models](/Users/iwosmura/projects/hack4sages/models): active training and evaluation packages.
+- [data](/Users/iwosmura/projects/hack4sages/data): dataset generators, validators, and benchmark preparation code.
+- [website](/Users/iwosmura/projects/hack4sages/website): the polished presentation site for the project story.
+- [reports](/Users/iwosmura/projects/hack4sages/reports): generated evaluation summaries and audit notes.
+- [archive](/Users/iwosmura/projects/hack4sages/archive): preserved exploratory notebooks and the deduped pre-cleanup snapshot imported from `/Users/iwosmura/Downloads/hack4sages`.
 
-## Quick Start
+## Model map
 
-- **Datasets and EDA**: see [`data/README.md`](data/README.md)
-- **Validation Set Method**: see [`data/VALIDATION_SET_METHOD.md`](data/VALIDATION_SET_METHOD.md)
-- **Transmission Benchmark Method**: see [`data/TRANSMISSION_BENCHMARK_METHOD.md`](data/TRANSMISSION_BENCHMARK_METHOD.md)
-- **Website**: see [`website/`](website/)
+- [models/ariel_codex](/Users/iwosmura/projects/hack4sages/models/ariel_codex): hybrid quantum regressor for the ADC2023 Ariel dataset.
+- [models/taurex_codex](/Users/iwosmura/projects/hack4sages/models/taurex_codex): TauREx/POSEIDON cross-generator version of the hybrid quantum model.
+- [models/taurex_codex_without_quant](/Users/iwosmura/projects/hack4sages/models/taurex_codex_without_quant): classical control / ablation of the TauREx model.
+- [models/five_qubit_codex](/Users/iwosmura/projects/hack4sages/models/five_qubit_codex): five-qubit variant of the same family.
+- [models/ariel_winner_nf](/Users/iwosmura/projects/hack4sages/models/ariel_winner_nf), [models/ariel_winner_on_taurex](/Users/iwosmura/projects/hack4sages/models/ariel_winner_on_taurex), and [models/ariel_winner_trace_nf](/Users/iwosmura/projects/hack4sages/models/ariel_winner_trace_nf): winner-style normalizing-flow baselines and reruns.
+- [models/sbi_ariel_adc2023](/Users/iwosmura/projects/hack4sages/models/sbi_ariel_adc2023) and [models/taurex_fmpe](/Users/iwosmura/projects/hack4sages/models/taurex_fmpe): FMPE / flow-matching baselines.
+- [models/garnet_ariel_quantum_regression](/Users/iwosmura/projects/hack4sages/models/garnet_ariel_quantum_regression): IQM Garnet evaluation path for the quantum branch.
 
-## Website
+## What was cleaned up
 
-Run locally:
+- The nonsense package name `models/ariel_winner_rerun_model_please` was renamed to [models/ariel_winner_trace_nf](/Users/iwosmura/projects/hack4sages/models/ariel_winner_trace_nf).
+- Stray root-level experiment files were moved into [archive/model_sketch_experiment](/Users/iwosmura/projects/hack4sages/archive/model_sketch_experiment) and [archive/ariel_runtime_data_scaled.ipynb](/Users/iwosmura/projects/hack4sages/archive/ariel_runtime_data_scaled.ipynb).
+- The CPU sweep bundle `fair_small_experiment_cpu` was moved under [outputs/fair_small_experiment_cpu](/Users/iwosmura/projects/hack4sages/outputs/fair_small_experiment_cpu), because it is a generated benchmark run, not source code.
+- A deduped authored-file snapshot from `/Users/iwosmura/Downloads/hack4sages` now lives in [archive/early_prototype_snapshot](/Users/iwosmura/projects/hack4sages/archive/early_prototype_snapshot).
+- A second curated snapshot from `/Users/iwosmura/Downloads/hack4sages 2` now lives in [archive/hack4sages_2_snapshot](/Users/iwosmura/projects/hack4sages/archive/hack4sages_2_snapshot). It preserves the useful parts of that dump: baseline code, audit reports, alternate website prototypes, video source, research docs, and quantum-advantage notebooks.
+- Heavy generated outputs, raw dataset blobs, virtual environments, and obvious duplicate files were intentionally not copied from `Downloads/`.
 
-```bash
-cd website
-npm install
-npm run dev
-```
+## Where to start
 
-## Datasets
+- Read [archive/early_prototype_snapshot/README.md](/Users/iwosmura/projects/hack4sages/archive/early_prototype_snapshot/README.md) if you want the notebook-era prototype history.
+- Read [archive/hack4sages_2_snapshot/README.md](/Users/iwosmura/projects/hack4sages/archive/hack4sages_2_snapshot/README.md) if you want the later mixed snapshot with web prototypes, audit docs, and presentation assets.
+- Read the package README nearest the model family you care about in [models](/Users/iwosmura/projects/hack4sages/models).
+- Open [website](/Users/iwosmura/projects/hack4sages/website) if you want the judge-facing presentation artifact.
+- Open [data/README.md](/Users/iwosmura/projects/hack4sages/data/README.md) if you want the dataset-generation pipeline.
 
-- Curated datasets and EDA are published on `origin/iwosmu/data-artifacts`.
-- The current published generated dataset is `data/published/crossgen_biosignatures/20260311/` on that branch.
-- `data/ariel-ml-dataset/`: canonical ADC2023-format challenge dataset, committed with Git LFS.
-- `data/petitradtrans-adc2023-validation/`: generated pRT-based ADC2023 validation dataset, committed with Git LFS.
-- `data/generated-data/`: local scratch output root for ignored generation runs on `main`.
+## Verified result snapshot
 
-## Data Workflow
-
-- `data/eda/`: exploratory data analysis of the ADC dataset.
-- `data/prt_adc2023_validation/`: generator, physics helpers, empirical prior, and validator.
-- `data/reference_data/adc2023_reference_bundle.npz`: published reference bundle lives on the data branch; rebuild locally when needed.
-- `data/scripts/build_reference_bundle.py`: rebuild the compact empirical prior bundle.
-- `data/scripts/rebin_prt_opacities.py`: rebin official pRT correlated-k opacities to `R=400`.
-- `data/scripts/generate_validation_set.py`: generate shard outputs and assemble the final dataset.
-- `data/scripts/validate_validation_set.py`: validate shapes, physical consistency, noise, and checksums.
-- `data/scripts/check_generation_status.py`: inspect or watch generation progress from `work/progress.json`.
-- `data/scripts/run_local_generation.sh`: launch a local background generation run.
-- `data/prt_transmission_benchmark/`: transmission benchmark generator, grid utilities, and validator.
-- `data/scripts/rebin_prt_transmission_opacities.py`: rebin pRT opacities for the `0.5-5.0 um` transmission benchmark setup.
-- `data/scripts/generate_transmission_benchmark.py`: generate transmission benchmark shards and assemble the canonical HDF5 + Parquet dataset.
-- `data/scripts/validate_transmission_benchmark.py`: validate schema, physics bounds, rebin consistency, and split reproducibility.
-- `data/scripts/tune_transmission_workers.py`: benchmark worker-count candidates on the local machine.
-- `data/scripts/run_transmission_benchmark.sh`: launch a background transmission benchmark generation run with single-threaded BLAS workers.
-
-## Scientific Sources
-
-- `petitRADTRANS==2.6.7`
-- Gebhard et al. 2025: `https://arxiv.org/html/2410.21477v1`
-- Vasist et al. 2023: `https://arxiv.org/abs/2301.06575`
-- Official ADC2023 baseline binning: `https://github.com/ucl-exoplanets/ADC2023-baseline`
-- sbi-ear input-data bundle and rebin pattern: `https://github.com/francois-rozet/sbi-ear`
-
-## Research
-
-- [Vetrano et al. 2025 — QELM for atmospheric retrieval](https://arxiv.org/abs/2509.03617)
-- [Cardenas et al. 2025 — MultiREx dataset](https://doi.org/10.1093/mnras/stae2948)
+The current website copy and saved reports point to the same central claim: the best verified hybrid checkpoint is the epoch-6 model with validation `mRMSE` about `0.2936` and holdout `mRMSE` about `0.2994`. Cross-model comparison tables elsewhere in the repo still mix verified numbers with placeholder presentation values, so treat those sections accordingly.

@@ -1,0 +1,12 @@
+numpy>=1.26
+pandas>=2.2
+h5py>=3.10
+matplotlib>=3.8
+tqdm>=4.66
+torch>=2.3
+jupyterlab>=4.2
+pyarrow>=17
+scikit-learn>=1.5
+pennylane==0.44.0
+pennylane-lightning-gpu==0.44.0
+gast==0.6.0

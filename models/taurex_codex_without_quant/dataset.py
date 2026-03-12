@@ -18,6 +18,8 @@ from .constants import (
     COARSE_ABUNDANCE_QUANTILES,
     COARSE_STRATIFY_MIN_COUNT,
     DEFAULT_PREPARED_CACHE_SUBDIR,
+    ENHANCED_AUX_COLUMNS,
+    ENHANCED_MODEL_SPECTRAL_CHANNELS,
     FIXED_SPECTRAL_CHANNELS,
     HDF5_GROUP_PREFIX,
     LOG10_AUX_COLUMNS,
@@ -26,6 +28,7 @@ from .constants import (
     PRIMARY_STRATIFY_MIN_COUNT,
     RAW_SPECTRAL_CHANNELS,
     SAMPLE_SPECTRAL_CHANNELS,
+    SUPPORTED_FEATURE_RECIPES,
     TARGET_COLUMNS,
     TAUREX_TARGET_COLUMNS,
     WAVELENGTH_DATASET,
@@ -190,6 +193,15 @@ def resolve_dataset_format(data_root: Path, dataset_format: str = "auto") -> str
     raise FileNotFoundError(
         f"Could not infer dataset format for {root}. Expected ADC folders or TauREx labels.parquet/spectra.h5."
     )
+
+
+def resolve_feature_recipe(feature_recipe: str = "legacy") -> str:
+    resolved = str(feature_recipe).strip().lower()
+    if resolved not in SUPPORTED_FEATURE_RECIPES:
+        raise ValueError(
+            f"Unsupported feature_recipe={feature_recipe!r}. Expected one of {SUPPORTED_FEATURE_RECIPES}."
+        )
+    return resolved
 
 
 def _drop_unnamed_columns(frame: pd.DataFrame) -> pd.DataFrame:
@@ -371,6 +383,84 @@ def transform_aux_features(frame: pd.DataFrame) -> np.ndarray:
     return values.astype(np.float32)
 
 
+def compute_engineered_aux_features(
+    frame: pd.DataFrame,
+    raw_spectrum: np.ndarray,
+    raw_noise: np.ndarray,
+) -> np.ndarray:
+    spectrum = np.asarray(raw_spectrum, dtype=np.float32)
+    noise = np.asarray(raw_noise, dtype=np.float32)
+    if spectrum.ndim != 2:
+        raise AssertionError(f"Expected raw_spectrum with shape (N, L), got {spectrum.shape}.")
+    if noise.shape != spectrum.shape:
+        raise AssertionError(f"Expected raw_noise shape {spectrum.shape}, got {noise.shape}.")
+
+    star_radius = frame["star_radius_m"].to_numpy(dtype=np.float32).reshape(-1, 1)
+    planet_mass = frame["planet_mass_kg"].to_numpy(dtype=np.float32).reshape(-1, 1)
+    surface_gravity = frame["planet_surface_gravity"].to_numpy(dtype=np.float32).reshape(-1, 1)
+
+    spectrum_mean = np.clip(spectrum.mean(axis=1, keepdims=True), 1.0e-12, None)
+    spectrum_std = spectrum.std(axis=1, keepdims=True).astype(np.float32)
+    spectrum_gradient = np.diff(spectrum, axis=1, prepend=spectrum[:, :1])
+    spectrum_curvature = np.diff(spectrum_gradient, axis=1, prepend=spectrum_gradient[:, :1])
+    gradient_std = spectrum_gradient.std(axis=1, keepdims=True).astype(np.float32)
+    curvature_std = spectrum_curvature.std(axis=1, keepdims=True).astype(np.float32)
+    noise_mean = np.clip(noise.mean(axis=1, keepdims=True), 1.0e-12, None)
+
+    radius_from_spectrum = star_radius / RJUP_M * np.sqrt(spectrum_mean)
+    gravity_term = np.clip(planet_mass / np.clip(surface_gravity, 1.0e-12, None) * G_NEWTON, 1.0e-18, None)
+    radius_from_gravity = np.sqrt(gravity_term) / RJUP_M
+    radius_delta = radius_from_spectrum - radius_from_gravity
+    radius_ratio = radius_from_spectrum / np.clip(radius_from_gravity, 1.0e-6, None)
+    mean_signal_to_noise = spectrum_mean / noise_mean
+
+    return np.concatenate(
+        [
+            spectrum_mean.astype(np.float32),
+            spectrum_std,
+            gradient_std,
+            curvature_std,
+            noise_mean.astype(np.float32),
+            radius_from_spectrum.astype(np.float32),
+            radius_from_gravity.astype(np.float32),
+            radius_delta.astype(np.float32),
+            radius_ratio.astype(np.float32),
+            mean_signal_to_noise.astype(np.float32),
+        ],
+        axis=1,
+    ).astype(np.float32)
+
+
+def build_model_aux_features(
+    frame: pd.DataFrame,
+    raw_spectrum: np.ndarray,
+    raw_noise: np.ndarray,
+    feature_recipe: str,
+) -> tuple[np.ndarray, list[str]]:
+    resolved_recipe = resolve_feature_recipe(feature_recipe)
+    base_features = transform_aux_features(frame)
+    if resolved_recipe == "legacy":
+        return base_features, list(AUX_COLUMNS)
+
+    engineered = compute_engineered_aux_features(frame, raw_spectrum, raw_noise)
+    return np.concatenate([base_features, engineered], axis=1).astype(np.float32), list(ENHANCED_AUX_COLUMNS)
+
+
+def augment_sample_spectra(values: np.ndarray, feature_recipe: str) -> tuple[np.ndarray, list[str]]:
+    resolved_recipe = resolve_feature_recipe(feature_recipe)
+    normalized = _normalize_sample_spectra(values)
+    if resolved_recipe == "legacy":
+        return normalized.astype(np.float32), list(MODEL_SPECTRAL_CHANNELS)
+
+    spectrum = normalized[:, 0, :]
+    noise = normalized[:, 1, :]
+    gradient = np.diff(spectrum, axis=1, prepend=spectrum[:, :1])
+    curvature = np.diff(gradient, axis=1, prepend=gradient[:, :1])
+    signal_to_noise = spectrum / np.clip(noise, 1.0e-6, None)
+    augmented = np.stack([spectrum, noise, gradient, curvature, signal_to_noise], axis=1).astype(np.float32)
+    return augmented, list(ENHANCED_MODEL_SPECTRAL_CHANNELS)
+
+
 def _presence_signature(targets: np.ndarray) -> np.ndarray:
     presence = (targets >= PRESENCE_THRESHOLD_LOG10_VMR).astype(np.int64)
     bit_weights = (1 << np.arange(presence.shape[1], dtype=np.int64)).reshape(1, -1)
@@ -436,6 +526,7 @@ def _make_inference_split(planet_ids: np.ndarray, aux_values: np.ndarray, spectr
 def _expected_manifest(
     data_root: Path,
     dataset_format: str,
+    feature_recipe: str,
     seed: int,
     train_limit: Optional[int],
     val_limit: Optional[int],
@@ -443,10 +534,16 @@ def _expected_manifest(
     test_limit: Optional[int],
     taurex_ignore_poseidon: bool,
 ) -> dict[str, Any]:
+    resolved_feature_recipe = resolve_feature_recipe(feature_recipe)
+    model_aux_columns = AUX_COLUMNS if resolved_feature_recipe == "legacy" else ENHANCED_AUX_COLUMNS
+    model_spectral_channels = (
+        MODEL_SPECTRAL_CHANNELS if resolved_feature_recipe == "legacy" else ENHANCED_MODEL_SPECTRAL_CHANNELS
+    )
     return {
-        "version": 4,
+        "version": 5,
         "data_root": str(Path(data_root).expanduser().resolve()),
         "dataset_format": dataset_format,
+        "feature_recipe": resolved_feature_recipe,
         "seed": int(seed),
         "taurex_ignore_poseidon": bool(taurex_ignore_poseidon),
         "split_fractions": {"train": 0.8, "val": 0.1, "holdout": 0.1} if dataset_format == "adc" else None,
@@ -456,14 +553,15 @@ def _expected_manifest(
             "holdout": holdout_limit,
             "testdata": test_limit,
         },
-        "aux_columns": AUX_COLUMNS,
+        "aux_columns": model_aux_columns,
+        "base_aux_columns": AUX_COLUMNS,
         "log10_aux_columns": LOG10_AUX_COLUMNS,
         "target_columns": TARGET_COLUMNS,
         "target_source_columns": TARGET_COLUMNS if dataset_format == "adc" else TAUREX_TARGET_COLUMNS,
         "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
         "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
         "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
-        "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+        "model_spectral_channels": model_spectral_channels,
         "split_strategy": "random_stratified" if dataset_format == "adc" else "embedded_generator_splits",
         "sample_spectral_normalization": {
             "mode": "divide_by_sample_mean",
@@ -589,6 +687,7 @@ def prepare_data(
     output_dir: Path,
     prepared_cache_dir: Optional[str | Path] = None,
     dataset_format: str = "auto",
+    feature_recipe: str = "legacy",
     seed: int = 42,
     train_limit: Optional[int] = None,
     val_limit: Optional[int] = None,
@@ -600,9 +699,11 @@ def prepare_data(
     output_path = Path(output_dir).expanduser().resolve()
     cache_dir = resolve_prepared_cache_dir(output_path, prepared_cache_dir)
     resolved_dataset_format = resolve_dataset_format(root, dataset_format)
+    resolved_feature_recipe = resolve_feature_recipe(feature_recipe)
     expected_manifest = _expected_manifest(
         root,
         resolved_dataset_format,
+        resolved_feature_recipe,
         seed,
         train_limit,
         val_limit,
@@ -621,10 +722,6 @@ def prepare_data(
         if not np.allclose(test_wavelength_um, wavelength_um, atol=1.0e-8):
             raise AssertionError("Training and test wavelength grids do not match.")
 
-        labeled_aux_raw = transform_aux_features(labeled_frame)
-        test_aux_raw = transform_aux_features(test_frame)
-        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
-
         sample_channel_indices = [RAW_SPECTRAL_CHANNELS.index(name) for name in SAMPLE_SPECTRAL_CHANNELS]
         width_channel_index = RAW_SPECTRAL_CHANNELS.index("instrument_width")
 
@@ -633,8 +730,24 @@ def prepare_data(
             (0, 2, 1),
         ).astype(np.float32)
         test_sample_spectra = np.transpose(test_spectra_raw[:, :, sample_channel_indices], (0, 2, 1)).astype(np.float32)
-        labeled_sample_spectra = _normalize_sample_spectra(labeled_sample_spectra)
-        test_sample_spectra = _normalize_sample_spectra(test_sample_spectra)
+        labeled_aux_raw, model_aux_columns = build_model_aux_features(
+            labeled_frame,
+            labeled_sample_spectra[:, 0, :],
+            labeled_sample_spectra[:, 1, :],
+            resolved_feature_recipe,
+        )
+        test_aux_raw, _ = build_model_aux_features(
+            test_frame,
+            test_sample_spectra[:, 0, :],
+            test_sample_spectra[:, 1, :],
+            resolved_feature_recipe,
+        )
+        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
+        labeled_sample_spectra, model_spectral_channels = augment_sample_spectra(
+            labeled_sample_spectra,
+            resolved_feature_recipe,
+        )
+        test_sample_spectra, _ = augment_sample_spectra(test_sample_spectra, resolved_feature_recipe)
         fixed_channels = np.stack(
             [
                 _normalize_fixed_channel(labeled_spectra_raw[0, :, width_channel_index]),
@@ -698,15 +811,17 @@ def prepare_data(
             "wavelength_min_um": float(wavelength_um.min()),
             "wavelength_max_um": float(wavelength_um.max()),
             "raw_spectrum_shape": [int(labeled_spectra_raw.shape[1]), len(RAW_SPECTRAL_CHANNELS)],
-            "model_spectrum_shape": [len(MODEL_SPECTRAL_CHANNELS), int(labeled_sample_spectra.shape[2])],
-            "aux_columns": AUX_COLUMNS,
+            "model_spectrum_shape": [len(model_spectral_channels), int(labeled_sample_spectra.shape[2])],
+            "feature_recipe": resolved_feature_recipe,
+            "aux_columns": model_aux_columns,
+            "base_aux_columns": AUX_COLUMNS,
             "log10_aux_columns": LOG10_AUX_COLUMNS,
             "target_columns": TARGET_COLUMNS,
             "target_source_columns": TARGET_COLUMNS,
             "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
             "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
             "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
-            "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+            "model_spectral_channels": model_spectral_channels,
             "sample_spectral_normalization": {
                 "mode": "divide_by_sample_mean",
                 "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],
@@ -767,13 +882,21 @@ def prepare_data(
         width_template = _compute_wavelength_width_template(wavelength_um)
         noise_matrix = _build_taurex_noise_matrix(spectra_bundle["sigma_ppm"], len(wavelength_um))
 
-        labeled_aux_raw = transform_aux_features(labeled_frame)
-        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
         labeled_sample_spectra = np.stack(
             [spectra_bundle["spectra"].astype(np.float32), noise_matrix.astype(np.float32)],
             axis=1,
         )
-        labeled_sample_spectra = _normalize_sample_spectra(labeled_sample_spectra)
+        labeled_aux_raw, model_aux_columns = build_model_aux_features(
+            labeled_frame,
+            labeled_sample_spectra[:, 0, :],
+            labeled_sample_spectra[:, 1, :],
+            resolved_feature_recipe,
+        )
+        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
+        labeled_sample_spectra, model_spectral_channels = augment_sample_spectra(
+            labeled_sample_spectra,
+            resolved_feature_recipe,
+        )
         fixed_channels = np.stack(
             [
                 _normalize_fixed_channel(width_template),
@@ -844,15 +967,17 @@ def prepare_data(
             "wavelength_min_um": float(wavelength_um.min()),
             "wavelength_max_um": float(wavelength_um.max()),
             "raw_spectrum_shape": [int(len(wavelength_um)), len(RAW_SPECTRAL_CHANNELS)],
-            "model_spectrum_shape": [len(MODEL_SPECTRAL_CHANNELS), int(labeled_sample_spectra.shape[2])],
-            "aux_columns": AUX_COLUMNS,
+            "model_spectrum_shape": [len(model_spectral_channels), int(labeled_sample_spectra.shape[2])],
+            "feature_recipe": resolved_feature_recipe,
+            "aux_columns": model_aux_columns,
+            "base_aux_columns": AUX_COLUMNS,
             "log10_aux_columns": LOG10_AUX_COLUMNS,
             "target_columns": TARGET_COLUMNS,
             "target_source_columns": TAUREX_TARGET_COLUMNS,
             "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
             "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
             "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
-            "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+            "model_spectral_channels": model_spectral_channels,
             "sample_spectral_normalization": {
                 "mode": "divide_by_sample_mean",
                 "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],

@@ -20,6 +20,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--project-root", default=str(PROJECT_ROOT))
     parser.add_argument("--data-root", default="data/TauREx set")
     parser.add_argument("--dataset-format", default="auto", choices=("auto", "adc", "taurex"))
+    parser.add_argument("--device", default="auto", choices=("auto", "cpu", "mps", "cuda"))
+    parser.add_argument("--feature-recipe", default="legacy", choices=("legacy", "spectral_plus"))
     parser.add_argument("--output-dir", default="outputs/taurex_codex_without_quant")
     parser.add_argument("--prepared-cache-dir", default=None)
     parser.add_argument("--init-checkpoint-path", default=None)
@@ -35,7 +37,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--weight-decay", type=float, default=1.0e-4)
     parser.add_argument("--gradient-clip-norm", type=float, default=5.0)
     parser.add_argument("--dropout", type=float, default=0.05)
-    parser.add_argument("--loss-name", default="mse", choices=("mse", "huber", "mrmse"))
+    parser.add_argument("--loss-name", default="mse", choices=("mse", "huber", "mrmse", "mse_mrmse"))
+    parser.add_argument("--mse-loss-weight", type=float, default=0.35)
+    parser.add_argument("--mrmse-loss-weight", type=float, default=0.65)
     parser.add_argument("--qnn-qubits", type=int, default=8, help="Legacy flag name for latent token count.")
     parser.add_argument("--qnn-depth", type=int, default=2, help="Legacy flag name for refinement depth.")
     parser.add_argument("--qnn-init-scale", type=float, default=0.1, help="Retained for checkpoint compatibility.")
@@ -44,6 +48,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--quantum-warmup-epochs", type=int, default=3, help="Legacy flag name for refinement warmup.")
     parser.add_argument("--quantum-ramp-epochs", type=int, default=6, help="Legacy flag name for refinement ramp.")
     parser.add_argument("--quantum-backbone-freeze-epochs", type=int, default=0)
+    parser.add_argument(
+        "--architecture",
+        default="legacy_conv_refiner",
+        choices=("legacy_conv_refiner", "pyramid_film"),
+    )
+    parser.add_argument("--spectral-width", type=int, default=48)
+    parser.add_argument("--ema-decay", type=float, default=0.0)
     parser.add_argument("--log-every-batches", type=int, default=20)
     parser.add_argument("--train-limit", type=int, default=None)
     parser.add_argument("--val-limit", type=int, default=None)
@@ -60,6 +71,7 @@ def main() -> None:
     args = build_parser().parse_args()
     if args.cpu_only:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+        args.device = "cpu"
 
     from models.taurex_codex_without_quant.training import TrainingConfig, run_training_experiment
 
@@ -67,6 +79,8 @@ def main() -> None:
         project_root=str(Path(args.project_root).resolve()),
         data_root=args.data_root,
         dataset_format=args.dataset_format,
+        device=args.device,
+        feature_recipe=args.feature_recipe,
         output_dir=args.output_dir,
         prepared_cache_dir=args.prepared_cache_dir,
         init_checkpoint_path=args.init_checkpoint_path,
@@ -83,14 +97,19 @@ def main() -> None:
         gradient_clip_norm=args.gradient_clip_norm,
         dropout=args.dropout,
         loss_name=args.loss_name,
+        mse_loss_weight=args.mse_loss_weight,
+        mrmse_loss_weight=args.mrmse_loss_weight,
         qnn_qubits=args.qnn_qubits,
         qnn_depth=args.qnn_depth,
         qnn_init_scale=args.qnn_init_scale,
         quantum_use_async=args.quantum_use_async,
         classical_only=args.classical_only,
+        architecture=args.architecture,
+        spectral_width=args.spectral_width,
         quantum_warmup_epochs=args.quantum_warmup_epochs,
         quantum_ramp_epochs=args.quantum_ramp_epochs,
         quantum_backbone_freeze_epochs=args.quantum_backbone_freeze_epochs,
+        ema_decay=args.ema_decay,
         use_amp=not args.no_amp,
         log_every_batches=args.log_every_batches,
         train_limit=args.train_limit,

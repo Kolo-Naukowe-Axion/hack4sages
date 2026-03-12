@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import random
@@ -15,9 +16,9 @@ import pandas as pd
 import torch
 import torch.nn as nn
 
-from .constants import AUX_COLUMNS, DEFAULT_DATA_ROOT, DEFAULT_OUTPUT_DIR, TARGET_COLUMNS
+from .constants import AUX_COLUMNS, DEFAULT_DATA_ROOT, DEFAULT_OUTPUT_DIR, ENHANCED_AUX_COLUMNS, TARGET_COLUMNS
 from .dataset import InferenceSplit, LabeledSplit, PreparedData, prepare_data
-from .model import ModelConfig, TauRExNoQuantRegressor, build_model
+from .model import ModelConfig, NoQuantRegressorBase, SUPPORTED_ARCHITECTURES, build_model
 
 
 def resolve_project_root(path_hint: Optional[Path] = None) -> Path:
@@ -36,6 +37,8 @@ class TrainingConfig:
     output_dir: str = str(DEFAULT_OUTPUT_DIR)
     prepared_cache_dir: Optional[str] = None
     dataset_format: str = "auto"
+    device: str = "auto"
+    feature_recipe: str = "legacy"
     init_checkpoint_path: Optional[str] = None
     seed: int = 42
     batch_size: int = 256
@@ -50,15 +53,20 @@ class TrainingConfig:
     gradient_clip_norm: float = 5.0
     dropout: float = 0.05
     loss_name: str = "mse"
+    mse_loss_weight: float = 0.35
+    mrmse_loss_weight: float = 0.65
     qnn_qubits: int = 8
     qnn_depth: int = 2
     qnn_init_scale: float = 0.1
     quantum_device: str = "classical_refiner"
     quantum_use_async: bool = False
     classical_only: bool = False
+    architecture: str = "legacy_conv_refiner"
+    spectral_width: int = 48
     quantum_warmup_epochs: int = 3
     quantum_ramp_epochs: int = 6
     quantum_backbone_freeze_epochs: int = 0
+    ema_decay: float = 0.0
     use_amp: bool = True
     log_every_batches: int = 20
     train_limit: Optional[int] = None
@@ -101,12 +109,15 @@ class TrainingConfig:
     def to_json_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         refinement_width = max(32, int(self.qnn_qubits) * 4)
+        feature_columns = AUX_COLUMNS if self.feature_recipe == "legacy" else ENHANCED_AUX_COLUMNS
         payload["project_root"] = str(self.resolved_project_root())
         payload["data_root"] = str(self.resolved_data_root())
         payload["output_dir"] = str(self.resolved_output_dir())
         payload["prepared_cache_dir"] = self.resolved_prepared_cache_dir()
         payload["init_checkpoint_path"] = self.resolved_init_checkpoint_path()
-        payload["aux_columns"] = AUX_COLUMNS
+        payload["device"] = str(self.device)
+        payload["aux_columns"] = feature_columns
+        payload["base_aux_columns"] = AUX_COLUMNS
         payload["target_columns"] = TARGET_COLUMNS
         payload["refinement_width"] = refinement_width
         payload["refinement_layers"] = int(self.qnn_depth)
@@ -146,11 +157,24 @@ def configure_runtime() -> None:
 
 
 def resolve_training_device(config: TrainingConfig) -> torch.device:
-    if torch.cuda.is_available():
+    requested = str(config.device).strip().lower()
+    if requested in {"", "auto"}:
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+            return torch.device("mps")
+        return torch.device("cpu")
+    if requested == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("CUDA was requested but is unavailable.")
         return torch.device("cuda")
-    if getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+    if requested == "mps":
+        if getattr(torch.backends, "mps", None) is None or not torch.backends.mps.is_available():
+            raise RuntimeError("MPS was requested but is unavailable.")
         return torch.device("mps")
-    return torch.device("cpu")
+    if requested == "cpu":
+        return torch.device("cpu")
+    raise ValueError(f"Unsupported device={config.device!r}. Expected one of: auto, cpu, cuda, mps.")
 
 
 def move_split_to_device(split: LabeledSplit | InferenceSplit, device: torch.device) -> LabeledSplit | InferenceSplit:
@@ -183,6 +207,8 @@ def batch_indices(length: int, batch_size: int, seed: int, epoch: int, device: t
 def maybe_sync_cuda(device: torch.device) -> None:
     if device.type == "cuda":
         torch.cuda.synchronize(device)
+    elif device.type == "mps" and hasattr(torch, "mps"):
+        torch.mps.synchronize()
 
 
 def gather_labeled_batch(split: LabeledSplit, indices: torch.Tensor, device: torch.device) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -256,6 +282,31 @@ class OriginalScaleMRMSELoss(nn.Module):
         return per_target_rmse.mean()
 
 
+class CompositeOriginalScaleLoss(nn.Module):
+    def __init__(
+        self,
+        target_scale: np.ndarray,
+        mse_weight: float,
+        mrmse_weight: float,
+        eps: float = 1.0e-8,
+    ) -> None:
+        super().__init__()
+        total = float(mse_weight) + float(mrmse_weight)
+        if total <= 0.0:
+            raise ValueError("Composite loss requires a positive combination of mse_weight and mrmse_weight.")
+        self.mse_weight = float(mse_weight) / total
+        self.mrmse_weight = float(mrmse_weight) / total
+        self.register_buffer("target_scale", torch.as_tensor(target_scale, dtype=torch.float32))
+        self.eps = float(eps)
+
+    def forward(self, pred_scaled: torch.Tensor, target_scaled: torch.Tensor) -> torch.Tensor:
+        delta = (pred_scaled - target_scaled) * self.target_scale
+        mse = delta.square().mean()
+        per_target_rmse = torch.sqrt(delta.square().mean(dim=0) + self.eps)
+        mrmse = per_target_rmse.mean()
+        return self.mse_weight * mse + self.mrmse_weight * mrmse
+
+
 def build_loss_fn(config: TrainingConfig, data: PreparedData) -> nn.Module:
     loss_name = config.loss_name.strip().lower()
     if loss_name == "mse":
@@ -264,11 +315,42 @@ def build_loss_fn(config: TrainingConfig, data: PreparedData) -> nn.Module:
         return OriginalScaleHuberLoss(data.target_scaler.scale, delta=1.0)
     if loss_name == "mrmse":
         return OriginalScaleMRMSELoss(data.target_scaler.scale)
-    raise ValueError(f"Unsupported loss_name={config.loss_name!r}. Expected one of: mse, huber, mrmse.")
+    if loss_name in {"mse_mrmse", "composite"}:
+        return CompositeOriginalScaleLoss(
+            data.target_scaler.scale,
+            mse_weight=config.mse_loss_weight,
+            mrmse_weight=config.mrmse_loss_weight,
+        )
+    raise ValueError(
+        f"Unsupported loss_name={config.loss_name!r}. Expected one of: mse, huber, mrmse, mse_mrmse."
+    )
+
+
+def maybe_build_ema_model(model: NoQuantRegressorBase, config: TrainingConfig) -> Optional[NoQuantRegressorBase]:
+    decay = float(config.ema_decay)
+    if decay <= 0.0 or decay >= 1.0:
+        return None
+    ema_model = copy.deepcopy(model)
+    ema_model.eval()
+    for parameter in ema_model.parameters():
+        parameter.requires_grad_(False)
+    return ema_model
+
+
+@torch.no_grad()
+def update_ema_model(ema_model: NoQuantRegressorBase, model: NoQuantRegressorBase, decay: float) -> None:
+    ema_state = ema_model.state_dict()
+    model_state = model.state_dict()
+    for name, ema_value in ema_state.items():
+        source_value = model_state[name].detach()
+        if torch.is_floating_point(ema_value):
+            ema_value.mul_(decay).add_(source_value, alpha=1.0 - decay)
+        else:
+            ema_value.copy_(source_value)
 
 
 def evaluate_labeled_split(
-    model: TauRExNoQuantRegressor,
+    model: NoQuantRegressorBase,
     split: LabeledSplit,
     target_scaler,
     batch_size: int,
@@ -314,7 +396,7 @@ def evaluate_labeled_split(
 
 
 def predict_inference_split(
-    model: TauRExNoQuantRegressor,
+    model: NoQuantRegressorBase,
     split: InferenceSplit,
     target_scaler,
     batch_size: int,
@@ -387,6 +469,7 @@ def save_training_progress(
     refinement_scale: float,
     backbone_frozen: bool,
 ) -> None:
+    feature_columns = AUX_COLUMNS if config.feature_recipe == "legacy" else ENHANCED_AUX_COLUMNS
     history_frame = pd.DataFrame(history)
     history_frame.to_csv(output_dir / "history.csv", index=False)
     save_json(
@@ -399,12 +482,13 @@ def save_training_progress(
             "refinement_active": bool(refinement_active),
             "refinement_scale": float(refinement_scale),
             "backbone_frozen": bool(backbone_frozen),
+            "ema_active": float(config.ema_decay) > 0.0,
         },
     )
     torch.save(
         {
             "config": config.to_json_dict(),
-            "feature_cols": AUX_COLUMNS,
+            "feature_cols": feature_columns,
             "target_cols": TARGET_COLUMNS,
             "model_state_dict": last_state,
         },
@@ -414,7 +498,7 @@ def save_training_progress(
         torch.save(
             {
                 "config": config.to_json_dict(),
-                "feature_cols": AUX_COLUMNS,
+                "feature_cols": feature_columns,
                 "target_cols": TARGET_COLUMNS,
                 "best_epoch": int(best_epoch),
                 "best_val_rmse": float(best_val_rmse),
@@ -425,7 +509,7 @@ def save_training_progress(
         )
 
 
-def maybe_initialize_from_checkpoint(model: TauRExNoQuantRegressor, config: TrainingConfig) -> None:
+def maybe_initialize_from_checkpoint(model: NoQuantRegressorBase, config: TrainingConfig) -> None:
     checkpoint_path = config.resolved_init_checkpoint_path()
     if checkpoint_path is None:
         return
@@ -455,18 +539,27 @@ def maybe_initialize_from_checkpoint(model: TauRExNoQuantRegressor, config: Trai
 
 
 def train_model(config: TrainingConfig, data: PreparedData, device: torch.device, output_dir: Optional[Path] = None) -> dict[str, Any]:
+    if config.architecture not in SUPPORTED_ARCHITECTURES:
+        raise ValueError(
+            f"Unsupported architecture={config.architecture!r}. Expected one of {SUPPORTED_ARCHITECTURES}."
+        )
+
     model = build_model(
         ModelConfig(
             spectral_input_channels=int(data.train.spectra.shape[1]),
+            aux_input_dim=int(data.train.aux.shape[1]),
             dropout=config.dropout,
             refinement_width=max(32, int(config.qnn_qubits) * 4),
             refinement_layers=max(1, int(config.qnn_depth)),
             classical_only=config.classical_only,
             use_amp=config.use_amp,
+            architecture=config.architecture,
+            spectral_width=config.spectral_width,
         ),
         device,
     )
     maybe_initialize_from_checkpoint(model, config)
+    ema_model = maybe_build_ema_model(model, config)
     backbone_params = list(model.backbone_parameters())
     refinement_params = list(model.refinement_parameters())
     loss_fn = build_loss_fn(config, data).to(device)
@@ -495,12 +588,18 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
     patience_left = config.early_stop_patience
     total_batches = (len(data.train.aux) + config.batch_size - 1) // config.batch_size
 
-    print(f"Torch device: {device} | classical_only={config.classical_only}", flush=True)
+    print(
+        f"Torch device: {device} | classical_only={config.classical_only} | "
+        f"architecture={config.architecture} | feature_dim={data.train.aux.shape[1]} | "
+        f"spectral_channels={data.train.spectra.shape[1]}",
+        flush=True,
+    )
     print(
         f"Loss: {config.loss_name} | refinement_width={max(32, int(config.qnn_qubits) * 4)} | refinement_layers={config.qnn_depth} | "
         f"warmup_epochs={0 if config.classical_only else config.quantum_warmup_epochs} | "
         f"ramp_epochs={0 if config.classical_only else config.quantum_ramp_epochs} | "
-        f"freeze_epochs={0 if config.classical_only else config.quantum_backbone_freeze_epochs}",
+        f"freeze_epochs={0 if config.classical_only else config.quantum_backbone_freeze_epochs} | "
+        f"ema_decay={config.ema_decay:.4f}",
         flush=True,
     )
     if device.type == "cuda":
@@ -540,6 +639,8 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             if refinement_params:
                 torch.nn.utils.clip_grad_norm_(refinement_params, config.gradient_clip_norm)
             optimizer.step()
+            if ema_model is not None:
+                update_ema_model(ema_model, model, float(config.ema_decay))
             maybe_sync_cuda(device)
             batch_losses.append(float(loss.item()))
             train_pred_batches.append(pred.detach().cpu().numpy())
@@ -556,8 +657,9 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
                 )
 
         train_metrics = summarize_epoch_predictions(data.target_scaler, train_pred_batches, train_true_batches)
+        eval_model = ema_model if ema_model is not None else model
         val_metrics = evaluate_labeled_split(
-            model,
+            eval_model,
             data.val,
             data.target_scaler,
             config.eval_batch_size,
@@ -584,6 +686,7 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             "refinement_active": int(refinement_active),
             "refinement_scale": float(refinement_scale),
             "backbone_frozen": int(backbone_frozen),
+            "ema_active": int(ema_model is not None),
         }
         for target_name, rmse_value in zip(TARGET_COLUMNS, train_metrics["rmse_orig"]):
             history_row[f"train_rmse_{target_name}"] = float(rmse_value)
@@ -602,7 +705,7 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             f"val_mae_mean={history_row['val_mae_mean']:.5f} | "
             f"time={epoch_seconds:.1f}s | lr=({backbone_lr:.2e}, {refinement_lr:.2e}) | "
             f"refinement_active={refinement_active} | refinement_scale={refinement_scale:.2f} | "
-            f"backbone_frozen={backbone_frozen}",
+            f"backbone_frozen={backbone_frozen} | eval_source={'ema' if ema_model is not None else 'model'}",
             flush=True,
         )
         print(f"Train RMSE      | {format_target_vector(train_metrics['rmse_orig'])}", flush=True)
@@ -615,7 +718,7 @@ def train_model(config: TrainingConfig, data: PreparedData, device: torch.device
             best_val_rmse = float(val_metrics["rmse_mean"])
             best_epoch = epoch + 1
             best_refinement_scale = float(refinement_scale)
-            best_state = {name: value.detach().cpu() for name, value in model.state_dict().items()}
+            best_state = {name: value.detach().cpu() for name, value in eval_model.state_dict().items()}
             patience_left = config.early_stop_patience
         else:
             patience_left -= 1
@@ -716,6 +819,8 @@ def run_training_experiment(config: Optional[TrainingConfig] = None) -> dict[str
     print(f"Data root: {cfg.resolved_data_root()}", flush=True)
     print(f"Output dir: {output_dir}", flush=True)
     print(f"Dataset format: {cfg.dataset_format}", flush=True)
+    print(f"Feature recipe: {cfg.feature_recipe}", flush=True)
+    print(f"Architecture: {cfg.architecture}", flush=True)
     print(f"Batch size: {cfg.batch_size}", flush=True)
     print(f"Eval batch size: {cfg.eval_batch_size}", flush=True)
     print(f"Refinement width / layers: {max(32, int(cfg.qnn_qubits) * 4)}/{cfg.qnn_depth}", flush=True)
@@ -730,6 +835,7 @@ def run_training_experiment(config: Optional[TrainingConfig] = None) -> dict[str
         output_dir=output_dir,
         prepared_cache_dir=cfg.resolved_prepared_cache_dir(),
         dataset_format=cfg.dataset_format,
+        feature_recipe=cfg.feature_recipe,
         seed=cfg.seed,
         train_limit=cfg.train_limit,
         val_limit=cfg.val_limit,
