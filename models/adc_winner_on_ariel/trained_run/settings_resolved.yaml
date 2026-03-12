@@ -1,0 +1,25 @@
+seed: 42
+model:
+  context_dim: 118
+  hidden_features: 152
+  transforms: 18
+  bins: 19
+  hidden_layers: 5
+training:
+  device: cuda
+  learning_rate: 0.001
+  batch_size: 1024
+  eval_batch_size: 2048
+  epochs: 300
+  patience: 30
+  scheduler_factor: 0.5
+  scheduler_patience: 4
+  gradient_clip_norm: 5.0
+evaluation:
+  metric_every_epochs: 10
+  metric_max_rows: 256
+  metric_num_samples: 16
+  final_num_samples: 128
+  point_estimate: median
+  row_seed: 42
+  noise_seed: 42

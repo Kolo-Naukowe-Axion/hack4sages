@@ -1,0 +1,25 @@
+{
+  "data_root": "/Users/iwosmura/projects/hack4sages/data/full-ariel",
+  "seed": 42,
+  "split_source": "/Users/iwosmura/projects/hack4sages/data/val_dataset",
+  "context_layout": {
+    "aux_engineered": 12,
+    "spectrum_stats": 2,
+    "spectrum_normalized": 52,
+    "noise_scaled": 52,
+    "total": 118
+  },
+  "split_sizes": {
+    "train": 33138,
+    "validation": 4142,
+    "holdout": 4143,
+    "testdata": 685
+  },
+  "target_columns": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ]
+}

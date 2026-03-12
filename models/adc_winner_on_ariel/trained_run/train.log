@@ -1,0 +1,107 @@
+Epoch 1 complete | train_nll=-0.263920 val_nll=-0.944484 lr=1.000000e-03
+Epoch 2 complete | train_nll=-3.241843 val_nll=-1.898952 lr=1.000000e-03
+Epoch 3 complete | train_nll=-3.839724 val_nll=-1.741367 lr=1.000000e-03
+Epoch 4 complete | train_nll=-4.246214 val_nll=-2.772591 lr=1.000000e-03
+Epoch 5 complete | train_nll=-4.310005 val_nll=-3.096802 lr=1.000000e-03
+Epoch 6 complete | train_nll=-4.777913 val_nll=-3.361786 lr=1.000000e-03
+Epoch 7 complete | train_nll=-5.068844 val_nll=-3.305810 lr=1.000000e-03
+Epoch 8 complete | train_nll=-4.857848 val_nll=-3.553718 lr=1.000000e-03
+Epoch 9 complete | train_nll=-5.155913 val_nll=-3.994587 lr=1.000000e-03
+Epoch 10 complete | train_nll=-5.194848 val_nll=-4.157974 lr=1.000000e-03
+Epoch 10 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 10 validation: batch 1/1
+Epoch 10 validation mRMSE | mean=0.629857 point=median
+Epoch 11 complete | train_nll=-5.084294 val_nll=-3.754604 lr=1.000000e-03
+Epoch 12 complete | train_nll=-5.272715 val_nll=-4.406361 lr=1.000000e-03
+Epoch 13 complete | train_nll=-5.234721 val_nll=-3.830644 lr=1.000000e-03
+Epoch 14 complete | train_nll=-5.329200 val_nll=-4.444212 lr=1.000000e-03
+Epoch 15 complete | train_nll=-5.594166 val_nll=-4.409791 lr=1.000000e-03
+Epoch 16 complete | train_nll=-5.348972 val_nll=-4.119602 lr=1.000000e-03
+Epoch 17 complete | train_nll=-5.557122 val_nll=-4.502142 lr=1.000000e-03
+Epoch 18 complete | train_nll=-5.644705 val_nll=-4.265474 lr=1.000000e-03
+Epoch 19 complete | train_nll=-5.147442 val_nll=-4.022896 lr=1.000000e-03
+Epoch 20 complete | train_nll=-5.333636 val_nll=-4.291990 lr=1.000000e-03
+Epoch 20 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 20 validation: batch 1/1
+Epoch 20 validation mRMSE | mean=0.612171 point=median
+Epoch 21 complete | train_nll=-5.644315 val_nll=-4.175105 lr=1.000000e-03
+Epoch 22 complete | train_nll=-5.627089 val_nll=-4.610914 lr=1.000000e-03
+Epoch 23 complete | train_nll=-5.725975 val_nll=-4.697508 lr=1.000000e-03
+Epoch 24 complete | train_nll=-5.690576 val_nll=-4.496300 lr=1.000000e-03
+Epoch 25 complete | train_nll=-5.844343 val_nll=-4.790866 lr=1.000000e-03
+Epoch 26 complete | train_nll=-5.814514 val_nll=-4.627467 lr=1.000000e-03
+Epoch 27 complete | train_nll=-5.584927 val_nll=-4.079750 lr=1.000000e-03
+Epoch 28 complete | train_nll=-5.582018 val_nll=-4.665994 lr=1.000000e-03
+Epoch 29 complete | train_nll=-5.690990 val_nll=-4.866158 lr=1.000000e-03
+Epoch 30 complete | train_nll=-5.941130 val_nll=-4.813315 lr=1.000000e-03
+Epoch 30 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 30 validation: batch 1/1
+Epoch 30 validation mRMSE | mean=0.573626 point=median
+Epoch 31 complete | train_nll=-5.723293 val_nll=-4.892291 lr=1.000000e-03
+Epoch 32 complete | train_nll=-5.886458 val_nll=-4.790336 lr=1.000000e-03
+Epoch 33 complete | train_nll=-5.927865 val_nll=-4.856693 lr=1.000000e-03
+Epoch 34 complete | train_nll=-5.822145 val_nll=-4.509028 lr=1.000000e-03
+Epoch 35 complete | train_nll=-5.813100 val_nll=-4.744234 lr=1.000000e-03
+Epoch 36 complete | train_nll=-5.962096 val_nll=-4.890007 lr=5.000000e-04
+Epoch 37 complete | train_nll=-6.197300 val_nll=-5.075902 lr=5.000000e-04
+Epoch 38 complete | train_nll=-6.208676 val_nll=-5.047445 lr=5.000000e-04
+Epoch 39 complete | train_nll=-6.157851 val_nll=-5.092501 lr=5.000000e-04
+Epoch 40 complete | train_nll=-6.183456 val_nll=-4.988507 lr=5.000000e-04
+Epoch 40 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 40 validation: batch 1/1
+Epoch 40 validation mRMSE | mean=0.579947 point=median
+Epoch 41 complete | train_nll=-6.230853 val_nll=-5.025512 lr=5.000000e-04
+Epoch 42 complete | train_nll=-6.224084 val_nll=-4.988604 lr=5.000000e-04
+Epoch 43 complete | train_nll=-6.262760 val_nll=-5.070549 lr=5.000000e-04
+Epoch 44 complete | train_nll=-6.271630 val_nll=-5.056879 lr=2.500000e-04
+Epoch 45 complete | train_nll=-6.402878 val_nll=-5.103379 lr=2.500000e-04
+Epoch 46 complete | train_nll=-6.375826 val_nll=-5.134227 lr=2.500000e-04
+Epoch 47 complete | train_nll=-6.390900 val_nll=-5.151185 lr=2.500000e-04
+Epoch 48 complete | train_nll=-6.425536 val_nll=-5.052712 lr=2.500000e-04
+Epoch 49 complete | train_nll=-6.407166 val_nll=-5.214858 lr=2.500000e-04
+Epoch 50 complete | train_nll=-6.450289 val_nll=-5.170971 lr=2.500000e-04
+Epoch 50 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 50 validation: batch 1/1
+Epoch 50 validation mRMSE | mean=0.562935 point=median
+Epoch 51 complete | train_nll=-6.427700 val_nll=-5.127622 lr=2.500000e-04
+Epoch 52 complete | train_nll=-6.471234 val_nll=-5.183821 lr=2.500000e-04
+Epoch 53 complete | train_nll=-6.438057 val_nll=-5.128668 lr=2.500000e-04
+Epoch 54 complete | train_nll=-6.477716 val_nll=-5.119090 lr=1.250000e-04
+Epoch 55 complete | train_nll=-6.522051 val_nll=-5.134396 lr=1.250000e-04
+Epoch 56 complete | train_nll=-6.521726 val_nll=-5.166705 lr=1.250000e-04
+Epoch 57 complete | train_nll=-6.538139 val_nll=-5.172571 lr=1.250000e-04
+Epoch 58 complete | train_nll=-6.555708 val_nll=-5.117066 lr=1.250000e-04
+Epoch 59 complete | train_nll=-6.548585 val_nll=-5.112022 lr=6.250000e-05
+Epoch 60 complete | train_nll=-6.578145 val_nll=-5.160249 lr=6.250000e-05
+Epoch 60 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 60 validation: batch 1/1
+Epoch 60 validation mRMSE | mean=0.544989 point=median
+Epoch 61 complete | train_nll=-6.594414 val_nll=-5.160137 lr=6.250000e-05
+Epoch 62 complete | train_nll=-6.593170 val_nll=-5.150248 lr=6.250000e-05
+Epoch 63 complete | train_nll=-6.602977 val_nll=-5.167696 lr=6.250000e-05
+Epoch 64 complete | train_nll=-6.591523 val_nll=-5.161202 lr=3.125000e-05
+Epoch 65 complete | train_nll=-6.625478 val_nll=-5.193652 lr=3.125000e-05
+Epoch 66 complete | train_nll=-6.625881 val_nll=-5.181345 lr=3.125000e-05
+Epoch 67 complete | train_nll=-6.645156 val_nll=-5.212373 lr=3.125000e-05
+Epoch 68 complete | train_nll=-6.636956 val_nll=-5.179424 lr=3.125000e-05
+Epoch 69 complete | train_nll=-6.634735 val_nll=-5.169596 lr=1.562500e-05
+Epoch 70 complete | train_nll=-6.660059 val_nll=-5.177026 lr=1.562500e-05
+Epoch 70 validation mRMSE | rows=256/4142 samples=16 point=median
+epoch 70 validation: batch 1/1
+Epoch 70 validation mRMSE | mean=0.565738 point=median
+Epoch 71 complete | train_nll=-6.655604 val_nll=-5.168512 lr=1.562500e-05
+Epoch 72 complete | train_nll=-6.658944 val_nll=-5.201022 lr=1.562500e-05
+Epoch 73 complete | train_nll=-6.658155 val_nll=-5.176330 lr=1.562500e-05
+Epoch 74 complete | train_nll=-6.650934 val_nll=-5.179995 lr=7.812500e-06
+Epoch 75 complete | train_nll=-6.668583 val_nll=-5.188193 lr=7.812500e-06
+Epoch 76 complete | train_nll=-6.653872 val_nll=-5.188460 lr=7.812500e-06
+Epoch 77 complete | train_nll=-6.663934 val_nll=-5.199152 lr=7.812500e-06
+Epoch 78 complete | train_nll=-6.669548 val_nll=-5.199808 lr=7.812500e-06
+Epoch 79 complete | train_nll=-6.660409 val_nll=-5.201686 lr=3.906250e-06
+Early stopping after epoch 79 due to validation NLL patience.
+validation final: batch 1/3
+validation final: batch 2/3
+validation final: batch 3/3
+holdout final: batch 1/3
+holdout final: batch 2/3
+holdout final: batch 3/3

@@ -1,0 +1,37 @@
+{
+  "created_at_utc": "2026-03-11T23:34:48.061805+00:00",
+  "source": {
+    "data_root": "/Users/iwosmura/projects/hack4sages/data/full-ariel",
+    "auxiliary_csv": "/Users/iwosmura/projects/hack4sages/data/full-ariel/TrainingData/AuxillaryTable.csv",
+    "target_csv": "/Users/iwosmura/projects/hack4sages/data/full-ariel/TrainingData/Ground Truth Package/FM_Parameter_Table.csv",
+    "spectral_hdf5": "/Users/iwosmura/projects/hack4sages/data/full-ariel/TrainingData/SpectralData.hdf5",
+    "cached_split_ids_dir": "/home/iwo/hack4sages-crossgen/outputs/ariel_quantum_two_stage_v2_20260311_175726/prepared_cache"
+  },
+  "output_dir": "/Users/iwosmura/projects/hack4sages/data/val_dataset",
+  "split_seed": 42,
+  "split_fractions": {
+    "train": 0.8,
+    "val": 0.1,
+    "holdout": 0.1
+  },
+  "rows": {
+    "train": 33138,
+    "validation": 4142,
+    "holdout": 4143
+  },
+  "files": {
+    "train_auxiliary_csv": "train_auxiliary.csv",
+    "validation_auxiliary_csv": "validation_auxiliary.csv",
+    "holdout_auxiliary_csv": "holdout_auxiliary.csv",
+    "train_targets_csv": "train_targets.csv",
+    "validation_targets_csv": "validation_targets.csv",
+    "holdout_targets_csv": "holdout_targets.csv",
+    "train_planet_ids_csv": "train_planet_ids.csv",
+    "validation_planet_ids_csv": "validation_planet_ids.csv",
+    "holdout_planet_ids_csv": "holdout_planet_ids.csv"
+  },
+  "notes": [
+    "These splits match the exact cached train/validation/holdout memberships used by the saved Ariel quantum run.",
+    "Spectra were not duplicated; use the saved planet_ID lists to select matching groups from TrainingData/SpectralData.hdf5."
+  ]
+}
