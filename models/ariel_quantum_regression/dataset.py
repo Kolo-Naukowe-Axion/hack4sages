@@ -1,4 +1,4 @@
-"""ADC-format dataset loading and cached preparation for Ariel regression."""
+"""Dataset loading and cached preparation for Ariel regression."""
 
 from __future__ import annotations
 
@@ -27,8 +27,46 @@ from .constants import (
     RAW_SPECTRAL_CHANNELS,
     SAMPLE_SPECTRAL_CHANNELS,
     TARGET_COLUMNS,
+    TAUREX_TARGET_COLUMNS,
     WAVELENGTH_DATASET,
 )
+
+SUPPORTED_DATASET_FORMATS = ("auto", "adc", "taurex")
+TAUREX_REQUIRED_LABEL_COLUMNS = (
+    "sample_id",
+    "generator",
+    "split",
+    "planet_radius_rjup",
+    "log_g_cgs",
+    "star_radius_rsun",
+    *TAUREX_TARGET_COLUMNS,
+)
+TAUREX_REQUIRED_SPECTRA_KEYS = (
+    "sample_id",
+    "generator",
+    "split",
+    "wavelength_um",
+    "transit_depth_noisy",
+    "sigma_ppm",
+)
+TAUREX_TARGET_RENAME_MAP = dict(zip(TAUREX_TARGET_COLUMNS, TARGET_COLUMNS))
+TAUREX_TRAIN_GENERATOR = "tau"
+TAUREX_TRAIN_SPLIT = "train"
+TAUREX_VAL_GENERATOR = "tau"
+TAUREX_VAL_SPLIT = "val"
+TAUREX_HOLDOUT_GENERATOR = "poseidon"
+TAUREX_HOLDOUT_SPLIT = "test"
+G_NEWTON = 6.674e-11
+AU_M = 1.495978707e11
+RJUP_M = 69_911_000.0
+SECONDS_PER_DAY = 86_400.0
+SOLAR_RADIUS_M = 6.957e8
+SOLAR_MASS_KG = 1.98847e30
+TAUREX_FIXED_STAR_DISTANCE_PC = 10.0
+TAUREX_FIXED_STAR_MASS_KG = SOLAR_MASS_KG
+TAUREX_FIXED_STAR_TEMPERATURE_K = 5_500.0
+TAUREX_FIXED_PLANET_DISTANCE_AU = 0.05
+TAUREX_NOISE_PPM_TO_TRANSIT_DEPTH = 1.0e-6
 
 
 @dataclass
@@ -135,6 +173,25 @@ class PreparedData:
     prepared_manifest: dict[str, Any]
 
 
+def resolve_dataset_format(data_root: Path, dataset_format: str = "auto") -> str:
+    requested = str(dataset_format).strip().lower()
+    if requested not in SUPPORTED_DATASET_FORMATS:
+        raise ValueError(
+            f"Unsupported dataset_format={dataset_format!r}. Expected one of {SUPPORTED_DATASET_FORMATS}."
+        )
+    if requested != "auto":
+        return requested
+
+    root = Path(data_root).expanduser().resolve()
+    if (root / "TrainingData").exists():
+        return "adc"
+    if (root / "labels.parquet").exists() and (root / "spectra.h5").exists():
+        return "taurex"
+    raise FileNotFoundError(
+        f"Could not infer dataset format for {root}. Expected ADC folders or TauREx labels.parquet/spectra.h5."
+    )
+
+
 def _drop_unnamed_columns(frame: pd.DataFrame) -> pd.DataFrame:
     unnamed = [column for column in frame.columns if column.startswith("Unnamed:")]
     if unnamed:
@@ -199,6 +256,111 @@ def load_test_dataset(data_root: Path) -> tuple[pd.DataFrame, np.ndarray, np.nda
 
     spectra, wavelength_um = _load_spectra(spectral_path, aux["planet_ID"].to_numpy(dtype="U32"))
     return aux.reset_index(drop=True), spectra, wavelength_um
+
+
+def _decode_string_array(values: np.ndarray) -> np.ndarray:
+    if values.dtype.kind == "S":
+        return values.astype("U64")
+    return values.astype(str)
+
+
+def _load_taurex_labels(data_root: Path) -> pd.DataFrame:
+    root = Path(data_root).expanduser().resolve()
+    labels = pd.read_parquet(root / "labels.parquet").copy()
+    missing = [column for column in TAUREX_REQUIRED_LABEL_COLUMNS if column not in labels.columns]
+    if missing:
+        raise KeyError(f"TauREx labels.parquet is missing required columns: {missing}")
+    return labels.reset_index(drop=True)
+
+
+def _load_taurex_spectra(data_root: Path) -> dict[str, np.ndarray]:
+    root = Path(data_root).expanduser().resolve()
+    with h5py.File(root / "spectra.h5", "r") as handle:
+        missing = [key for key in TAUREX_REQUIRED_SPECTRA_KEYS if key not in handle]
+        if missing:
+            raise KeyError(f"TauREx spectra.h5 is missing required datasets: {missing}")
+        payload = {
+            "sample_id": _decode_string_array(handle["sample_id"][:]),
+            "generator": _decode_string_array(handle["generator"][:]),
+            "split": _decode_string_array(handle["split"][:]),
+            "wavelength_um": np.asarray(handle["wavelength_um"][:], dtype=np.float32),
+            "spectra": np.asarray(handle["transit_depth_noisy"][:], dtype=np.float32),
+            "sigma_ppm": np.asarray(handle["sigma_ppm"][:], dtype=np.float32),
+        }
+    if payload["spectra"].ndim != 2:
+        raise RuntimeError(f"Unexpected TauREx spectra shape {payload['spectra'].shape}; expected a 2D array.")
+    if payload["sigma_ppm"].shape[0] != payload["spectra"].shape[0]:
+        raise RuntimeError("TauREx sigma_ppm row count does not match the spectra row count.")
+    return payload
+
+
+def _validate_taurex_alignment(labels: pd.DataFrame, spectra: dict[str, np.ndarray]) -> None:
+    row_count = len(labels)
+    if row_count != int(spectra["spectra"].shape[0]):
+        raise RuntimeError("labels.parquet and spectra.h5 have different row counts.")
+    if not np.array_equal(labels["sample_id"].to_numpy(dtype=str), spectra["sample_id"]):
+        raise RuntimeError("sample_id ordering mismatch between labels.parquet and spectra.h5.")
+    if not np.array_equal(labels["generator"].to_numpy(dtype=str), spectra["generator"]):
+        raise RuntimeError("generator ordering mismatch between labels.parquet and spectra.h5.")
+    if not np.array_equal(labels["split"].to_numpy(dtype=str), spectra["split"]):
+        raise RuntimeError("split ordering mismatch between labels.parquet and spectra.h5.")
+
+
+def _taurex_orbital_period_days(planet_distance_au: np.ndarray, star_mass_kg: np.ndarray) -> np.ndarray:
+    semi_major_axis_m = planet_distance_au.astype(np.float64) * AU_M
+    period_seconds = 2.0 * np.pi * np.sqrt(np.power(semi_major_axis_m, 3) / (G_NEWTON * star_mass_kg.astype(np.float64)))
+    return (period_seconds / SECONDS_PER_DAY).astype(np.float32)
+
+
+def _build_taurex_auxiliary_frame(labels: pd.DataFrame) -> pd.DataFrame:
+    row_count = len(labels)
+    planet_radius_m = labels["planet_radius_rjup"].to_numpy(dtype=np.float64) * RJUP_M
+    planet_surface_gravity = (10.0 ** labels["log_g_cgs"].to_numpy(dtype=np.float64)) / 100.0
+    planet_mass_kg = planet_surface_gravity * np.square(planet_radius_m) / G_NEWTON
+    star_mass_kg = np.full(row_count, TAUREX_FIXED_STAR_MASS_KG, dtype=np.float32)
+    planet_distance = np.full(row_count, TAUREX_FIXED_PLANET_DISTANCE_AU, dtype=np.float32)
+    aux = pd.DataFrame(
+        {
+            "planet_ID": labels["sample_id"].astype(str).to_numpy(dtype="U64"),
+            "star_distance": np.full(row_count, TAUREX_FIXED_STAR_DISTANCE_PC, dtype=np.float32),
+            "star_mass_kg": star_mass_kg,
+            "star_radius_m": labels["star_radius_rsun"].to_numpy(dtype=np.float32) * SOLAR_RADIUS_M,
+            "star_temperature": np.full(row_count, TAUREX_FIXED_STAR_TEMPERATURE_K, dtype=np.float32),
+            "planet_mass_kg": planet_mass_kg.astype(np.float32),
+            "planet_orbital_period": _taurex_orbital_period_days(planet_distance, star_mass_kg),
+            "planet_distance": planet_distance,
+            "planet_surface_gravity": planet_surface_gravity.astype(np.float32),
+        }
+    )
+    return aux.loc[:, ["planet_ID", *AUX_COLUMNS]].reset_index(drop=True)
+
+
+def _compute_wavelength_width_template(wavelength_um: np.ndarray) -> np.ndarray:
+    wavelength = np.asarray(wavelength_um, dtype=np.float64)
+    if wavelength.ndim != 1:
+        raise AssertionError(f"Expected a 1D wavelength grid, got shape {wavelength.shape}.")
+    if wavelength.size == 0:
+        raise AssertionError("TauREx wavelength grid is empty.")
+    if wavelength.size == 1:
+        return np.ones(1, dtype=np.float32)
+
+    edges = np.empty(wavelength.size + 1, dtype=np.float64)
+    edges[1:-1] = 0.5 * (wavelength[:-1] + wavelength[1:])
+    edges[0] = wavelength[0] - (edges[1] - wavelength[0])
+    edges[-1] = wavelength[-1] + (wavelength[-1] - edges[-2])
+    widths = np.diff(edges)
+    widths = np.clip(widths, 1.0e-12, None)
+    return widths.astype(np.float32)
+
+
+def _build_taurex_noise_matrix(sigma_ppm: np.ndarray, spectral_length: int) -> np.ndarray:
+    sigma_depth = sigma_ppm.astype(np.float32).reshape(-1, 1) * TAUREX_NOISE_PPM_TO_TRANSIT_DEPTH
+    return np.repeat(sigma_depth, spectral_length, axis=1).astype(np.float32)
+
+
+def _taurex_selector_indices(labels: pd.DataFrame, *, generator: str, split: str) -> np.ndarray:
+    mask = (labels["generator"].astype(str) == generator) & (labels["split"].astype(str) == split)
+    return np.flatnonzero(mask.to_numpy())
 
 
 def transform_aux_features(frame: pd.DataFrame) -> np.ndarray:
@@ -273,6 +435,7 @@ def _make_inference_split(planet_ids: np.ndarray, aux_values: np.ndarray, spectr
 
 def _expected_manifest(
     data_root: Path,
+    dataset_format: str,
     seed: int,
     train_limit: Optional[int],
     val_limit: Optional[int],
@@ -280,10 +443,11 @@ def _expected_manifest(
     test_limit: Optional[int],
 ) -> dict[str, Any]:
     return {
-        "version": 3,
+        "version": 4,
         "data_root": str(Path(data_root).expanduser().resolve()),
+        "dataset_format": dataset_format,
         "seed": int(seed),
-        "split_fractions": {"train": 0.8, "val": 0.1, "holdout": 0.1},
+        "split_fractions": {"train": 0.8, "val": 0.1, "holdout": 0.1} if dataset_format == "adc" else None,
         "limits": {
             "train": train_limit,
             "val": val_limit,
@@ -293,10 +457,12 @@ def _expected_manifest(
         "aux_columns": AUX_COLUMNS,
         "log10_aux_columns": LOG10_AUX_COLUMNS,
         "target_columns": TARGET_COLUMNS,
+        "target_source_columns": TARGET_COLUMNS if dataset_format == "adc" else TAUREX_TARGET_COLUMNS,
         "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
         "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
         "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
         "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+        "split_strategy": "random_stratified" if dataset_format == "adc" else "embedded_generator_splits",
         "sample_spectral_normalization": {
             "mode": "divide_by_sample_mean",
             "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],
@@ -420,6 +586,7 @@ def prepare_data(
     data_root: Path,
     output_dir: Path,
     prepared_cache_dir: Optional[str | Path] = None,
+    dataset_format: str = "auto",
     seed: int = 42,
     train_limit: Optional[int] = None,
     val_limit: Optional[int] = None,
@@ -429,147 +596,310 @@ def prepare_data(
     root = Path(data_root).expanduser().resolve()
     output_path = Path(output_dir).expanduser().resolve()
     cache_dir = resolve_prepared_cache_dir(output_path, prepared_cache_dir)
-    expected_manifest = _expected_manifest(root, seed, train_limit, val_limit, holdout_limit, test_limit)
+    resolved_dataset_format = resolve_dataset_format(root, dataset_format)
+    expected_manifest = _expected_manifest(
+        root,
+        resolved_dataset_format,
+        seed,
+        train_limit,
+        val_limit,
+        holdout_limit,
+        test_limit,
+    )
 
     cached = _load_prepared_cache(cache_dir, expected_manifest)
     if cached is not None:
         return cached
 
-    labeled_frame, labeled_spectra_raw, wavelength_um = load_training_dataset(root)
-    test_frame, test_spectra_raw, test_wavelength_um = load_test_dataset(root)
-    if not np.allclose(test_wavelength_um, wavelength_um, atol=1.0e-8):
-        raise AssertionError("Training and test wavelength grids do not match.")
+    if resolved_dataset_format == "adc":
+        labeled_frame, labeled_spectra_raw, wavelength_um = load_training_dataset(root)
+        test_frame, test_spectra_raw, test_wavelength_um = load_test_dataset(root)
+        if not np.allclose(test_wavelength_um, wavelength_um, atol=1.0e-8):
+            raise AssertionError("Training and test wavelength grids do not match.")
 
-    labeled_aux_raw = transform_aux_features(labeled_frame)
-    test_aux_raw = transform_aux_features(test_frame)
-    labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
+        labeled_aux_raw = transform_aux_features(labeled_frame)
+        test_aux_raw = transform_aux_features(test_frame)
+        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
 
-    sample_channel_indices = [RAW_SPECTRAL_CHANNELS.index(name) for name in SAMPLE_SPECTRAL_CHANNELS]
-    width_channel_index = RAW_SPECTRAL_CHANNELS.index("instrument_width")
+        sample_channel_indices = [RAW_SPECTRAL_CHANNELS.index(name) for name in SAMPLE_SPECTRAL_CHANNELS]
+        width_channel_index = RAW_SPECTRAL_CHANNELS.index("instrument_width")
 
-    labeled_sample_spectra = np.transpose(labeled_spectra_raw[:, :, sample_channel_indices], (0, 2, 1)).astype(np.float32)
-    test_sample_spectra = np.transpose(test_spectra_raw[:, :, sample_channel_indices], (0, 2, 1)).astype(np.float32)
-    labeled_sample_spectra = _normalize_sample_spectra(labeled_sample_spectra)
-    test_sample_spectra = _normalize_sample_spectra(test_sample_spectra)
-    fixed_channels = np.stack(
-        [
-            _normalize_fixed_channel(labeled_spectra_raw[0, :, width_channel_index]),
-            _normalize_fixed_channel(wavelength_um),
-        ],
-        axis=0,
-    ).astype(np.float32)
+        labeled_sample_spectra = np.transpose(
+            labeled_spectra_raw[:, :, sample_channel_indices],
+            (0, 2, 1),
+        ).astype(np.float32)
+        test_sample_spectra = np.transpose(test_spectra_raw[:, :, sample_channel_indices], (0, 2, 1)).astype(np.float32)
+        labeled_sample_spectra = _normalize_sample_spectra(labeled_sample_spectra)
+        test_sample_spectra = _normalize_sample_spectra(test_sample_spectra)
+        fixed_channels = np.stack(
+            [
+                _normalize_fixed_channel(labeled_spectra_raw[0, :, width_channel_index]),
+                _normalize_fixed_channel(wavelength_um),
+            ],
+            axis=0,
+        ).astype(np.float32)
 
-    stratify_all, stratify_mode_all = build_stratify_labels(labeled_targets_raw)
-    all_indices = np.arange(len(labeled_frame), dtype=np.int64)
-    train_indices, temp_indices = train_test_split(
-        all_indices,
-        test_size=0.2,
-        random_state=seed,
-        shuffle=True,
-        stratify=stratify_all if stratify_all is not None else None,
-    )
+        stratify_all, stratify_mode_all = build_stratify_labels(labeled_targets_raw)
+        all_indices = np.arange(len(labeled_frame), dtype=np.int64)
+        train_indices, temp_indices = train_test_split(
+            all_indices,
+            test_size=0.2,
+            random_state=seed,
+            shuffle=True,
+            stratify=stratify_all if stratify_all is not None else None,
+        )
 
-    temp_targets_raw = labeled_targets_raw[temp_indices]
-    stratify_temp, stratify_mode_temp = build_stratify_labels(temp_targets_raw)
-    temp_positions = np.arange(len(temp_indices), dtype=np.int64)
-    val_positions, holdout_positions = train_test_split(
-        temp_positions,
-        test_size=0.5,
-        random_state=seed + 1,
-        shuffle=True,
-        stratify=stratify_temp if stratify_temp is not None else None,
-    )
+        temp_targets_raw = labeled_targets_raw[temp_indices]
+        stratify_temp, stratify_mode_temp = build_stratify_labels(temp_targets_raw)
+        temp_positions = np.arange(len(temp_indices), dtype=np.int64)
+        val_positions, holdout_positions = train_test_split(
+            temp_positions,
+            test_size=0.5,
+            random_state=seed + 1,
+            shuffle=True,
+            stratify=stratify_temp if stratify_temp is not None else None,
+        )
 
-    train_indices = _limit_indices(train_indices, train_limit)
-    val_indices = _limit_indices(temp_indices[val_positions], val_limit)
-    holdout_indices = _limit_indices(temp_indices[holdout_positions], holdout_limit)
-    test_indices = _limit_indices(np.arange(len(test_frame), dtype=np.int64), test_limit)
+        train_indices = _limit_indices(train_indices, train_limit)
+        val_indices = _limit_indices(temp_indices[val_positions], val_limit)
+        holdout_indices = _limit_indices(temp_indices[holdout_positions], holdout_limit)
+        test_indices = _limit_indices(np.arange(len(test_frame), dtype=np.int64), test_limit)
 
-    aux_scaler = ArrayStandardizer.fit(labeled_aux_raw[train_indices])
-    target_scaler = ArrayStandardizer.fit(labeled_targets_raw[train_indices])
-    spectral_scaler = SpectralStandardizer.fit(labeled_sample_spectra[train_indices], fixed_channels=fixed_channels)
+        aux_scaler = ArrayStandardizer.fit(labeled_aux_raw[train_indices])
+        target_scaler = ArrayStandardizer.fit(labeled_targets_raw[train_indices])
+        spectral_scaler = SpectralStandardizer.fit(labeled_sample_spectra[train_indices], fixed_channels=fixed_channels)
 
-    def transform_labeled(indices: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        aux_scaled = aux_scaler.transform(labeled_aux_raw[indices])
-        spectra_scaled = spectral_scaler.transform(labeled_sample_spectra[indices])
-        raw_targets = labeled_targets_raw[indices]
-        targets_scaled = target_scaler.transform(raw_targets)
-        return aux_scaled, spectra_scaled, targets_scaled, raw_targets
+        def transform_labeled(indices: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            aux_scaled = aux_scaler.transform(labeled_aux_raw[indices])
+            spectra_scaled = spectral_scaler.transform(labeled_sample_spectra[indices])
+            raw_targets = labeled_targets_raw[indices]
+            targets_scaled = target_scaler.transform(raw_targets)
+            return aux_scaled, spectra_scaled, targets_scaled, raw_targets
 
-    train_aux, train_spectra_scaled, train_targets_scaled, train_targets_raw = transform_labeled(train_indices)
-    val_aux, val_spectra_scaled, val_targets_scaled, val_targets_raw = transform_labeled(val_indices)
-    holdout_aux, holdout_spectra_scaled, holdout_targets_scaled, holdout_targets_raw = transform_labeled(holdout_indices)
-    test_aux_scaled = aux_scaler.transform(test_aux_raw[test_indices])
-    test_spectra_scaled = spectral_scaler.transform(test_sample_spectra[test_indices])
+        train_aux, train_spectra_scaled, train_targets_scaled, train_targets_raw = transform_labeled(train_indices)
+        val_aux, val_spectra_scaled, val_targets_scaled, val_targets_raw = transform_labeled(val_indices)
+        holdout_aux, holdout_spectra_scaled, holdout_targets_scaled, holdout_targets_raw = transform_labeled(holdout_indices)
+        test_aux_scaled = aux_scaler.transform(test_aux_raw[test_indices])
+        test_spectra_scaled = spectral_scaler.transform(test_sample_spectra[test_indices])
 
-    split_manifest = {
-        "rows_total": int(len(labeled_frame)),
-        "testdata_rows_total": int(len(test_frame)),
-        "train_rows": int(len(train_indices)),
-        "val_rows": int(len(val_indices)),
-        "holdout_rows": int(len(holdout_indices)),
-        "testdata_rows": int(len(test_indices)),
-        "wavelength_bins": int(len(wavelength_um)),
-        "wavelength_min_um": float(wavelength_um.min()),
-        "wavelength_max_um": float(wavelength_um.max()),
-        "raw_spectrum_shape": [52, len(RAW_SPECTRAL_CHANNELS)],
-        "model_spectrum_shape": [len(MODEL_SPECTRAL_CHANNELS), 52],
-        "aux_columns": AUX_COLUMNS,
-        "log10_aux_columns": LOG10_AUX_COLUMNS,
-        "target_columns": TARGET_COLUMNS,
-        "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
-        "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
-        "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
-        "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
-        "sample_spectral_normalization": {
-            "mode": "divide_by_sample_mean",
-            "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],
-            "applied_channels": SAMPLE_SPECTRAL_CHANNELS,
-        },
-        "presence_threshold_log10_vmr": PRESENCE_THRESHOLD_LOG10_VMR,
-        "split_seed": int(seed),
-        "split_fractions": {"train": 0.8, "val": 0.1, "holdout": 0.1},
-        "primary_stratify_mode": stratify_mode_all,
-        "secondary_stratify_mode": stratify_mode_temp,
-    }
+        split_manifest = {
+            "dataset_format": resolved_dataset_format,
+            "rows_total": int(len(labeled_frame)),
+            "testdata_rows_total": int(len(test_frame)),
+            "train_rows": int(len(train_indices)),
+            "val_rows": int(len(val_indices)),
+            "holdout_rows": int(len(holdout_indices)),
+            "testdata_rows": int(len(test_indices)),
+            "wavelength_bins": int(len(wavelength_um)),
+            "wavelength_min_um": float(wavelength_um.min()),
+            "wavelength_max_um": float(wavelength_um.max()),
+            "raw_spectrum_shape": [int(labeled_spectra_raw.shape[1]), len(RAW_SPECTRAL_CHANNELS)],
+            "model_spectrum_shape": [len(MODEL_SPECTRAL_CHANNELS), int(labeled_sample_spectra.shape[2])],
+            "aux_columns": AUX_COLUMNS,
+            "log10_aux_columns": LOG10_AUX_COLUMNS,
+            "target_columns": TARGET_COLUMNS,
+            "target_source_columns": TARGET_COLUMNS,
+            "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
+            "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
+            "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
+            "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+            "sample_spectral_normalization": {
+                "mode": "divide_by_sample_mean",
+                "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],
+                "applied_channels": SAMPLE_SPECTRAL_CHANNELS,
+            },
+            "presence_threshold_log10_vmr": PRESENCE_THRESHOLD_LOG10_VMR,
+            "split_seed": int(seed),
+            "split_strategy": "random_stratified",
+            "split_fractions": {"train": 0.8, "val": 0.1, "holdout": 0.1},
+            "primary_stratify_mode": stratify_mode_all,
+            "secondary_stratify_mode": stratify_mode_temp,
+        }
+
+        prepared = PreparedData(
+            train=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[train_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=train_aux,
+                spectra_values=train_spectra_scaled,
+                targets_scaled=train_targets_scaled,
+                raw_targets=train_targets_raw,
+            ),
+            val=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[val_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=val_aux,
+                spectra_values=val_spectra_scaled,
+                targets_scaled=val_targets_scaled,
+                raw_targets=val_targets_raw,
+            ),
+            holdout=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[holdout_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=holdout_aux,
+                spectra_values=holdout_spectra_scaled,
+                targets_scaled=holdout_targets_scaled,
+                raw_targets=holdout_targets_raw,
+            ),
+            testdata=_make_inference_split(
+                planet_ids=test_frame.iloc[test_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=test_aux_scaled,
+                spectra_values=test_spectra_scaled,
+            ),
+            aux_scaler=aux_scaler,
+            target_scaler=target_scaler,
+            spectral_scaler=spectral_scaler,
+            wavelength_um=wavelength_um.astype(np.float32),
+            split_manifest=split_manifest,
+            prepared_manifest={},
+        )
+    else:
+        labels = _load_taurex_labels(root)
+        spectra_bundle = _load_taurex_spectra(root)
+        _validate_taurex_alignment(labels, spectra_bundle)
+
+        labeled_frame = _build_taurex_auxiliary_frame(labels)
+        target_frame = labels.loc[:, TAUREX_TARGET_COLUMNS].rename(columns=TAUREX_TARGET_RENAME_MAP)
+        labeled_frame = pd.concat([labeled_frame, target_frame], axis=1)
+
+        wavelength_um = spectra_bundle["wavelength_um"].astype(np.float32)
+        width_template = _compute_wavelength_width_template(wavelength_um)
+        noise_matrix = _build_taurex_noise_matrix(spectra_bundle["sigma_ppm"], len(wavelength_um))
+
+        labeled_aux_raw = transform_aux_features(labeled_frame)
+        labeled_targets_raw = labeled_frame[TARGET_COLUMNS].to_numpy(dtype=np.float32, copy=True)
+        labeled_sample_spectra = np.stack(
+            [spectra_bundle["spectra"].astype(np.float32), noise_matrix.astype(np.float32)],
+            axis=1,
+        )
+        labeled_sample_spectra = _normalize_sample_spectra(labeled_sample_spectra)
+        fixed_channels = np.stack(
+            [
+                _normalize_fixed_channel(width_template),
+                _normalize_fixed_channel(wavelength_um),
+            ],
+            axis=0,
+        ).astype(np.float32)
+
+        train_source_indices = _taurex_selector_indices(
+            labels,
+            generator=TAUREX_TRAIN_GENERATOR,
+            split=TAUREX_TRAIN_SPLIT,
+        )
+        val_source_indices = _taurex_selector_indices(
+            labels,
+            generator=TAUREX_VAL_GENERATOR,
+            split=TAUREX_VAL_SPLIT,
+        )
+        holdout_source_indices = _taurex_selector_indices(
+            labels,
+            generator=TAUREX_HOLDOUT_GENERATOR,
+            split=TAUREX_HOLDOUT_SPLIT,
+        )
+        if len(train_source_indices) == 0:
+            raise RuntimeError("No TauREx train rows found for the quantum regressor.")
+        if len(val_source_indices) == 0:
+            raise RuntimeError("No TauREx validation rows found for the quantum regressor.")
+        if len(holdout_source_indices) == 0:
+            raise RuntimeError("No TauREx holdout rows found for the quantum regressor.")
+
+        train_indices = _limit_indices(train_source_indices, train_limit)
+        val_indices = _limit_indices(val_source_indices, val_limit)
+        holdout_indices = _limit_indices(holdout_source_indices, holdout_limit)
+        if test_limit is None and holdout_limit is not None:
+            test_indices = holdout_indices.copy()
+        else:
+            test_indices = _limit_indices(holdout_source_indices, test_limit)
+
+        aux_scaler = ArrayStandardizer.fit(labeled_aux_raw[train_indices])
+        target_scaler = ArrayStandardizer.fit(labeled_targets_raw[train_indices])
+        spectral_scaler = SpectralStandardizer.fit(labeled_sample_spectra[train_indices], fixed_channels=fixed_channels)
+
+        def transform_labeled(indices: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            aux_scaled = aux_scaler.transform(labeled_aux_raw[indices])
+            spectra_scaled = spectral_scaler.transform(labeled_sample_spectra[indices])
+            raw_targets = labeled_targets_raw[indices]
+            targets_scaled = target_scaler.transform(raw_targets)
+            return aux_scaled, spectra_scaled, targets_scaled, raw_targets
+
+        train_aux, train_spectra_scaled, train_targets_scaled, train_targets_raw = transform_labeled(train_indices)
+        val_aux, val_spectra_scaled, val_targets_scaled, val_targets_raw = transform_labeled(val_indices)
+        holdout_aux, holdout_spectra_scaled, holdout_targets_scaled, holdout_targets_raw = transform_labeled(holdout_indices)
+        test_aux_scaled = aux_scaler.transform(labeled_aux_raw[test_indices])
+        test_spectra_scaled = spectral_scaler.transform(labeled_sample_spectra[test_indices])
+
+        split_manifest = {
+            "dataset_format": resolved_dataset_format,
+            "rows_total": int(len(labeled_frame)),
+            "testdata_rows_total": int(len(holdout_source_indices)),
+            "train_rows": int(len(train_indices)),
+            "val_rows": int(len(val_indices)),
+            "holdout_rows": int(len(holdout_indices)),
+            "testdata_rows": int(len(test_indices)),
+            "wavelength_bins": int(len(wavelength_um)),
+            "wavelength_min_um": float(wavelength_um.min()),
+            "wavelength_max_um": float(wavelength_um.max()),
+            "raw_spectrum_shape": [int(len(wavelength_um)), len(RAW_SPECTRAL_CHANNELS)],
+            "model_spectrum_shape": [len(MODEL_SPECTRAL_CHANNELS), int(labeled_sample_spectra.shape[2])],
+            "aux_columns": AUX_COLUMNS,
+            "log10_aux_columns": LOG10_AUX_COLUMNS,
+            "target_columns": TARGET_COLUMNS,
+            "target_source_columns": TAUREX_TARGET_COLUMNS,
+            "raw_spectral_channels": RAW_SPECTRAL_CHANNELS,
+            "sample_spectral_channels": SAMPLE_SPECTRAL_CHANNELS,
+            "fixed_spectral_channels": FIXED_SPECTRAL_CHANNELS,
+            "model_spectral_channels": MODEL_SPECTRAL_CHANNELS,
+            "sample_spectral_normalization": {
+                "mode": "divide_by_sample_mean",
+                "reference_channel": SAMPLE_SPECTRAL_CHANNELS[0],
+                "applied_channels": SAMPLE_SPECTRAL_CHANNELS,
+            },
+            "presence_threshold_log10_vmr": PRESENCE_THRESHOLD_LOG10_VMR,
+            "split_seed": None,
+            "split_strategy": "embedded_generator_splits",
+            "split_selectors": {
+                "train": {"generator": TAUREX_TRAIN_GENERATOR, "split": TAUREX_TRAIN_SPLIT},
+                "val": {"generator": TAUREX_VAL_GENERATOR, "split": TAUREX_VAL_SPLIT},
+                "holdout": {"generator": TAUREX_HOLDOUT_GENERATOR, "split": TAUREX_HOLDOUT_SPLIT},
+                "testdata": {"generator": TAUREX_HOLDOUT_GENERATOR, "split": TAUREX_HOLDOUT_SPLIT},
+            },
+        }
+
+        prepared = PreparedData(
+            train=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[train_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=train_aux,
+                spectra_values=train_spectra_scaled,
+                targets_scaled=train_targets_scaled,
+                raw_targets=train_targets_raw,
+            ),
+            val=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[val_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=val_aux,
+                spectra_values=val_spectra_scaled,
+                targets_scaled=val_targets_scaled,
+                raw_targets=val_targets_raw,
+            ),
+            holdout=_make_labeled_split(
+                planet_ids=labeled_frame.iloc[holdout_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=holdout_aux,
+                spectra_values=holdout_spectra_scaled,
+                targets_scaled=holdout_targets_scaled,
+                raw_targets=holdout_targets_raw,
+            ),
+            testdata=_make_inference_split(
+                planet_ids=labeled_frame.iloc[test_indices]["planet_ID"].to_numpy(dtype="U32"),
+                aux_values=test_aux_scaled,
+                spectra_values=test_spectra_scaled,
+            ),
+            aux_scaler=aux_scaler,
+            target_scaler=target_scaler,
+            spectral_scaler=spectral_scaler,
+            wavelength_um=wavelength_um.astype(np.float32),
+            split_manifest=split_manifest,
+            prepared_manifest={},
+        )
 
     prepared_manifest = dict(expected_manifest)
     prepared_manifest["cache_dir"] = str(cache_dir)
     prepared_manifest["cache_hit"] = False
-
-    prepared = PreparedData(
-        train=_make_labeled_split(
-            planet_ids=labeled_frame.iloc[train_indices]["planet_ID"].to_numpy(dtype="U32"),
-            aux_values=train_aux,
-            spectra_values=train_spectra_scaled,
-            targets_scaled=train_targets_scaled,
-            raw_targets=train_targets_raw,
-        ),
-        val=_make_labeled_split(
-            planet_ids=labeled_frame.iloc[val_indices]["planet_ID"].to_numpy(dtype="U32"),
-            aux_values=val_aux,
-            spectra_values=val_spectra_scaled,
-            targets_scaled=val_targets_scaled,
-            raw_targets=val_targets_raw,
-        ),
-        holdout=_make_labeled_split(
-            planet_ids=labeled_frame.iloc[holdout_indices]["planet_ID"].to_numpy(dtype="U32"),
-            aux_values=holdout_aux,
-            spectra_values=holdout_spectra_scaled,
-            targets_scaled=holdout_targets_scaled,
-            raw_targets=holdout_targets_raw,
-        ),
-        testdata=_make_inference_split(
-            planet_ids=test_frame.iloc[test_indices]["planet_ID"].to_numpy(dtype="U32"),
-            aux_values=test_aux_scaled,
-            spectra_values=test_spectra_scaled,
-        ),
-        aux_scaler=aux_scaler,
-        target_scaler=target_scaler,
-        spectral_scaler=spectral_scaler,
-        wavelength_um=wavelength_um.astype(np.float32),
-        split_manifest=split_manifest,
-        prepared_manifest=prepared_manifest,
-    )
+    prepared.prepared_manifest = prepared_manifest
     _save_prepared_cache(cache_dir, expected_manifest, prepared)
     return prepared

@@ -34,6 +34,14 @@ TARGET_COLUMNS = [
     "log_NH3",
 ]
 
+TAUREX_TARGET_COLUMNS = [
+    "log10_vmr_h2o",
+    "log10_vmr_co2",
+    "log10_vmr_co",
+    "log10_vmr_ch4",
+    "log10_vmr_nh3",
+]
+
 RAW_SPECTRAL_CHANNELS = [
     "instrument_spectrum",
     "instrument_noise",

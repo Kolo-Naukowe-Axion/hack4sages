@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", default=str(PROJECT_ROOT))
     parser.add_argument("--data-root", default="data/ariel-ml-dataset")
+    parser.add_argument("--dataset-format", default="auto", choices=("auto", "adc", "taurex"))
     parser.add_argument("--output-dir", default="outputs/ariel_quantum_regression")
     parser.add_argument("--prepared-cache-dir", default=None)
     parser.add_argument("--init-checkpoint-path", default=None)
@@ -64,6 +65,7 @@ def main() -> None:
     config = TrainingConfig(
         project_root=str(Path(args.project_root).resolve()),
         data_root=args.data_root,
+        dataset_format=args.dataset_format,
         output_dir=args.output_dir,
         prepared_cache_dir=args.prepared_cache_dir,
         init_checkpoint_path=args.init_checkpoint_path,
