@@ -1,0 +1,9 @@
+autoray==0.8.2
+numpy==2.4.3
+pandas==3.0.1
+pennylane==0.44.1
+pennylane-lightning==0.44.0
+pennylane-lightning-gpu==0.44.0
+scikit-learn==1.8.0
+h5py>=3.10
+pyarrow>=17
