@@ -12,6 +12,8 @@ REMOTE_DATA_ROOT="${REMOTE_DATA_ROOT:-$REMOTE_ROOT/data/TauREx_set}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$REMOTE_ROOT/outputs/ariel_quantum_taurex_$(date +%Y%m%d_%H%M%S)}"
 SESSION_NAME="${SESSION_NAME:-aqr_taurex_train}"
 ENV_DIR="${ENV_DIR:-/opt/aqr-taurex}"
+PYTHON_BIN="${PYTHON_BIN:-}"
+UPGRADE_PIP="${UPGRADE_PIP:-0}"
 
 remote_script=$(cat <<'EOF'
 set -euo pipefail
@@ -54,13 +56,13 @@ mkdir -p "$OUTPUT_ROOT"
 if command -v tmux >/dev/null 2>&1; then
   tmux kill-session -t "$SESSION_NAME" 2>/dev/null || true
   tmux new-session -d -s "$SESSION_NAME" \
-    "cd $REMOTE_ROOT && DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") ENV_DIR=$(printf '%q' "$ENV_DIR") bash models/ariel_quantum_regression/run_ariel_quantum_taurex_ubuntu_gpu.sh"
+    "cd $REMOTE_ROOT && DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") ENV_DIR=$(printf '%q' "$ENV_DIR") PYTHON_BIN=$(printf '%q' "$PYTHON_BIN") UPGRADE_PIP=$(printf '%q' "$UPGRADE_PIP") bash models/ariel_quantum_regression/run_ariel_quantum_taurex_ubuntu_gpu.sh"
   echo "Started remote tmux session: $SESSION_NAME"
   echo "Attach with: tmux attach -t $SESSION_NAME"
 else
   setsid -f bash -lc \
     "cd $(printf '%q' "$REMOTE_ROOT") && \
-     exec env DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") ENV_DIR=$(printf '%q' "$ENV_DIR") \
+     exec env DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") ENV_DIR=$(printf '%q' "$ENV_DIR") PYTHON_BIN=$(printf '%q' "$PYTHON_BIN") UPGRADE_PIP=$(printf '%q' "$UPGRADE_PIP") \
      bash $(printf '%q' "$REMOTE_ROOT/models/ariel_quantum_regression/run_ariel_quantum_taurex_ubuntu_gpu.sh") \
      > $(printf '%q' "$OUTPUT_ROOT/launcher.log") 2>&1 < /dev/null"
   echo "Started remote background process without tmux."
@@ -73,4 +75,4 @@ EOF
 )
 
 ssh ${REMOTE_SSH_ARGS} -t "$REMOTE_HOST" \
-  "REMOTE_ROOT=$(printf '%q' "$REMOTE_ROOT") REMOTE_DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") SESSION_NAME=$(printf '%q' "$SESSION_NAME") ENV_DIR=$(printf '%q' "$ENV_DIR") SRC_URL=$(printf '%q' "$SRC_URL") LABELS_URL=$(printf '%q' "$LABELS_URL") SPECTRA_URL=$(printf '%q' "$SPECTRA_URL") bash -lc $(printf '%q' "$remote_script")"
+  "REMOTE_ROOT=$(printf '%q' "$REMOTE_ROOT") REMOTE_DATA_ROOT=$(printf '%q' "$REMOTE_DATA_ROOT") OUTPUT_ROOT=$(printf '%q' "$OUTPUT_ROOT") SESSION_NAME=$(printf '%q' "$SESSION_NAME") ENV_DIR=$(printf '%q' "$ENV_DIR") PYTHON_BIN=$(printf '%q' "$PYTHON_BIN") UPGRADE_PIP=$(printf '%q' "$UPGRADE_PIP") SRC_URL=$(printf '%q' "$SRC_URL") LABELS_URL=$(printf '%q' "$LABELS_URL") SPECTRA_URL=$(printf '%q' "$SPECTRA_URL") bash -lc $(printf '%q' "$remote_script")"

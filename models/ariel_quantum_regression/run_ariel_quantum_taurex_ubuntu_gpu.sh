@@ -8,7 +8,8 @@ DATA_ROOT="${DATA_ROOT:-$PROJECT_ROOT/data/TauREx_set}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$PROJECT_ROOT/outputs/ariel_quantum_taurex_$(date +%Y%m%d_%H%M%S)}"
 ENV_DIR="${ENV_DIR:-/opt/aqr-taurex}"
 PYTORCH_INDEX_URL="${PYTORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}"
-PYTHON_BIN="${PYTHON_BIN:-$ENV_DIR/bin/python}"
+PYTHON_BIN="${PYTHON_BIN:-}"
+UPGRADE_PIP="${UPGRADE_PIP:-0}"
 SEED="${SEED:-42}"
 
 STAGE1_BATCH_SIZE="${STAGE1_BATCH_SIZE:-1024}"
@@ -40,27 +41,59 @@ done
 
 mkdir -p "$OUTPUT_ROOT"
 
-if [[ ! -x "$PYTHON_BIN" ]]; then
-  rm -rf "$ENV_DIR"
-  python3 -m venv "$ENV_DIR"
+use_managed_env=0
+if [[ -z "$PYTHON_BIN" || "$PYTHON_BIN" == "$ENV_DIR/bin/python" ]]; then
+  PYTHON_BIN="$ENV_DIR/bin/python"
+  use_managed_env=1
 fi
 
-source "$ENV_DIR/bin/activate"
+if [[ "$use_managed_env" == "1" ]]; then
+  if [[ ! -x "$PYTHON_BIN" ]]; then
+    rm -rf "$ENV_DIR"
+    python3 -m venv "$ENV_DIR"
+  fi
+  # shellcheck disable=SC1091
+  source "$ENV_DIR/bin/activate"
+  PYTHON_BIN="$ENV_DIR/bin/python"
+fi
+
 cd "$PROJECT_ROOT"
 
-python -m pip install --upgrade pip
-python -m pip install --index-url "$PYTORCH_INDEX_URL" torch torchvision torchaudio
-python -m pip install custatevec-cu12
+python_has_modules() {
+  local modules_literal="$1"
+  "$PYTHON_BIN" - <<PY
+import importlib.util
+
+modules = ${modules_literal}
+missing = [name for name in modules if importlib.util.find_spec(name) is None]
+raise SystemExit(0 if not missing else 1)
+PY
+}
+
+if [[ "$UPGRADE_PIP" == "1" ]]; then
+  "$PYTHON_BIN" -m pip install --upgrade pip
+fi
+
+if ! python_has_modules "['torch', 'torchvision', 'torchaudio']"; then
+  "$PYTHON_BIN" -m pip install --index-url "$PYTORCH_INDEX_URL" torch torchvision torchaudio
+fi
+
+if ! python_has_modules "['cuquantum']"; then
+  "$PYTHON_BIN" -m pip install custatevec-cu12
+fi
+
 export CUQUANTUM_SDK="$(
-  python - <<'PYSDK'
+  "$PYTHON_BIN" - <<'PYSDK'
 import site
 print(f"{site.getsitepackages()[0]}/cuquantum")
 PYSDK
 )"
 export LD_LIBRARY_PATH="${CUQUANTUM_SDK}/lib:${LD_LIBRARY_PATH:-}"
-python -m pip install -r "$WORKFLOW_DIR/requirements-vast.txt"
+if ! python_has_modules "['numpy', 'pandas', 'h5py', 'pyarrow', 'sklearn', 'pennylane', 'pennylane_lightning']"; then
+  "$PYTHON_BIN" -m pip install -r "$WORKFLOW_DIR/requirements-vast.txt"
+fi
 
-python - <<'PYCHECK'
+"$PYTHON_BIN" - <<'PYCHECK'
 import numpy as np
 import pennylane as qml
 import torch
