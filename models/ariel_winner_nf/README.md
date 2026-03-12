@@ -27,11 +27,17 @@ What is implemented here:
 Entry points:
 
 - prepare data:
-  - `python -m models.ariel_winner_nf.prepare_dataset --data-root data/full-ariel --output data/generated-data/ariel_winner_nf_prepared --overwrite`
+  - `python -m models.ariel_winner_nf.prepare_dataset --data-root data/full-ariel --split-source data/val_dataset --output data/generated-data/ariel_winner_nf_prepared --overwrite`
 - train:
   - `python -m models.ariel_winner_nf.train --settings models/ariel_winner_nf/settings/winner_noised_independent_nsf.yaml --prepared-data data/generated-data/ariel_winner_nf_prepared --run-dir local_runs/ariel_winner_nf_test`
 - launcher:
   - `bash models/ariel_winner_nf/run_train_ubuntu4090.sh`
+
+Saved split behavior:
+
+- if `data/val_dataset` exists, preparation uses its exact `train/validation/holdout` `planet_ID` membership
+- the current saved split is `33,138 / 4,142 / 4,143` rows, for `41,423` labeled planets total
+- the launcher fails fast if those split files are missing, rather than silently reshuffling rows
 
 Default context dimension is `118`:
 

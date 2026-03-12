@@ -15,6 +15,16 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
+def parse_fold_numbers(raw_value: str | None) -> tuple[int, ...] | None:
+    if raw_value is None:
+        return None
+    parts = [part.strip() for part in raw_value.split(",")]
+    fold_numbers = [int(part) for part in parts if part]
+    if not fold_numbers:
+        raise argparse.ArgumentTypeError("--fold-numbers must contain at least one integer.")
+    return tuple(fold_numbers)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", default=str(PROJECT_ROOT))
@@ -23,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--init-checkpoint-path", default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--num-folds", type=int, default=5)
+    parser.add_argument("--fold-numbers", default=None, help="Comma-separated 1-based fold numbers to run, e.g. 1,3,5.")
     parser.add_argument("--val-fraction", type=float, default=0.1)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--eval-batch-size", type=int, default=128)
@@ -52,6 +63,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--classical-only", action="store_true")
     parser.add_argument("--cpu-only", action="store_true")
     parser.add_argument("--no-amp", action="store_true")
+    parser.add_argument("--aggregate-only", action="store_true")
     return parser
 
 
@@ -60,9 +72,15 @@ def main() -> None:
     if args.cpu_only:
         os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-    from models.ariel_quantum_regression.cross_validation import CrossValidationConfig, run_cross_validation_experiment
+    from models.ariel_quantum_regression.cross_validation import (
+        CrossValidationConfig,
+        aggregate_cross_validation_outputs,
+        normalize_selected_folds,
+        run_cross_validation_experiment,
+    )
     from models.ariel_quantum_regression.training import TrainingConfig
 
+    selected_folds = normalize_selected_folds(parse_fold_numbers(args.fold_numbers), args.num_folds)
     config = TrainingConfig(
         project_root=str(Path(args.project_root).resolve()),
         data_root=args.data_root,
@@ -99,9 +117,16 @@ def main() -> None:
     if args.quantum_device is not None:
         config.quantum_device = args.quantum_device
 
-    cv_config = CrossValidationConfig(num_folds=args.num_folds, val_fraction=args.val_fraction)
+    cv_config = CrossValidationConfig(
+        num_folds=args.num_folds,
+        val_fraction=args.val_fraction,
+        selected_folds=selected_folds,
+    )
     print(json.dumps({"training": config.to_json_dict(), "cross_validation": cv_config.to_json_dict()}, indent=2), flush=True)
-    result = run_cross_validation_experiment(config, cv_config=cv_config)
+    if args.aggregate_only:
+        result = aggregate_cross_validation_outputs(config.resolved_output_dir(), cv_config=cv_config)
+    else:
+        result = run_cross_validation_experiment(config, cv_config=cv_config)
     print(json.dumps(result, indent=2), flush=True)
 
 

@@ -5,6 +5,7 @@ WORKFLOW_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$WORKFLOW_DIR/../.." && pwd)"
 
 DATA_ROOT="${DATA_ROOT:-$PROJECT_ROOT/data/full-ariel}"
+SPLIT_SOURCE="${SPLIT_SOURCE:-$PROJECT_ROOT/data/val_dataset}"
 PREPARED_DATA="${PREPARED_DATA:-$PROJECT_ROOT/data/generated-data/ariel_winner_nf_prepared}"
 RUN_DIR="${RUN_DIR:-$PROJECT_ROOT/local_runs/ariel_winner_nf_$(date +%Y%m%d_%H%M%S)}"
 SETTINGS_FILE="${SETTINGS_FILE:-$WORKFLOW_DIR/settings/winner_noised_independent_nsf.yaml}"
@@ -25,6 +26,19 @@ for path in "${required_files[@]}"; do
   fi
 done
 
+split_files=(
+  "$SPLIT_SOURCE/train_planet_ids.csv"
+  "$SPLIT_SOURCE/validation_planet_ids.csv"
+  "$SPLIT_SOURCE/holdout_planet_ids.csv"
+  "$SPLIT_SOURCE/manifest.json"
+)
+for path in "${split_files[@]}"; do
+  if [[ ! -f "$path" ]]; then
+    echo "Saved split dataset is incomplete. Missing: $path" >&2
+    exit 1
+  fi
+done
+
 mkdir -p "$RUN_DIR"
 if [[ ! -x "$VENV_DIR/bin/python3" ]]; then
   rm -rf "$VENV_DIR"
@@ -40,6 +54,7 @@ python -m pip install -r "$WORKFLOW_DIR/requirements-vast.txt"
 if [[ "${PREPARED_FORCE_OVERWRITE:-0}" == "1" || ! -f "$PREPARED_DATA/manifest.json" ]]; then
   python -m models.ariel_winner_nf.prepare_dataset \
     --data-root "$DATA_ROOT" \
+    --split-source "$SPLIT_SOURCE" \
     --output "$PREPARED_DATA" \
     --overwrite
 else
@@ -52,4 +67,3 @@ python -u -m models.ariel_winner_nf.train \
   --run-dir "$RUN_DIR" \
   --resume auto \
   | tee "$RUN_DIR/train.log"
-

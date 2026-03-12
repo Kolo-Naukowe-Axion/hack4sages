@@ -4,9 +4,13 @@ __MACOSX/
 
 # IDE & tools
 .ipynb_checkpoints/
+web/presentation/
 web/presentation-lab/node_modules/
 web/presentation-lab/.next/
 web/presentation-lab/tsconfig.tsbuildinfo
+website/.next/
+website/node_modules/
+website/tsconfig.tsbuildinfo
 
 # Python
 .venv/

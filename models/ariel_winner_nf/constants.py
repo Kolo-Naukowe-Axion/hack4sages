@@ -39,6 +39,6 @@ VERTICAL_LINE_LOW = 0.71488e8 / RJUP_M
 VERTICAL_LINE_HIGH = 0.714881e8 / RJUP_M
 
 DEFAULT_DATA_ROOT = Path("data/full-ariel")
+DEFAULT_SPLIT_ROOT = Path("data/val_dataset")
 DEFAULT_PREPARED_ROOT = Path("data/generated-data/ariel_winner_nf_prepared")
 DEFAULT_RUNS_ROOT = Path("local_runs")
-

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from .constants import AUX_COLUMNS, DEFAULT_DATA_ROOT, DEFAULT_PREPARED_ROOT, SPECTRAL_LENGTH, TARGET_COLUMNS
+from .constants import AUX_COLUMNS, DEFAULT_DATA_ROOT, DEFAULT_PREPARED_ROOT, DEFAULT_SPLIT_ROOT, SPECTRAL_LENGTH, TARGET_COLUMNS
 from .preprocessing import PreparedScalers, fit_scalers, transform_targets
 
 
@@ -76,6 +76,55 @@ def split_indices(num_rows: int, targets: np.ndarray, seed: int) -> tuple[np.nda
     return np.sort(train_idx), np.sort(val_idx), np.sort(holdout_idx)
 
 
+def load_saved_split_ids(split_source: Path) -> dict[str, np.ndarray]:
+    split_files = {
+        "train": split_source / "train_planet_ids.csv",
+        "validation": split_source / "validation_planet_ids.csv",
+        "holdout": split_source / "holdout_planet_ids.csv",
+    }
+    missing = [str(path) for path in split_files.values() if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Missing saved split files: {missing}")
+
+    saved_ids: dict[str, np.ndarray] = {}
+    for name, path in split_files.items():
+        table = pd.read_csv(path)
+        if "planet_ID" not in table.columns:
+            raise KeyError(f"Saved split file is missing planet_ID column: {path}")
+        saved_ids[name] = numeric_planet_ids(table["planet_ID"])
+
+    combined = np.concatenate([saved_ids["train"], saved_ids["validation"], saved_ids["holdout"]], axis=0)
+    unique = np.unique(combined)
+    if unique.size != combined.size:
+        raise ValueError("Saved split files contain duplicate planet IDs across train/validation/holdout.")
+    return saved_ids
+
+
+def split_indices_from_saved_ids(all_ids: np.ndarray, split_source: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    if np.unique(all_ids).size != all_ids.size:
+        raise ValueError("Training tables contain duplicate planet IDs; cannot map saved splits reliably.")
+    id_to_index = {int(planet_id): idx for idx, planet_id in enumerate(all_ids.tolist())}
+    saved_ids = load_saved_split_ids(split_source)
+
+    def resolve(name: str) -> np.ndarray:
+        missing = [int(planet_id) for planet_id in saved_ids[name] if int(planet_id) not in id_to_index]
+        if missing:
+            preview = ", ".join(str(value) for value in missing[:10])
+            raise KeyError(f"Saved {name} split contains planet IDs not found in training data: {preview}")
+        return np.array([id_to_index[int(planet_id)] for planet_id in saved_ids[name]], dtype=np.int64)
+
+    train_idx = resolve("train")
+    val_idx = resolve("validation")
+    holdout_idx = resolve("holdout")
+    combined = np.concatenate([train_idx, val_idx, holdout_idx], axis=0)
+    expected = np.arange(all_ids.shape[0], dtype=np.int64)
+    if combined.shape[0] != expected.shape[0] or np.unique(combined).size != combined.size:
+        raise ValueError("Saved split indices are not a full disjoint partition of the training rows.")
+    if np.any(np.sort(combined) != expected):
+        raise ValueError("Saved split indices do not cover the exact set of training rows.")
+    return train_idx, val_idx, holdout_idx
+
+
 def save_split(path: Path, *, ids: np.ndarray, aux: np.ndarray, spectra: np.ndarray, noise: np.ndarray, targets: np.ndarray | None) -> None:
     payload = {
         "planet_id": ids.astype(np.int64),
@@ -92,6 +141,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--output", type=Path, default=DEFAULT_PREPARED_ROOT)
+    parser.add_argument("--split-source", type=Path, default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
@@ -113,7 +163,17 @@ def main() -> None:
     aux_test = test_aux_table[AUX_COLUMNS].to_numpy(dtype=np.float32)
     ids_test = numeric_planet_ids(test_aux_table["planet_ID"])
 
-    train_idx, val_idx, holdout_idx = split_indices(len(merged), targets_train, seed=args.seed)
+    split_source = None
+    if args.split_source is not None:
+        split_source = args.split_source.expanduser().resolve()
+        train_idx, val_idx, holdout_idx = split_indices_from_saved_ids(ids_train, split_source)
+    else:
+        default_split_root = DEFAULT_SPLIT_ROOT.expanduser().resolve()
+        if default_split_root.is_dir():
+            split_source = default_split_root
+            train_idx, val_idx, holdout_idx = split_indices_from_saved_ids(ids_train, split_source)
+        else:
+            train_idx, val_idx, holdout_idx = split_indices(len(merged), targets_train, seed=args.seed)
 
     scalers = fit_scalers(aux_train[train_idx], train_spectra[train_idx], train_noise[train_idx], targets_train[train_idx])
     scalers.save(output / "scalers.npz")
@@ -154,6 +214,7 @@ def main() -> None:
     manifest = {
         "data_root": str(data_root),
         "seed": int(args.seed),
+        "split_source": str(split_source) if split_source is not None else None,
         "context_layout": {
             "aux_engineered": 12,
             "spectrum_stats": 2,

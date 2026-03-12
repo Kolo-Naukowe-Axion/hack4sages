@@ -407,7 +407,7 @@ def _normalize_fixed_channel(values: np.ndarray) -> np.ndarray:
 
 
 def _normalize_sample_spectra(values: np.ndarray) -> np.ndarray:
-    values = np.asarray(values, dtype=np.float32, copy=True)
+    values = np.array(values, dtype=np.float32, copy=True)
     if values.ndim != 3:
         raise AssertionError(f"Expected sample spectra with shape (N, C, L), got {values.shape}.")
     reference = values[:, 0, :]

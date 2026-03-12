@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
 import numpy as np
 import pandas as pd
@@ -17,6 +18,11 @@ from .constants import (
     PRIMARY_STRATIFY_MIN_COUNT,
     TARGET_COLUMNS,
 )
+
+
+def save_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 @dataclass(frozen=True)
@@ -33,9 +39,30 @@ class FoldSpec:
 class CrossValidationConfig:
     num_folds: int = 5
     val_fraction: float = 0.1
+    selected_folds: Optional[tuple[int, ...]] = None
 
     def to_json_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["selected_folds"] = list(self.selected_folds) if self.selected_folds is not None else None
+        return payload
+
+
+def normalize_selected_folds(selected_folds: Optional[Iterable[int]], num_folds: int) -> Optional[tuple[int, ...]]:
+    if selected_folds is None:
+        return None
+    normalized: list[int] = []
+    seen: set[int] = set()
+    for raw_value in selected_folds:
+        fold_number = int(raw_value)
+        if fold_number < 1 or fold_number > num_folds:
+            raise ValueError(f"Selected fold {fold_number} is out of range for num_folds={num_folds}.")
+        if fold_number in seen:
+            continue
+        normalized.append(fold_number)
+        seen.add(fold_number)
+    if not normalized:
+        raise ValueError("selected_folds must contain at least one fold number.")
+    return tuple(normalized)
 
 
 @dataclass(frozen=True)
@@ -180,6 +207,18 @@ def build_cross_validation_folds(
         )
 
     return folds
+
+
+def select_cross_validation_folds(
+    folds: list[FoldSpec],
+    selected_folds: Optional[Iterable[int]],
+    num_folds: int,
+) -> list[FoldSpec]:
+    normalized = normalize_selected_folds(selected_folds, num_folds)
+    if normalized is None:
+        return folds
+    selected = set(normalized)
+    return [fold for fold in folds if (fold.fold_index + 1) in selected]
 
 
 def compute_regression_metrics(true_values: np.ndarray, pred_values: np.ndarray) -> dict[str, Any]:
@@ -404,6 +443,91 @@ def _aggregate_test_predictions(frames: list[pd.DataFrame]) -> pd.DataFrame:
     return result
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text())
+
+
+def aggregate_cross_validation_outputs(
+    output_root: str | Path,
+    cv_config: Optional[CrossValidationConfig] = None,
+) -> dict[str, Any]:
+    root = Path(output_root).expanduser().resolve()
+    root.mkdir(parents=True, exist_ok=True)
+
+    cv_cfg = cv_config or CrossValidationConfig()
+    selected_folds = normalize_selected_folds(cv_cfg.selected_folds, cv_cfg.num_folds)
+    if selected_folds is None:
+        requested_folds = tuple(range(1, cv_cfg.num_folds + 1))
+    else:
+        requested_folds = selected_folds
+
+    fold_summaries: list[dict[str, Any]] = []
+    oof_frames: list[pd.DataFrame] = []
+    test_prediction_frames: list[pd.DataFrame] = []
+    missing_folds: list[int] = []
+
+    for fold_number in requested_folds:
+        fold_output_dir = root / f"fold_{fold_number:02d}"
+        summary_path = fold_output_dir / "run_summary.json"
+        holdout_path = fold_output_dir / "holdout_predictions.csv"
+        testdata_path = fold_output_dir / "testdata_predictions.csv"
+        if not summary_path.exists() or not holdout_path.exists() or not testdata_path.exists():
+            missing_folds.append(fold_number)
+            continue
+
+        fold_summary = _read_json(summary_path)
+        fold_summaries.append(fold_summary)
+
+        holdout_frame = pd.read_csv(holdout_path)
+        holdout_frame.insert(0, "fold", int(fold_number))
+        oof_frames.append(holdout_frame)
+
+        test_frame = pd.read_csv(testdata_path)
+        test_frame.insert(0, "fold", int(fold_number))
+        test_prediction_frames.append(test_frame)
+
+    if not fold_summaries:
+        requested = ", ".join(str(fold_number) for fold_number in requested_folds)
+        raise FileNotFoundError(f"No completed fold outputs were found under {root} for folds: {requested}.")
+
+    fold_summary_frame = pd.DataFrame(fold_summaries).sort_values("fold").reset_index(drop=True)
+    fold_summary_frame.to_csv(root / "fold_summaries.csv", index=False)
+
+    oof_frame = pd.concat(oof_frames, ignore_index=True).sort_values(["planet_ID", "fold"]).reset_index(drop=True)
+    oof_frame.to_csv(root / "oof_predictions.csv", index=False)
+    oof_true = oof_frame[[f"true_{target_name}" for target_name in TARGET_COLUMNS]].to_numpy(dtype=np.float32)
+    oof_pred = oof_frame[[f"pred_{target_name}" for target_name in TARGET_COLUMNS]].to_numpy(dtype=np.float32)
+    oof_metrics = compute_regression_metrics(oof_true, oof_pred)
+    save_json(root / "oof_metrics.json", oof_metrics)
+
+    aggregated_test_predictions = _aggregate_test_predictions(test_prediction_frames)
+    aggregated_test_predictions.to_csv(root / "testdata_predictions_ensemble.csv", index=False)
+
+    summary = {
+        "num_folds": int(len(fold_summaries)),
+        "configured_num_folds": int(cv_cfg.num_folds),
+        "val_fraction": float(cv_cfg.val_fraction),
+        "selected_folds": list(requested_folds),
+        "completed_folds": fold_summary_frame["fold"].astype(int).tolist(),
+        "missing_folds": [int(fold_number) for fold_number in missing_folds],
+        "output_dir": str(root),
+        "folds": fold_summaries,
+        "aggregate": {
+            "best_val_rmse_mean_avg": float(fold_summary_frame["best_val_rmse_mean"].mean()),
+            "best_val_rmse_mean_std": float(fold_summary_frame["best_val_rmse_mean"].std(ddof=0)),
+            "holdout_rmse_mean_avg": float(fold_summary_frame["holdout_rmse_mean"].mean()),
+            "holdout_rmse_mean_std": float(fold_summary_frame["holdout_rmse_mean"].std(ddof=0)),
+            "holdout_mae_mean_avg": float(fold_summary_frame["holdout_mae_mean"].mean()),
+            "holdout_mae_mean_std": float(fold_summary_frame["holdout_mae_mean"].std(ddof=0)),
+            "best_epoch_avg": float(fold_summary_frame["best_epoch"].mean()),
+            "best_epoch_std": float(fold_summary_frame["best_epoch"].std(ddof=0)),
+        },
+        "oof_metrics": oof_metrics,
+    }
+    save_json(root / "cross_validation_summary.json", summary)
+    return summary
+
+
 def run_cross_validation_experiment(
     base_config=None,
     cv_config: Optional[CrossValidationConfig] = None,
@@ -448,10 +572,7 @@ def run_cross_validation_experiment(
         val_limit=cfg.val_limit,
         holdout_limit=cfg.holdout_limit,
     )
-
-    fold_summaries: list[dict[str, Any]] = []
-    oof_frames: list[pd.DataFrame] = []
-    test_prediction_frames: list[pd.DataFrame] = []
+    folds = select_cross_validation_folds(folds, cv_cfg.selected_folds, cv_cfg.num_folds)
 
     for fold in folds:
         fold_number = fold.fold_index + 1
@@ -526,43 +647,8 @@ def run_cross_validation_experiment(
             "dataset": data.split_manifest,
         }
         save_json(fold_output_dir / "run_summary.json", fold_summary)
-        fold_summaries.append(fold_summary)
-        oof_frames.append(_build_labeled_prediction_frame(fold_number, data.holdout.planet_ids, holdout_metrics))
-        test_prediction_frames.append(_build_test_prediction_frame(fold_number, data.testdata.planet_ids, test_predictions))
 
         del model, training, data
         if device.type == "cuda":
             torch.cuda.empty_cache()
-
-    fold_summary_frame = pd.DataFrame(fold_summaries)
-    fold_summary_frame.to_csv(output_root / "fold_summaries.csv", index=False)
-
-    oof_frame = pd.concat(oof_frames, ignore_index=True).sort_values(["planet_ID", "fold"]).reset_index(drop=True)
-    oof_frame.to_csv(output_root / "oof_predictions.csv", index=False)
-    oof_true = oof_frame[[f"true_{target_name}" for target_name in TARGET_COLUMNS]].to_numpy(dtype=np.float32)
-    oof_pred = oof_frame[[f"pred_{target_name}" for target_name in TARGET_COLUMNS]].to_numpy(dtype=np.float32)
-    oof_metrics = compute_regression_metrics(oof_true, oof_pred)
-    save_json(output_root / "oof_metrics.json", oof_metrics)
-
-    aggregated_test_predictions = _aggregate_test_predictions(test_prediction_frames)
-    aggregated_test_predictions.to_csv(output_root / "testdata_predictions_ensemble.csv", index=False)
-
-    summary = {
-        "num_folds": int(cv_cfg.num_folds),
-        "val_fraction": float(cv_cfg.val_fraction),
-        "output_dir": str(output_root),
-        "folds": fold_summaries,
-        "aggregate": {
-            "best_val_rmse_mean_avg": float(fold_summary_frame["best_val_rmse_mean"].mean()),
-            "best_val_rmse_mean_std": float(fold_summary_frame["best_val_rmse_mean"].std(ddof=0)),
-            "holdout_rmse_mean_avg": float(fold_summary_frame["holdout_rmse_mean"].mean()),
-            "holdout_rmse_mean_std": float(fold_summary_frame["holdout_rmse_mean"].std(ddof=0)),
-            "holdout_mae_mean_avg": float(fold_summary_frame["holdout_mae_mean"].mean()),
-            "holdout_mae_mean_std": float(fold_summary_frame["holdout_mae_mean"].std(ddof=0)),
-            "best_epoch_avg": float(fold_summary_frame["best_epoch"].mean()),
-            "best_epoch_std": float(fold_summary_frame["best_epoch"].std(ddof=0)),
-        },
-        "oof_metrics": oof_metrics,
-    }
-    save_json(output_root / "cross_validation_summary.json", summary)
-    return summary
+    return aggregate_cross_validation_outputs(output_root, cv_config=cv_cfg)
