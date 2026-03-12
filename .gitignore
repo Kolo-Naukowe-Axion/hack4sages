@@ -14,6 +14,7 @@ __pycache__/
 # Generated runs and logs
 data/generated-data/
 data/local_runs/
+data/val_dataset/
 tmp/
 output/
 outputs/
@@ -23,6 +24,9 @@ outputs/
 *.keras
 *.npy
 *.npz
+
+# Local saved model artifacts
+artifacts/ariel_winner_nf_fastgpu_20260311_230446/
 
 # Curated datasets live on origin/iwosmu/data-artifacts
 data/ariel-ml-dataset/
