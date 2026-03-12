@@ -13,10 +13,10 @@ The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignatu
 
 ## Model map
 
-- [models/ariel_codex](/Users/iwosmura/projects/hack4sages/models/ariel_codex): hybrid quantum regressor for the ADC2023 Ariel dataset.
-- [models/taurex_codex](/Users/iwosmura/projects/hack4sages/models/taurex_codex): TauREx/POSEIDON cross-generator version of the hybrid quantum model.
-- [models/taurex_codex_without_quant](/Users/iwosmura/projects/hack4sages/models/taurex_codex_without_quant): classical control / ablation of the TauREx model.
-- [models/five_qubit_codex](/Users/iwosmura/projects/hack4sages/models/five_qubit_codex): five-qubit variant of the same family.
+- [models/ariel_exobiome](/Users/iwosmura/projects/hack4sages/models/ariel_exobiome): hybrid quantum regressor for the ADC2023 Ariel dataset.
+- [models/taurex_exobiome](/Users/iwosmura/projects/hack4sages/models/taurex_exobiome): TauREx/POSEIDON cross-generator version of the hybrid quantum model.
+- [models/taurex_exobiome_without_quant](/Users/iwosmura/projects/hack4sages/models/taurex_exobiome_without_quant): classical control / ablation of the TauREx model.
+- [models/five_qubit_exobiome](/Users/iwosmura/projects/hack4sages/models/five_qubit_exobiome): five-qubit variant of the same family.
 - [models/ariel_winner_nf](/Users/iwosmura/projects/hack4sages/models/ariel_winner_nf), [models/ariel_winner_on_taurex](/Users/iwosmura/projects/hack4sages/models/ariel_winner_on_taurex), and [models/ariel_winner_trace_nf](/Users/iwosmura/projects/hack4sages/models/ariel_winner_trace_nf): winner-style normalizing-flow baselines and reruns.
 - [models/sbi_ariel_adc2023](/Users/iwosmura/projects/hack4sages/models/sbi_ariel_adc2023) and [models/taurex_fmpe](/Users/iwosmura/projects/hack4sages/models/taurex_fmpe): FMPE / flow-matching baselines.
 - [models/garnet_ariel_quantum_regression](/Users/iwosmura/projects/hack4sages/models/garnet_ariel_quantum_regression): IQM Garnet evaluation path for the quantum branch.

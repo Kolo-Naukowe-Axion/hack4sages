@@ -8,7 +8,7 @@ rsync -az \
   --exclude '.git' \
   --exclude '.venv' \
   --exclude '.venv-*' \
-  --exclude '.codex-venv' \
+  --exclude '.exobiome-venv' \
   --exclude '.local-prt' \
   --exclude '__pycache__' \
   --exclude '.DS_Store' \

@@ -7,14 +7,14 @@ That source folder was not one coherent repo. It was a mixed dump of alternate w
 What was kept:
 
 - `baseline/`: baseline notebooks and helper scripts
-- `codex_model/`: training notebooks, audit reports, and planning docs
+- `exobiome_model/`: training notebooks, audit reports, and planning docs
 - `iwo_web/` and `prompt_updated/`: alternate Next.js presentation prototypes without build output
 - `video/`: source for the presentation video composition
 - `quantum_advantage/`: notes, notebooks, and helper code for the quantum-advantage investigation
 - `quantum_model*`: older training scripts and cross-generator notebooks
 - `research/`: markdown notes and reference PDFs
 - `plots/` and selected `different_shit/` figures: exported presentation assets worth keeping
-- `models/ariel_codex/`: architecture diagram assets that were not already present in the cleaned repo
+- `models/ariel_exobiome/`: architecture diagram assets that were not already present in the cleaned repo
 - `data/eda/`: EDA notebook and notes not otherwise represented here
 
 What was left out:
