@@ -1,0 +1,8 @@
+{
+  "best_epoch": 59,
+  "checkpoint_path": "/Users/iwosmura/projects/hack4sages/outputs/taurex_noquant_mac_20260312_133054/train/best_model.pt",
+  "checkpoint_refinement_active": true,
+  "checkpoint_refinement_scale": 1.0,
+  "data_root": "/Users/iwosmura/projects/hack4sages/data/TauREx set",
+  "rows": 685
+}
