@@ -11,11 +11,11 @@ REMOTE_DATA_ROOT="${REMOTE_DATA_ROOT:-$REMOTE_ROOT/data/TauREx_set}"
 
 ssh ${REMOTE_SSH_ARGS} "$REMOTE_HOST" "mkdir -p '$REMOTE_ROOT/models' '$REMOTE_ROOT/data'"
 
-rsync -az --delete -e "ssh ${REMOTE_SSH_ARGS}" \
+rsync -a --delete --info=progress2 -e "ssh ${REMOTE_SSH_ARGS}" \
   "${PROJECT_ROOT}/models/ariel_quantum_regression/" \
   "${REMOTE_HOST}:${REMOTE_ROOT}/models/ariel_quantum_regression/"
 
-rsync -az --delete -e "ssh ${REMOTE_SSH_ARGS}" \
+rsync -a --delete --info=progress2 -e "ssh ${REMOTE_SSH_ARGS}" \
   "${PROJECT_ROOT}/data/TauREx set/" \
   "${REMOTE_HOST}:${REMOTE_DATA_ROOT}/"
 
