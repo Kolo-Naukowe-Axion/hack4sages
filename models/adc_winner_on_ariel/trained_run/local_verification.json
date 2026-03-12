@@ -1,0 +1,9 @@
+{
+  "verification_type": "local_cpu_smoke_and_artifact_contract",
+  "status": "passed",
+  "test_command": "python -m unittest -q tests.test_adc_winner_on_ariel",
+  "tests_run": 2,
+  "output_log": "/Users/iwosmura/projects/hack4sages/models/adc_winner_on_ariel/trained_run/local_test_output.txt",
+  "comparison_metrics_json": "/Users/iwosmura/projects/hack4sages/models/adc_winner_on_ariel/trained_run/comparison_metrics.json",
+  "comparison_metrics_csv": "/Users/iwosmura/projects/hack4sages/models/adc_winner_on_ariel/trained_run/comparison_metrics.csv"
+}
