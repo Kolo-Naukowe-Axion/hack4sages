@@ -19,14 +19,33 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
-apt-get install -y python3-venv git curl ca-certificates tmux rsync
+apt-get install -y python3-venv git curl ca-certificates tmux rsync aria2
 
 mkdir -p "$REMOTE_ROOT" "$REMOTE_ROOT/models" "$REMOTE_DATA_ROOT" "$REMOTE_ROOT/outputs"
 rm -rf "$REMOTE_ROOT/models/ariel_quantum_regression"
 
-curl -fL --retry 5 --retry-all-errors "$SRC_URL" -o /tmp/ariel_quantum_regression_remote.tgz
-curl -fL --retry 5 --retry-all-errors "$LABELS_URL" -o "$REMOTE_DATA_ROOT/labels.parquet"
-curl -fL --retry 5 --retry-all-errors "$SPECTRA_URL" -o "$REMOTE_DATA_ROOT/spectra.h5"
+download_file() {
+  local url="$1"
+  local destination="$2"
+  if command -v aria2c >/dev/null 2>&1; then
+    aria2c \
+      --allow-overwrite=true \
+      --auto-file-renaming=false \
+      --file-allocation=none \
+      --max-connection-per-server=16 \
+      --split=16 \
+      --min-split-size=1M \
+      --dir="$(dirname "$destination")" \
+      --out="$(basename "$destination")" \
+      "$url"
+  else
+    curl -fL --retry 5 --retry-all-errors "$url" -o "$destination"
+  fi
+}
+
+download_file "$SRC_URL" /tmp/ariel_quantum_regression_remote.tgz
+download_file "$LABELS_URL" "$REMOTE_DATA_ROOT/labels.parquet"
+download_file "$SPECTRA_URL" "$REMOTE_DATA_ROOT/spectra.h5"
 tar -xzf /tmp/ariel_quantum_regression_remote.tgz -C "$REMOTE_ROOT"
 
 ls -lh "$REMOTE_DATA_ROOT/labels.parquet" "$REMOTE_DATA_ROOT/spectra.h5"
