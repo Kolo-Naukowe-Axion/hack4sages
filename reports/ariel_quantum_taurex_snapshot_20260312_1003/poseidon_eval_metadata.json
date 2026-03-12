@@ -1,0 +1,8 @@
+{
+  "best_epoch": 5,
+  "checkpoint_path": "/Users/iwosmura/projects/hack4sages/outputs/ariel_quantum_taurex_snapshot_20260312_1003/best_model.pt",
+  "checkpoint_quantum_active": true,
+  "checkpoint_quantum_scale": 0.625,
+  "data_root": "/Users/iwosmura/projects/hack4sages/data/TauREx set",
+  "rows": 685
+}
