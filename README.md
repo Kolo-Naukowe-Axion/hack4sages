@@ -10,14 +10,24 @@ Built by **Axion** for HACK-4-SAGES 2026 (ETH Zurich COPL).
 |--------|------|
 | `main` | Project code, workflow docs, generators, validators, and model training paths |
 | `iwosmu/data-artifacts` | Curated datasets and EDA assets |
-| `feat/web` | Web frontend (two design variants) |
+| `website/` on `main` | Current presentation website |
 
 ## Quick Start
 
 - **Datasets and EDA**: see [`data/README.md`](data/README.md)
 - **Validation Set Method**: see [`data/VALIDATION_SET_METHOD.md`](data/VALIDATION_SET_METHOD.md)
 - **Transmission Benchmark Method**: see [`data/TRANSMISSION_BENCHMARK_METHOD.md`](data/TRANSMISSION_BENCHMARK_METHOD.md)
-- **Web App**: switch to `feat/web` branch for setup instructions
+- **Website**: see [`website/`](website/)
+
+## Website
+
+Run locally:
+
+```bash
+cd website
+npm install
+npm run dev
+```
 
 ## Datasets
 
