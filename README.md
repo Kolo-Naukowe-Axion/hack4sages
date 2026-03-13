@@ -2,7 +2,7 @@
 
 ExoBiome is Axion's Hack4SAGES 2026 project on biosignature retrieval from exoplanet transmission spectra. The core idea is a hybrid quantum/classical regression stack for estimating five atmospheric gases (`H2O`, `CO2`, `CO`, `CH4`, `NH3`) from Ariel-style spectra, with classical baselines and winner-model ports alongside it.
 
-The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignature Identification in Transmission Spectroscopy](https://youtu.be/3fCZmm0QsE4?si=l1vFH72Xhi8hS9G2). The YouTube metadata identifies this as the Axion Hack4SAGES submission by Iwo Wojtakajtis, Iwo Smura, Maria Platek, and Michal Szczesny.
+The hackathon presentation is here: [ExoBiome - Hybrid Quantum ML for Biosignature Identification in Transmission Spectroscopy](https://youtu.be/3fCZmm0QsE4?si=l1vFH72Xhi8hS9G2). Authors: Iwo Wojtakajtis, Iwo Smura, Maria Platek, and Michal Szczesny.
 
 ## Current repo shape
 
