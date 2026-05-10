@@ -1,0 +1,19 @@
+{
+  "best_epoch": 2,
+  "best_model_by_loss_path": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_128/fmpe/best_model_by_loss.pt",
+  "best_model_by_mrmse_path": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_128/fmpe/best_model_by_mrmse.pt",
+  "best_model_path": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_128/fmpe/best_model.pt",
+  "best_monitor_epoch": 2,
+  "best_monitor_estimator": "mean",
+  "best_monitor_rmse_mean": 1.3741209149360656,
+  "best_val_loss": 1.8362586498260498,
+  "evaluation_outputs": {},
+  "global_step": 10,
+  "max_runtime_seconds": 120.0,
+  "next_epoch": 6,
+  "resume_checkpoint": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_128/fmpe/resume_latest.pt",
+  "run_dir": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_128/fmpe",
+  "run_final_evaluation": false,
+  "runtime_seconds": 137.3682397500088,
+  "status": "stopped_runtime"
+}

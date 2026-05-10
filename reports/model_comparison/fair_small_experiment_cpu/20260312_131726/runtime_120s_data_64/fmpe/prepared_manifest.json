@@ -1,0 +1,23 @@
+{
+  "context_dim": 112,
+  "data_root": "/Users/mariaplatek/projects/AXION/notebooks/data/ariel-ml-dataset",
+  "dataset_type": "ADC2023FiveGasFMPEPreparedDataset",
+  "normalization_mode": "adc2023_fivegas_context_zscore_v1",
+  "prepared_dir": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_64/fmpe_prepared_dataset",
+  "seed": 42,
+  "shared_split_file": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_64/shared_split.csv",
+  "split_counts": {
+    "holdout": 64,
+    "testdata": 685,
+    "train": 64,
+    "validation": 64
+  },
+  "target_columns": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ],
+  "theta_dim": 5
+}

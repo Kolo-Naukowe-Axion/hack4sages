@@ -1,0 +1,29 @@
+{
+  "epoch": 10,
+  "record": {
+    "device": "cpu",
+    "epoch": 10,
+    "full_num_rows": 64,
+    "global_step": 10,
+    "mean_rmse": {
+      "log_CH4": 1.4103171825408936,
+      "log_CO": 0.8532506227493286,
+      "log_CO2": 1.4562478065490723,
+      "log_H2O": 1.4732768535614014,
+      "log_NH3": 1.5404006242752075
+    },
+    "mean_rmse_mean": 1.3466986179351808,
+    "median_rmse": {
+      "log_CH4": 1.434094786643982,
+      "log_CO": 0.843187153339386,
+      "log_CO2": 1.470097303390503,
+      "log_H2O": 1.5077546834945679,
+      "log_NH3": 1.563868761062622
+    },
+    "median_rmse_mean": 1.3638005375862121,
+    "num_rows": 64,
+    "posterior_samples": 64
+  },
+  "rmse_mean": 1.3466986179351808,
+  "selected_point_estimate": "mean"
+}

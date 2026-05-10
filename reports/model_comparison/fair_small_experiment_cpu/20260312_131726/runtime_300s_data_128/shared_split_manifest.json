@@ -1,0 +1,7 @@
+{
+  "seed": 42,
+  "train_rows": 128,
+  "validation_rows": 64,
+  "holdout_rows": 64,
+  "shared_split_file": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_300s_data_128/shared_split.csv"
+}

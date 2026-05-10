@@ -1,0 +1,12 @@
+runtime_seconds,train_rows,codex_holdout_rmse_mean,fmpe_holdout_rmse_mean,codex_stage2_ran,codex_stage1_status,codex_stage2_status,winner
+60,64,1.2130138874053955,1.404694104194641,True,stopped_early,stopped_early,ExoBiome
+60,128,1.2390340566635132,1.4398184061050414,True,stopped_runtime,stopped_early,ExoBiome
+60,256,1.1066291332244873,1.3602155208587647,True,stopped_runtime,stopped_runtime,ExoBiome
+120,64,1.3470313549041748,1.4004509449005127,True,stopped_early,stopped_early,ExoBiome
+120,128,1.0817309617996216,1.3968929409980775,True,stopped_early,stopped_early,ExoBiome
+120,256,1.0849826335906982,1.9156048536300658,True,stopped_runtime,stopped_early,ExoBiome
+300,64,1.2635802030563354,1.3229289650917053,True,stopped_early,stopped_early,ExoBiome
+300,128,0.9688348770141602,1.0767192721366883,True,stopped_early,stopped_early,ExoBiome
+300,256,0.9293920397758484,1.0880907773971558,True,stopped_early,stopped_early,ExoBiome
+400,64,1.3273346424102783,1.3753389596939087,True,stopped_early,stopped_early,ExoBiome
+400,128,1.2129414081573486,1.1366409420967103,True,stopped_early,stopped_early,ADC_5

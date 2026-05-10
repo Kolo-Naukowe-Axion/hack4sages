@@ -1,0 +1,14 @@
+{
+  "holdout_rows": 64,
+  "shared_split_file": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_60s_data_64/shared_split.csv",
+  "target_columns": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ],
+  "train_rows": 64,
+  "val_rows": 64,
+  "wavelength_bins": 52
+}

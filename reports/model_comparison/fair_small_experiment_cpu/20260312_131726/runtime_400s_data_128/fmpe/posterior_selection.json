@@ -1,0 +1,7 @@
+{
+  "checkpoint_path": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_400s_data_128/fmpe/best_model_by_mrmse.pt",
+  "configured_point_estimate": "auto",
+  "selected_point_estimate": "mean",
+  "validation_mean_rmse_mean": 1.020557975769043,
+  "validation_median_rmse_mean": 1.0216378450393677
+}

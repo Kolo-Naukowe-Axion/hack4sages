@@ -1,0 +1,27 @@
+{
+  "best_epoch": 2,
+  "best_val_rmse_mean": 1.4913041591644287,
+  "dataset": {
+    "holdout_rows": 64,
+    "shared_split_file": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_64/shared_split.csv",
+    "target_columns": [
+      "log_H2O",
+      "log_CO2",
+      "log_CO",
+      "log_CH4",
+      "log_NH3"
+    ],
+    "train_rows": 64,
+    "val_rows": 64,
+    "wavelength_bins": 52
+  },
+  "holdout_mae_mean": 1.2478992938995361,
+  "holdout_rmse_mean": 1.4622044563293457,
+  "max_runtime_seconds": 30.0,
+  "output_dir": "/Users/mariaplatek/projects/AXION/notebooks/outputs/fair_small_experiment_cpu/20260312_131726/runtime_120s_data_64/codex/stage1_classical",
+  "runtime_seconds": 2.343277083011344,
+  "status": "stopped_early",
+  "testdata_rows": 685,
+  "validation_mae_mean": 1.2885613441467285,
+  "validation_rmse_mean": 1.5244178771972656
+}

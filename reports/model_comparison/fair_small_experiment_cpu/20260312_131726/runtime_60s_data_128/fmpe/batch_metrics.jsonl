@@ -1,0 +1,6 @@
+{"batch_in_epoch": 1, "epoch": 1, "global_step": 1, "grad_norm": 0.9632883071899414, "loss": 1.8628909587860107, "lr": 0.0005}
+{"batch_in_epoch": 2, "epoch": 1, "global_step": 2, "grad_norm": 1.611510992050171, "loss": 1.9561964273452759, "lr": 0.0005}
+{"batch_in_epoch": 1, "epoch": 2, "global_step": 3, "grad_norm": 1.3810588121414185, "loss": 1.6353124380111694, "lr": 0.0004999451708687113}
+{"batch_in_epoch": 2, "epoch": 2, "global_step": 4, "grad_norm": 1.5006126165390015, "loss": 1.7256988286972046, "lr": 0.0004999451708687113}
+{"batch_in_epoch": 1, "epoch": 3, "global_step": 5, "grad_norm": 1.4619014263153076, "loss": 1.7816779613494873, "lr": 0.0004997807075247146}
+{"batch_in_epoch": 2, "epoch": 3, "global_step": 6, "grad_norm": 2.0914576053619385, "loss": 1.7256673574447632, "lr": 0.0004997807075247146}
