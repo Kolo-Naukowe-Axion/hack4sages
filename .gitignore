@@ -12,6 +12,7 @@ web/presentation-lab/tsconfig.tsbuildinfo
 # Python
 .venv/
 .venv-ariel-eval/
+.venv-app/
 local_runs/
 __pycache__/
 *.pyc
@@ -41,6 +42,7 @@ data/reference_data/
 data/eda/
 data/published/
 data/TauREx set/
+/ariel-ml-dataset/
 
 # EDA local assets
 data/eda/data/
