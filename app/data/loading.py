@@ -22,7 +22,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Iterator
 
-import h5py
 import numpy as np
 import pandas as pd
 
@@ -148,6 +147,8 @@ def load_by_id(planet_id: str, data_root: str | Path | None = None) -> PlanetRec
     """
     root = _resolve_data_root(data_root)
     group_name = f"{HDF5_GROUP_PREFIX}{planet_id}"
+    import h5py
+
     for split, subdir in _SPLIT_DIRS.items():
         hdf5 = root / subdir / "SpectralData.hdf5"
         if not hdf5.exists():
@@ -192,6 +193,8 @@ def iter_spectra(
         raise DataError(f"Unknown split '{split}', expected one of {tuple(_SPLIT_DIRS)}.")
     root = _resolve_data_root(data_root)
     hdf5 = root / _SPLIT_DIRS[split] / "SpectralData.hdf5"
+    import h5py
+
     with h5py.File(hdf5, "r") as handle:
         for count, group_name in enumerate(handle):
             if limit is not None and count >= limit:
