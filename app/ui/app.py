@@ -112,8 +112,8 @@ def pick_record() -> PlanetRecord | None:
 
 
 def header() -> None:
-    cols = st.columns([1, 9], vertical_alignment="center", gap="small")
-    cols[0].image(_PLANET, width=78)
+    cols = st.columns([1, 11], vertical_alignment="center", gap="small")
+    cols[0].image(_PLANET, width=52)
     cols[1].title("ExoBiome")
 
 
@@ -186,9 +186,22 @@ def whatif_section(
             "odpala model (OOP). Zobacz, jak kształt widma przekłada się na przewidziany skład."
         )
         c = st.columns(3)
-        depth = c[0].slider("Głębokość cech ×", 0.0, 2.5, 1.0, 0.1)
-        noise = c[1].slider("Szum ×", 0.0, 5.0, 0.0, 0.25)
-        slope = c[2].slider("Nachylenie", -0.5, 0.5, 0.0, 0.05)
+        depth = c[0].slider(
+            "Głębokość cech ×", 0.0, 2.5, 1.0, 0.1,
+            help="Siła sygnału gazów: <1 = słabsze cechy absorpcji (mniej gazu), >1 = mocniejsze.",
+        )
+        noise = c[1].slider(
+            "Szum ×", 0.0, 5.0, 0.0, 0.25,
+            help="Jakość pomiaru: symuluje szum instrumentu/obserwacji - większy = bardziej zaszumione widmo.",
+        )
+        slope = c[2].slider(
+            "Nachylenie", -0.5, 0.5, 0.0, 0.05,
+            help="Przechylenie kontinuum, np. systematyka instrumentu albo aktywność gwiazdy.",
+        )
+        st.caption(
+            "Suwaki modelują realne zjawiska: **głębokość cech** = jak silnie gaz pochłania (sygnał), "
+            "**szum** = gorsza jakość pomiaru, **nachylenie** = przechył kontinuum (instrument / gwiazda)."
+        )
 
         record2 = whatif.perturbed_record(record, depth=depth, noise=noise, slope=slope)
         changed = engine.predict(record2)
@@ -196,20 +209,24 @@ def whatif_section(
         left, right = st.columns(2)
         with left:
             st.caption("Zmienione widmo")
-            st.altair_chart(components.spectrum_chart(record2), width="stretch")
+            st.altair_chart(components.spectrum_chart(record2, height=320), width="stretch")
         with right:
             st.caption("Skład: oryginał vs po zmianie" + (" vs prawda" if truth is not None else ""))
             rows, _ = ia.compare(
                 truth,
                 [Prediction("oryginał", dict(base.log_vmr)), Prediction("po zmianie", dict(changed.log_vmr))],
             )
-            st.altair_chart(components.comparison_chart(rows), width="stretch")
+            st.altair_chart(components.comparison_chart(rows, height=320), width="stretch")
 
         shift = (sum((base.log_vmr[g] - changed.log_vmr[g]) ** 2 for g in GASES) / len(GASES)) ** 0.5
         st.caption(f"Zmiana predykcji względem oryginału: **{shift:.3f}** (mRMSE).")
 
 
 def main() -> None:
+    st.html(
+        "<style>@keyframes exobiomeReveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}"
+        '[data-testid="stVerticalBlockBorderWrapper"]{animation:exobiomeReveal .4s ease both}</style>'
+    )
     try:
         engine = get_engine()
     except Exception as exc:  # noqa: BLE001
