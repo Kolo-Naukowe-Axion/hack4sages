@@ -96,7 +96,7 @@ def comparison_chart(rows: list[ComparisonRow]) -> alt.LayerChart:
             x=x,
             xOffset=alt.XOffset("seria:N"),
             y=alt.Y("log-VMR:Q", title="log-VMR  (wyżej = więcej gazu)"),
-            color=alt.Color("seria:N", title=None, legend=alt.Legend(orient="top")),
+            color=alt.Color("seria:N", title=None, legend=alt.Legend(orient="top", labelLimit=200)),
             tooltip=["gaz:N", "seria:N", alt.Tooltip("log-VMR:Q", format=".2f")],
         )
     )

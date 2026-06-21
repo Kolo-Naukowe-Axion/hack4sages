@@ -25,9 +25,9 @@ from app.data.pipeline import make_quantum_input
 from app.data.preprocessing import denormalize_targets, vmr_to_dict
 from app.data.types import GASES, ComparisonRow, GroundTruth, PlanetRecord, Prediction
 
-CLASSICAL_MODEL_NAME = "model (głowica klasyczna)"
-QUANTUM_MODEL_NAME = "model kwantowy (pełny)"
-BASELINE_MODEL_NAME = "baseline (średnia treningowa)"
+CLASSICAL_MODEL_NAME = "klasyczny"
+QUANTUM_MODEL_NAME = "kwantowy"
+BASELINE_MODEL_NAME = "baseline"
 VALIDATION_CSV = "validation_predictions.csv"
 
 # Per-gas mean log-VMR over the ADC2023 training set (FM_Parameter_Table). A

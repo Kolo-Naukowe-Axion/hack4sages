@@ -181,7 +181,7 @@ def spectrum_section(record: PlanetRecord) -> None:
 def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
     with st.container(border=True):
         st.markdown("##### :material/query_stats: Skład atmosfery - modele vs prawda")
-        st.caption("Słupki = predykcje modeli · ◆ = prawda · baseline to model zerowy (średnia treningowa).")
+        st.caption("Słupki = predykcje 3 modeli · ◆ = prawda · log-VMR: wyżej = więcej gazu.")
         st.altair_chart(components.comparison_chart(rows), width="stretch")
 
         if agg:
@@ -199,14 +199,19 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
                     border=True,
                     help="różnica vs baseline" if show_delta else "model zerowy",
                 )
+            st.caption(
+                "baseline = model zerowy (średnia treningowa) · "
+                "klasyczny = głowica klasyczna (na żywo) · "
+                "kwantowy = pełny model kwantowy (z checkpointu)"
+            )
 
-        with st.expander("Tabela porownania (log-VMR)", icon=":material/table_chart:"):
+        with st.expander("Tabela porównania (log-VMR)", icon=":material/table_chart:"):
             st.dataframe(components.comparison_dataframe(rows), width="stretch")
 
         if not quantum_present:
             st.caption(
                 ":material/info: Brak predykcji pełnego modelu kwantowego dla tej planety - "
-                "pokazane: baseline + głowica klasyczna vs prawda."
+                "pokazane: baseline + klasyczny vs prawda."
             )
 
 
@@ -219,24 +224,30 @@ def main() -> None:
         st.stop()
 
     record = pick_record()
-    hero()
-    if record is None:
-        st.info("Wybierz planetę, przykład albo wczytaj plik CSV w panelu po lewej.", icon=":material/arrow_back:")
-        return
 
-    try:
-        classical = engine.predict(record)
-        quantum = ia.full_quantum_prediction(engine.checkpoint_dir, record.planet_id)
-        preds = [ia.baseline_prediction(), classical] + ([quantum] if quantum is not None else [])
-        truth = record.truth or ia.reference_truth(engine.checkpoint_dir, record.planet_id)
-        rows, agg = ia.compare(truth, preds)
-    except DataError as exc:
-        st.error(f"Błąd danych: {exc}", icon=":material/error:")
-        return
+    _, center, _ = st.columns([1, 22, 1])
+    with center:
+        hero()
+        if record is None:
+            st.info(
+                "Wybierz planetę, przykład albo wczytaj plik CSV w panelu po lewej.",
+                icon=":material/arrow_back:",
+            )
+            return
 
-    kpi_row(record, truth, agg)
-    spectrum_section(record)
-    results_section(rows, agg, quantum is not None)
+        try:
+            classical = engine.predict(record)
+            quantum = ia.full_quantum_prediction(engine.checkpoint_dir, record.planet_id)
+            preds = [ia.baseline_prediction(), classical] + ([quantum] if quantum is not None else [])
+            truth = record.truth or ia.reference_truth(engine.checkpoint_dir, record.planet_id)
+            rows, agg = ia.compare(truth, preds)
+        except DataError as exc:
+            st.error(f"Błąd danych: {exc}", icon=":material/error:")
+            return
+
+        kpi_row(record, truth, agg)
+        spectrum_section(record)
+        results_section(rows, agg, quantum is not None)
 
 
 main()
