@@ -1,17 +1,18 @@
-# ExoBiome - deep space / spectroscopy theme (dark)
-# Adapted from the bundled developing-with-streamlit "financial-dashboard" template.
-# Native theming only - no custom CSS (per skill guidance).
+# ExoBiome - professional light theme.
+# Cool near-white scientific canvas + one muted slate-indigo accent + a soft,
+# hue-varied, mid-saturation categorical palette (readable as bars on white).
+# Native theming only - no custom CSS (per developing-with-streamlit skill).
 
 [theme]
-base = "dark"
-primaryColor = "#7C3AED"              # quantum violet (white button text is AA-safe)
-backgroundColor = "#0B1020"           # deep space navy
-secondaryBackgroundColor = "#151C30"  # panel slate
-codeBackgroundColor = "#151C30"
-textColor = "#E6EAF5"
-linkColor = "#A78BFA"                 # light violet, harmonizes with primary
-borderColor = "#232C44"
-codeTextColor = "#C7D0E6"
+base = "light"
+primaryColor = "#3D52A0"              # muted slate-indigo - white button text is AA (~6.7:1)
+backgroundColor = "#FCFCFD"           # cool near-white (softer than pure white)
+secondaryBackgroundColor = "#F1F3F8"  # light cool grey - cards / widgets / code / sidebar
+codeBackgroundColor = "#F1F3F8"
+textColor = "#1F2530"                 # dark slate charcoal (~13:1 on background)
+linkColor = "#3D52A0"
+borderColor = "#E2E5EC"               # soft hairline grey
+codeTextColor = "#384152"
 showWidgetBorder = true
 showSidebarBorder = true
 baseRadius = "8px"
@@ -28,33 +29,33 @@ headingFontSizes = ["30px", "24px", "20px", "16px", "14px", "12px"]
 headingFontWeights = [700, 600, 600, 600, 500, 500]
 linkUnderline = false
 
-# Semantic colors (badges, status, prediction error highlighting)
-greenColor = "#34D399"
-redColor = "#F87171"
-yellowColor = "#FBBF24"
-orangeColor = "#FB923C"
-blueColor = "#60A5FA"
-violetColor = "#A78BFA"
-grayColor = "#94A3B8"
+# Semantic colors (badges, status, error highlighting) - readable on white
+greenColor = "#1A7F5A"
+redColor = "#C0392B"
+yellowColor = "#B7791F"
+orangeColor = "#C2641A"
+blueColor = "#2D6CC0"
+violetColor = "#6D5BD0"
+grayColor = "#64748B"
 
-# Categorical chart palette - distinguishable on dark, for the 5 gases + model series
-chartCategoricalColors = ["#A78BFA", "#22D3EE", "#34D399", "#FBBF24", "#F472B6", "#60A5FA", "#FB923C", "#94A3B8"]
+# Categorical chart palette - soft, hue-varied, mid-saturation; distinct as bars on white.
+chartCategoricalColors = ["#3D52A0", "#3A9D8E", "#C98A3A", "#9B5DE0", "#C25A6B", "#5B8DC9", "#6B8F3E", "#7A8699"]
 
-# Sequential palette (indigo gradient) for spectra / heatmaps - exactly 10 colors
-chartSequentialColors = ["#1E1B4B", "#312E81", "#3730A3", "#4338CA", "#4F46E5", "#6366F1", "#818CF8", "#A5B4FC", "#C7D2FE", "#E0E7FF"]
+# Sequential palette (slate-indigo gradient) for spectra / heatmaps - exactly 10 colors
+chartSequentialColors = ["#EEF1FA", "#D7DDF1", "#BDC6E7", "#A2AFDC", "#8797D0", "#6C7FC4", "#5468B0", "#42549A", "#33437F", "#243162"]
 
 # Dataframe styling
-dataframeBorderColor = "#232C44"
-dataframeHeaderBackgroundColor = "#151C30"
+dataframeBorderColor = "#E2E5EC"
+dataframeHeaderBackgroundColor = "#F1F3F8"
 
-# Sidebar - slightly deeper than the main panel for visual depth
+# Sidebar - one notch deeper than the canvas for quiet depth (not a dark sidebar)
 [theme.sidebar]
-backgroundColor = "#090D1C"
-secondaryBackgroundColor = "#151C30"
-codeBackgroundColor = "#151C30"
-textColor = "#E6EAF5"
-borderColor = "#232C44"
-primaryColor = "#7C3AED"
+backgroundColor = "#F1F3F8"
+secondaryBackgroundColor = "#E7EAF2"
+codeBackgroundColor = "#E7EAF2"
+textColor = "#1F2530"
+borderColor = "#E2E5EC"
+primaryColor = "#3D52A0"
 
 [browser]
 gatherUsageStats = false
