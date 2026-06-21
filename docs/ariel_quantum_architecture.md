@@ -136,6 +136,90 @@ That is different from the earlier version in two important ways:
 - Added gradual ramp and temporary backbone freezing during hybrid fine-tuning.
 - Aligned training loss with the metric we care about by using `MSE` and selecting by RMSE.
 
+## 3.3 Class diagram (UML)
+
+The hybrid model OOP core lives in `models/hybrid_core/model.py`. Package-level `model.py` files are thin re-exports; training code depends on the shared ABC contract.
+
+```mermaid
+classDiagram
+    class HybridRegressorBase {
+        <<abstract>>
+        +forward(aux, spectra, enable_quantum, quantum_scale) Tensor
+        +backbone_parameters() Iterable
+        +quantum_parameters() Iterable
+        +quantum_adapter_parameters() Iterable
+        +set_backbone_trainable(enabled) void
+        #_compute_classical_prediction(aux, spectra) tuple
+    }
+
+    class ClassicalOnlyHybridRegressor {
+        +classical_only True
+        +forward(...)
+    }
+
+    class HybridArielRegressor {
+        +classical_only False
+        +forward(...)
+        -_select_branch_strategy(enable_quantum, quantum_scale) Strategy
+    }
+
+    class PredictionBranchStrategy {
+        <<abstract>>
+        +apply(context) Tensor
+    }
+
+    class ClassicalBranchStrategy {
+        +apply(context) Tensor
+    }
+
+    class QuantumBranchStrategy {
+        +apply(context) Tensor
+    }
+
+    class PredictionContext {
+        +fused Tensor
+        +head_context Tensor
+        +classical_pred Tensor
+        +quantum_scale float
+        +regressor HybridArielRegressor
+    }
+
+    class build_model {
+        <<factory>>
+        +build_model(config, device) HybridRegressorBase
+    }
+
+    class SpectralEncoder
+    class AuxEncoder
+    class FusionEncoder
+    class RegressionHead
+    class QuantumProjector
+    class QuantumBlock
+
+    HybridRegressorBase <|-- ClassicalOnlyHybridRegressor
+    HybridRegressorBase <|-- HybridArielRegressor
+    PredictionBranchStrategy <|-- ClassicalBranchStrategy
+    PredictionBranchStrategy <|-- QuantumBranchStrategy
+    HybridArielRegressor --> PredictionBranchStrategy : selects at runtime
+    HybridArielRegressor --> PredictionContext
+    HybridRegressorBase *-- SpectralEncoder
+    HybridRegressorBase *-- AuxEncoder
+    HybridRegressorBase *-- FusionEncoder
+    HybridRegressorBase *-- RegressionHead
+    HybridArielRegressor *-- QuantumProjector
+    HybridArielRegressor *-- QuantumBlock
+    HybridArielRegressor *-- RegressionHead : quantum_head
+    build_model ..> ClassicalOnlyHybridRegressor : classical_only=True
+    build_model ..> HybridArielRegressor : classical_only=False
+```
+
+Design notes:
+
+- **ABC**: `HybridRegressorBase` defines the training contract (`backbone_parameters`, `quantum_parameters`, `forward`).
+- **Factory**: `build_model()` returns `ClassicalOnlyHybridRegressor` or `HybridArielRegressor` based on `ModelConfig.classical_only`.
+- **Strategy**: `HybridArielRegressor.forward()` delegates the final prediction step to `ClassicalBranchStrategy` or `QuantumBranchStrategy` via `PredictionContext`.
+- **Encapsulation**: spectral, auxiliary, fusion, and quantum layers are separate `nn.Module` subclasses composed by the regressor variants.
+
 ## Latest verified run snapshot
 
 As of `2026-03-11`, the best confirmed hybrid checkpoint is:

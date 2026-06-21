@@ -17,7 +17,7 @@ import torch.nn as nn
 
 from .constants import AUX_COLUMNS, DEFAULT_DATA_ROOT, DEFAULT_OUTPUT_DIR, TARGET_COLUMNS
 from .dataset import InferenceSplit, LabeledSplit, PreparedData, prepare_data
-from .model import ModelConfig, HybridArielRegressor, build_model
+from .model import HybridRegressorBase, ModelConfig, build_model
 
 
 def resolve_project_root(path_hint: Optional[Path] = None) -> Path:
@@ -240,7 +240,7 @@ def format_cuda_memory(device: torch.device) -> str:
 
 
 def evaluate_labeled_split(
-    model: HybridArielRegressor,
+    model: HybridRegressorBase,
     split: LabeledSplit,
     target_scaler,
     batch_size: int,
@@ -286,7 +286,7 @@ def evaluate_labeled_split(
 
 
 def predict_inference_split(
-    model: HybridArielRegressor,
+    model: HybridRegressorBase,
     split: InferenceSplit,
     target_scaler,
     batch_size: int,
@@ -400,7 +400,7 @@ def save_training_progress(
         )
 
 
-def maybe_initialize_from_checkpoint(model: HybridArielRegressor, config: TrainingConfig) -> None:
+def maybe_initialize_from_checkpoint(model: HybridRegressorBase, config: TrainingConfig) -> None:
     checkpoint_path = config.resolved_init_checkpoint_path()
     if checkpoint_path is None:
         return
@@ -735,7 +735,7 @@ def run_training_experiment(config: Optional[TrainingConfig] = None) -> dict[str
 
     data = move_prepared_data_to_device(data, device)
     training = train_model(cfg, data, device, output_dir=output_dir)
-    model: HybridArielRegressor = training["model"]
+    model: HybridRegressorBase = training["model"]
     loss_fn = build_loss_fn(cfg)
 
     save_json(

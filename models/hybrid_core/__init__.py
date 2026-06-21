@@ -1,39 +1,27 @@
-"""Model definition for the Ariel five-gas hybrid regressor."""
+"""Shared OOP core for hybrid classical/quantum exobiome regressors."""
 
-from models.hybrid_core.model import (
+from .model import (
     ClassicalBranchStrategy,
     ClassicalOnlyHybridRegressor,
-    FusionEncoder,
     HybridArielRegressor,
     HybridRegressorBase,
     ModelConfig,
     PredictionBranchStrategy,
     PredictionContext,
-    QuantumBlock,
     QuantumBranchStrategy,
-    QuantumProjector,
-    RegressionHead,
-    SpectralEncoder,
-    AuxEncoder,
     build_model,
     resolve_amp_dtype,
 )
 
 __all__ = [
-    "AuxEncoder",
     "ClassicalBranchStrategy",
     "ClassicalOnlyHybridRegressor",
-    "FusionEncoder",
     "HybridArielRegressor",
     "HybridRegressorBase",
     "ModelConfig",
     "PredictionBranchStrategy",
     "PredictionContext",
-    "QuantumBlock",
     "QuantumBranchStrategy",
-    "QuantumProjector",
-    "RegressionHead",
-    "SpectralEncoder",
     "build_model",
     "resolve_amp_dtype",
 ]
