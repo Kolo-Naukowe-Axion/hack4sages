@@ -181,24 +181,26 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
         st.altair_chart(components.comparison_chart(rows), width="stretch")
 
         if agg:
-            st.markdown("**Średni błąd na planetę (mRMSE, mniej = lepiej)**")
-            base_rmse = agg.get(ia.BASELINE_MODEL_NAME, {}).get("rmse_mean")
-            cols = st.columns(len(agg))
-            for col, (model, metric) in zip(cols, agg.items()):
-                rmse = metric["rmse_mean"]
-                show_delta = base_rmse is not None and model != ia.BASELINE_MODEL_NAME
+            st.markdown("**Δ do prawdy**  ·  mRMSE = średnia odległość predykcji do prawdy (mniej = bliżej)")
+            order = [m for m in (ia.BASELINE_MODEL_NAME, ia.CLASSICAL_MODEL_NAME, ia.QUANTUM_MODEL_NAME) if m in agg]
+            best = min(order, key=lambda m: agg[m]["rmse_mean"]) if order else None
+            cols = st.columns(len(order) + 1)
+            cols[0].metric("prawda (cel)", "0.000", border=True, help="punkt odniesienia - idealne dopasowanie")
+            for col, model in zip(cols[1:], order):
+                rmse = agg[model]["rmse_mean"]
                 col.metric(
                     model,
                     f"{rmse:.3f}",
-                    delta=f"{rmse - base_rmse:+.2f}" if show_delta else None,
+                    delta=f"{rmse:+.2f} do prawdy",
                     delta_color="inverse",
                     border=True,
-                    help="różnica vs baseline" if show_delta else "klasyczny Random Forest",
+                    help="najbliżej prawdy ze wszystkich modeli" if model == best else "odległość do prawdy (mRMSE)",
                 )
-            st.caption(
-                "baseline (RF) = klasyczny Random Forest · klasyczny = głowica klasyczna naszej "
-                "hybrydy (na żywo) · kwantowy = pełny model kwantowy (z checkpointu)"
-            )
+            if best:
+                st.caption(
+                    f"Najbliżej prawdy: **{best}** ({agg[best]['rmse_mean']:.3f}). baseline (RF) = klasyczny "
+                    "Random Forest · klasyczny = głowica klasyczna (na żywo) · kwantowy = pełny model kwantowy."
+                )
 
         with st.expander("Tabela porównania (log-VMR)", icon=":material/table_chart:"):
             st.dataframe(components.comparison_dataframe(rows), width="stretch")
