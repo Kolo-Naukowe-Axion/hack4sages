@@ -134,3 +134,54 @@ def comparison_dataframe(rows: list[ComparisonRow]) -> pd.DataFrame:
             entry[f"|błąd| {model}"] = err
         data[gas_label(row.gas)] = entry
     return pd.DataFrame.from_dict(data, orient="index")
+
+
+def training_curve_chart(history: pd.DataFrame) -> alt.Chart:
+    """Train/validation mRMSE per epoch; the hybrid (quantum-on) phase is shaded."""
+    melt = history.melt(
+        id_vars=["epoch"],
+        value_vars=["train_rmse_mean", "val_rmse_mean"],
+        var_name="krzywa",
+        value_name="mRMSE",
+    )
+    melt["krzywa"] = melt["krzywa"].map({"train_rmse_mean": "trening", "val_rmse_mean": "walidacja"})
+    lines = alt.Chart(melt).mark_line(point=True).encode(
+        x=alt.X("epoch:Q", title="epoka"),
+        y=alt.Y("mRMSE:Q", scale=alt.Scale(zero=False)),
+        color=alt.Color("krzywa:N", title=None, legend=alt.Legend(orient="top")),
+        tooltip=["epoch:Q", "krzywa:N", alt.Tooltip("mRMSE:Q", format=".3f")],
+    )
+    active = history[history["quantum_active"] > 0]
+    if active.empty:
+        return lines.properties(height=300)
+    band = pd.DataFrame({"start": [float(active["epoch"].min())], "end": [float(history["epoch"].max())]})
+    shade = alt.Chart(band).mark_rect(opacity=0.12, color="#0F52BA").encode(x="start:Q", x2="end:Q")
+    return (shade + lines).properties(height=300)
+
+
+def per_gas_rmse_chart(rmse: dict[str, float]) -> alt.Chart:
+    """Per-gas validation RMSE of the quantum model."""
+    df = pd.DataFrame([{"gaz": gas_label(g), "RMSE": float(v)} for g, v in rmse.items()])
+    return (
+        alt.Chart(df)
+        .mark_bar(color="#0F52BA", cornerRadiusTopLeft=2, cornerRadiusTopRight=2)
+        .encode(
+            x=alt.X("gaz:N", title=None, sort=GAS_ORDER),
+            y=alt.Y("RMSE:Q", title="RMSE [dex]"),
+            tooltip=["gaz:N", alt.Tooltip("RMSE:Q", format=".3f")],
+        )
+        .properties(height=240)
+    )
+
+
+def parity_chart(df: pd.DataFrame) -> alt.FacetChart:
+    """Predicted vs true log-VMR per gas (one point per planet) with the y=x line."""
+    points = alt.Chart(df).mark_circle(size=12, opacity=0.3, color="#0F52BA").encode(
+        x=alt.X("prawda:Q", title="prawda"), y=alt.Y("predykcja:Q", title="predykcja")
+    )
+    identity = alt.Chart(df).mark_line(color="#000926", strokeDash=[4, 4], opacity=0.6).encode(
+        x="prawda:Q", y="prawda:Q"
+    )
+    return (points + identity).properties(width=128, height=128).facet(
+        facet=alt.Facet("gaz:N", title=None, sort=GAS_ORDER), columns=5
+    )
