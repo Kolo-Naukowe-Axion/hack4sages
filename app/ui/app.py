@@ -23,7 +23,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 # Auto-wire the sibling data worktree (../hack4sages-data) when present, so the
-# curated dropdown works with zero env setup. Examples + upload work without it.
+# planet list comes from the real ADC2023 dataset. Upload works without it.
 _SIBLING_DATA = _ROOT.parent / "hack4sages-data" / "data" / "ariel-ml-dataset"
 if "EXOBIOME_DATA" not in os.environ and (_SIBLING_DATA / "TrainingData").is_dir():
     os.environ["EXOBIOME_DATA"] = str(_SIBLING_DATA)
@@ -64,76 +64,71 @@ def dominant_gas(truth: GroundTruth | None) -> str | None:
     return components.gas_label(max(GASES, key=lambda gas: truth.log_vmr[gas]))
 
 
-# --- sidebar: source only ----------------------------------------------------
+# --- input: planet picker / upload (in the main area) ------------------------
 
 
 def _safe_parse(source) -> PlanetRecord | None:
     try:
         return loading.parse_upload(source)
     except DataError as exc:
-        st.sidebar.error(f"Nieprawidłowy plik: {exc}", icon=":material/error:")
+        st.error(f"Nieprawidłowy plik: {exc}", icon=":material/error:")
         return None
 
 
-def pick_record() -> PlanetRecord | None:
+def _planet_options() -> tuple[str, dict]:
+    """One unified planet list: real ADC2023 planets when the dataset is present,
+    otherwise the bundled example planets. The user never sees the distinction."""
     curated = get_curated()
-    examples = example_files()
-
-    modes: list[str] = []
     if curated:
-        modes.append("Kuratowana")
+        return "curated", {cp.label: cp.planet_id for cp in curated}
+    examples = example_files()
     if examples:
-        modes.append("Przykład")
-    modes.append("Upload CSV")
+        return "example", {path.stem: path for path in examples}
+    return "none", {}
 
-    record: PlanetRecord | None = None
-    with st.sidebar:
-        st.markdown("### Dane wejściowe")
-        mode = (
-            st.segmented_control(
-                "Źródło widma", modes, default=modes[0], selection_mode="single", width="stretch"
-            )
-            or modes[0]
+
+def input_controls() -> PlanetRecord | None:
+    kind, options = _planet_options()
+    sources = (["Planeta z listy"] if options else []) + ["Wczytaj plik CSV"]
+    source = (
+        st.segmented_control(
+            "Źródło widma", sources, default=sources[0], selection_mode="single", label_visibility="collapsed"
         )
+        or sources[0]
+    )
 
-        if mode == "Kuratowana":
-            labels = {cp.label: cp.planet_id for cp in curated}
-            choice = st.selectbox("Planeta", list(labels), help="Realne planety ADC2023 o różnej chemii.")
+    if source == "Planeta z listy" and options:
+        choice = st.selectbox(
+            "Wybierz planetę",
+            list(options),
+            label_visibility="collapsed",
+            help="Realne planety ADC2023 o różnej chemii - kliknij, aby wybrać.",
+        )
+        if kind == "curated":
             try:
-                record = loading.load_by_id(labels[choice])
+                return loading.load_by_id(options[choice])
             except DataError as exc:
                 st.error(f"Nie udało się wczytać: {exc}", icon=":material/error:")
-        elif mode == "Przykład":
-            files = {path.stem: path for path in examples}
-            choice = st.selectbox("Przykład", list(files))
-            record = _safe_parse(io.StringIO(files[choice].read_text()))
-        else:
-            st.caption("Jednowierszowy CSV: 8 cech aux + flux_0..51 + noise_0..51.")
-            if examples:
-                st.download_button(
-                    "Pobierz szablon",
-                    examples[0].read_text(),
-                    file_name="exobiome_template.csv",
-                    icon=":material/download:",
-                    width="stretch",
-                )
-            upload = st.file_uploader("Plik CSV", type=["csv"])
-            if upload is not None:
-                record = _safe_parse(io.StringIO(upload.getvalue().decode("utf-8")))
+                return None
+        return _safe_parse(io.StringIO(options[choice].read_text()))
 
-        st.space("medium")
-        st.caption("ExoBiome · Hack4SAGES 2026")
-    return record
+    cols = st.columns([3, 1], vertical_alignment="bottom")
+    upload = cols[0].file_uploader("Plik CSV (1 wiersz: 8 cech aux + flux_0..51 + noise_0..51)", type=["csv"])
+    examples = example_files()
+    if examples:
+        cols[1].download_button(
+            "Szablon",
+            examples[0].read_text(),
+            file_name="exobiome_template.csv",
+            icon=":material/download:",
+            width="stretch",
+        )
+    if upload is not None:
+        return _safe_parse(io.StringIO(upload.getvalue().decode("utf-8")))
+    return None
 
 
 # --- main content ------------------------------------------------------------
-
-
-def hero() -> None:
-    st.title("ExoBiome")
-    st.markdown(
-        ":violet-badge[hybryda kwantowo-klasyczna] :blue-badge[Ariel ADC2023] :gray-badge[5 gazów]"
-    )
 
 
 def intro() -> None:
@@ -147,16 +142,11 @@ def intro() -> None:
     )
 
 
-def kpi_row(record: PlanetRecord, truth: GroundTruth | None, agg: dict) -> None:
-    best = min(agg.items(), key=lambda kv: kv[1]["rmse_mean"]) if agg else None
-    cols = st.columns(4)
+def kpi_row(record: PlanetRecord, truth: GroundTruth | None) -> None:
+    cols = st.columns(2)
     cols[0].metric("Planeta", record.planet_id, border=True)
     cols[1].metric(
         "Dominujący gaz", dominant_gas(truth) or "-", border=True, help="Gaz o najwyższym udziale wg prawdy"
-    )
-    cols[2].metric("Prawda znana", "tak" if truth is not None else "nie", border=True)
-    cols[3].metric(
-        "Najlepszy mRMSE", f"{best[1]['rmse_mean']:.3f}" if best else "-", border=True, help=best[0] if best else None
     )
 
 
@@ -185,17 +175,12 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
             order = [m for m in (ia.BASELINE_MODEL_NAME, ia.CLASSICAL_MODEL_NAME, ia.QUANTUM_MODEL_NAME) if m in agg]
             best = min(order, key=lambda m: agg[m]["rmse_mean"]) if order else None
             cols = st.columns(len(order) + 1)
-            cols[0].metric(
-                "prawda (cel)", "0.000", delta="cel", delta_color="off", border=True,
-                help="punkt odniesienia - idealne dopasowanie",
-            )
+            cols[0].metric("prawda (cel)", "0.000", border=True, help="punkt odniesienia - idealne dopasowanie")
             for col, model in zip(cols[1:], order):
                 rmse = agg[model]["rmse_mean"]
                 col.metric(
                     model,
                     f"{rmse:.3f}",
-                    delta=f"{rmse:+.2f} do prawdy",
-                    delta_color="inverse",
                     border=True,
                     help="najbliżej prawdy ze wszystkich modeli" if model == best else "odległość do prawdy (mRMSE)",
                 )
@@ -223,16 +208,15 @@ def main() -> None:
         st.error(f"Nie udało się załadować modelu z checkpointu: {exc}", icon=":material/error:")
         st.stop()
 
-    record = pick_record()
-
     _, center, _ = st.columns([1, 22, 1])
     with center:
-        hero()
+        st.title("ExoBiome")
         intro()
+        record = input_controls()
         if record is None:
             st.info(
-                "Wybierz planetę, przykład albo wczytaj plik CSV w panelu po lewej.",
-                icon=":material/arrow_back:",
+                "Wybierz planetę z listy albo wczytaj własne widmo (CSV) powyżej.",
+                icon=":material/arrow_upward:",
             )
             return
 
@@ -248,7 +232,7 @@ def main() -> None:
             st.error(f"Błąd danych: {exc}", icon=":material/error:")
             return
 
-        kpi_row(record, truth, agg)
+        kpi_row(record, truth)
         spectrum_section(record)
         results_section(rows, agg, quantum is not None)
 
