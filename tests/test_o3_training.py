@@ -1,4 +1,4 @@
-"""Unit tests for Osoba 03 training orchestration.
+"""Unit tests for Iwo Smura's training orchestration.
 
 These tests use a fake stage runner, so they do not need the ADC dataset, a GPU,
 PennyLane, or a long training run.

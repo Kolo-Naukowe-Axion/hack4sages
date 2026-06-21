@@ -1,4 +1,4 @@
-"""Osoba 03 training orchestration for the ExoBiome app.
+"""Iwo Smura's training orchestration for the ExoBiome app.
 
 This layer is intentionally thin: the heavy model implementation stays in
 ``models.ariel_quantum_regression.training`` while the app gets a stable OOP

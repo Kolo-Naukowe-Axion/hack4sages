@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run or preview the Osoba 03 two-stage training workflow."""
+"""Run or preview Iwo Smura's two-stage training workflow."""
 
 from __future__ import annotations
 
