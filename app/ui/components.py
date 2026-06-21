@@ -2,8 +2,9 @@
 
 No Streamlit calls here - every function returns an Altair chart or a DataFrame,
 so the visual logic stays testable without a running app. ``app.py`` does the
-``st.*`` rendering and lets the Streamlit theme colour the charts (no hard-coded
-colours, so the chart palette follows ``.streamlit/config.toml``).
+``st.*`` rendering. The model-comparison bars follow the Streamlit theme from
+``.streamlit/config.toml``; a few brand accents (spectrum line, training curves,
+parity) use explicit navy hexes for emphasis.
 """
 
 from __future__ import annotations
