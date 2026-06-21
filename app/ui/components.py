@@ -79,21 +79,33 @@ def comparison_long(rows: list[ComparisonRow]) -> pd.DataFrame:
     return pd.DataFrame.from_records(records, columns=["gaz", "seria", "log-VMR"])
 
 
-def comparison_chart(rows: list[ComparisonRow]) -> alt.Chart:
-    """Grouped bars: predicted log-VMR per gas, one bar per series (truth + models)."""
+def comparison_chart(rows: list[ComparisonRow]) -> alt.LayerChart:
+    """Per gas: grouped bars for each model, with ground truth as a diamond marker.
+
+    Splitting truth (a single target per gas) from the model bars makes the chart
+    read as "how close does each model's bar get to the truth diamond", which is
+    clearer than burying truth as just another bar.
+    """
     df = comparison_long(rows)
-    return (
-        alt.Chart(df)
-        .mark_bar()
+    x = alt.X("gaz:N", title=None, sort=GAS_ORDER)
+    base = alt.Chart(df)
+    bars = (
+        base.transform_filter(alt.datum.seria != GROUND_TRUTH)
+        .mark_bar(cornerRadiusTopLeft=2, cornerRadiusTopRight=2)
         .encode(
-            x=alt.X("gaz:N", title=None, sort=GAS_ORDER),
+            x=x,
             xOffset=alt.XOffset("seria:N"),
-            y=alt.Y("log-VMR:Q", title="log-VMR"),
+            y=alt.Y("log-VMR:Q", title="log-VMR  (wyżej = więcej gazu)"),
             color=alt.Color("seria:N", title=None, legend=alt.Legend(orient="top")),
-            tooltip=["gaz:N", "seria:N", alt.Tooltip("log-VMR:Q", format=".3f")],
+            tooltip=["gaz:N", "seria:N", alt.Tooltip("log-VMR:Q", format=".2f")],
         )
-        .properties(height=320)
     )
+    truth = (
+        base.transform_filter(alt.datum.seria == GROUND_TRUTH)
+        .mark_point(shape="diamond", filled=True, size=170, color="#E6EAF5", stroke="#0B1020", strokeWidth=1.5)
+        .encode(x=x, y="log-VMR:Q", tooltip=[alt.Tooltip("log-VMR:Q", title="prawda", format=".2f")])
+    )
+    return (bars + truth).properties(height=340)
 
 
 def comparison_dataframe(rows: list[ComparisonRow]) -> pd.DataFrame:
