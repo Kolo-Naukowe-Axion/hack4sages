@@ -1,0 +1,15 @@
+{
+  "features": "flux52+noise52+aux8",
+  "gases": [
+    "log_H2O",
+    "log_CO2",
+    "log_CO",
+    "log_CH4",
+    "log_NH3"
+  ],
+  "n_train": 8000,
+  "mRMSE_holdout": 1.2674461661728942,
+  "n_estimators": 80,
+  "max_depth": 18,
+  "file_mb": 12.77
+}

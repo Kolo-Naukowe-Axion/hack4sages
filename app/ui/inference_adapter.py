@@ -27,25 +27,36 @@ from app.data.types import GASES, ComparisonRow, GroundTruth, PlanetRecord, Pred
 
 CLASSICAL_MODEL_NAME = "klasyczny"
 QUANTUM_MODEL_NAME = "kwantowy"
-BASELINE_MODEL_NAME = "baseline"
+BASELINE_MODEL_NAME = "baseline (RF)"
 VALIDATION_CSV = "validation_predictions.csv"
-
-# Per-gas mean log-VMR over the ADC2023 training set (FM_Parameter_Table). A
-# constant "null model": predict the prior mean for every planet, ignoring the
-# spectrum entirely. If the trained model beats it, it actually read the
-# spectrum. mRMSE of this baseline on the validation set is ~1.49 (model: ~0.31).
-BASELINE_LOG_VMR: dict[str, float] = {
-    "log_H2O": -5.983,
-    "log_CO2": -6.522,
-    "log_CO": -4.492,
-    "log_CH4": -5.997,
-    "log_NH3": -6.494,
-}
+RF_MODEL_PATH = Path(__file__).resolve().parent / "artifacts" / "rf_baseline.joblib"
 
 
-def baseline_prediction() -> Prediction:
-    """The constant prior-mean baseline (null model) as a Prediction."""
-    return Prediction(BASELINE_MODEL_NAME, dict(BASELINE_LOG_VMR))
+@lru_cache(maxsize=1)
+def _rf_model():
+    """Load the bundled Random Forest baseline once; None if it is not present."""
+    if not RF_MODEL_PATH.exists():
+        return None
+    import joblib
+
+    return joblib.load(RF_MODEL_PATH)
+
+
+def rf_prediction(record: PlanetRecord) -> Prediction | None:
+    """Classical Random Forest baseline (raw flux+noise+aux -> log-VMR). The
+    'is the trained model better than off-the-shelf RF?' reference point."""
+    model = _rf_model()
+    if model is None:
+        return None
+    import numpy as np
+
+    features = (
+        np.concatenate([record.spectrum.flux, record.spectrum.noise, record.aux.values])
+        .reshape(1, -1)
+        .astype(float)
+    )
+    pred = model.predict(features)[0]
+    return Prediction(BASELINE_MODEL_NAME, {gas: float(value) for gas, value in zip(GASES, pred)})
 
 
 @dataclass(frozen=True)
