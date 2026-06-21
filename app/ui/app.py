@@ -27,7 +27,7 @@ if "EXOBIOME_DATA" not in os.environ and (_SIBLING_DATA / "TrainingData").is_dir
 
 from app.data import loading  # noqa: E402
 from app.data.types import GASES, DataError, GroundTruth, PlanetRecord, Prediction  # noqa: E402
-from app.ui import components, whatif  # noqa: E402
+from app.ui import components, training_view, whatif  # noqa: E402
 from app.ui import inference_adapter as ia  # noqa: E402
 
 st.set_page_config(page_title="ExoBiome", page_icon=":material/science:", layout="wide")
@@ -265,6 +265,7 @@ def main() -> None:
         results_section(rows, agg, quantum_present)
         if classical is not None:
             whatif_section(record, engine, classical, truth)
+        training_view.render(engine)
 
 
 main()
