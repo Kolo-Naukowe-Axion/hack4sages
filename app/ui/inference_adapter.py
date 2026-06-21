@@ -1,14 +1,11 @@
 """UI-local inference seam (Osoba 4).
 
-Keeps the Streamlit UI decoupled from model internals. Wraps the frozen
-checkpoint bridge plus the functional data pipeline into a single
+The only place ``app/ui`` touches the model layer. Wraps the frozen checkpoint
+bridge plus the functional data pipeline into a single
 ``predict(record) -> Prediction``, and reads the checkpoint's precomputed
-full-quantum predictions and ground truth for the comparison view.
-
-This is the ONLY place ``app/ui`` touches the model layer, so when the planned
-``app/models`` (Osoba 1) or ``app/inference.py`` (Osoba 3) land, only this file
-changes. Heavy imports (torch, the checkpoint package) are deferred so the pure
-helpers stay importable and testable without them.
+full-quantum predictions and ground truth for the comparison view. Heavy imports
+(torch, the checkpoint package) are deferred so the pure helpers stay importable
+and testable without them.
 """
 
 from __future__ import annotations
@@ -44,8 +41,8 @@ def _rf_model():
 
 
 def rf_prediction(record: PlanetRecord) -> Prediction | None:
-    """Classical Random Forest baseline (raw flux+noise+aux -> log-VMR). The
-    'is the trained model better than off-the-shelf RF?' reference point."""
+    """Random Forest baseline (raw flux+noise+aux -> log-VMR): the off-the-shelf
+    reference point the trained models are measured against."""
     model = _rf_model()
     if model is None:
         return None
@@ -64,9 +61,8 @@ def rf_prediction(record: PlanetRecord) -> Prediction | None:
 class InferenceEngine:
     """Loaded checkpoint bundle, frozen bridge, and the model-input transform.
 
-    Build once (cache it in the UI with ``st.cache_resource``) and reuse across
-    reruns. ``transform`` is the closure returned by ``make_quantum_input`` that
-    maps a ``PlanetRecord`` to ``(aux_n (1, 8), spectra_n (1, 4, 52))``.
+    ``transform`` is the closure from ``make_quantum_input`` mapping a
+    ``PlanetRecord`` to ``(aux_n (1, 8), spectra_n (1, 4, 52))``.
     """
 
     bundle: Any

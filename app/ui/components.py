@@ -44,20 +44,16 @@ def spectrum_dataframe(record: PlanetRecord) -> pd.DataFrame:
     x, _, _ = _x_axis(record)
     flux = np.asarray(record.spectrum.flux, dtype=float)
     noise = np.abs(np.asarray(record.spectrum.noise, dtype=float))
-    # Keep the x column name simple: Vega-Lite reads "[" / "]" in a field name as
-    # a nested accessor, which silently breaks the x encoding. The human label
-    # ("długość fali [µm]") is applied as the axis title in spectrum_chart.
+    # Plain "x" column: Vega-Lite treats "[" / "]" in a field name as a nested
+    # accessor; the human axis title is applied in spectrum_chart instead.
     return pd.DataFrame({"x": x, "flux": flux, "lo": flux - noise, "hi": flux + noise})
 
 
 def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
-    """Transmission spectrum: flux line with a +/- noise band, annotated with the
-    gas absorption bands.
+    """Transmission spectrum: flux line with a +/- noise band and gas-band markers.
 
-    The y-axis is zoomed to the data (``zero=False``) so the spectral features -
-    the absorption signal the model reads - are visible; transit depths vary by
-    < 1e-3, so a zero-based axis would flatten them to a line. The dashed markers
-    show where each gas typically absorbs, so a dip under "CO2" is a CO2 feature.
+    The y-axis zooms to the data (``zero=False``) because transit depths vary by
+    < 1e-3, so a zero-based axis would flatten the spectral features to a line.
     """
     df = spectrum_dataframe(record)
     _, xtitle, is_wl = _x_axis(record)
