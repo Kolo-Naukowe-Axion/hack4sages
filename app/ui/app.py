@@ -185,7 +185,10 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
             order = [m for m in (ia.BASELINE_MODEL_NAME, ia.CLASSICAL_MODEL_NAME, ia.QUANTUM_MODEL_NAME) if m in agg]
             best = min(order, key=lambda m: agg[m]["rmse_mean"]) if order else None
             cols = st.columns(len(order) + 1)
-            cols[0].metric("prawda (cel)", "0.000", border=True, help="punkt odniesienia - idealne dopasowanie")
+            cols[0].metric(
+                "prawda (cel)", "0.000", delta="cel", delta_color="off", border=True,
+                help="punkt odniesienia - idealne dopasowanie",
+            )
             for col, model in zip(cols[1:], order):
                 rmse = agg[model]["rmse_mean"]
                 col.metric(
