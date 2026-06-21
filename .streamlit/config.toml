@@ -1,0 +1,60 @@
+# ExoBiome - deep space / spectroscopy theme (dark)
+# Adapted from the bundled developing-with-streamlit "financial-dashboard" template.
+# Native theming only - no custom CSS (per skill guidance).
+
+[theme]
+base = "dark"
+primaryColor = "#7C3AED"              # quantum violet (white button text is AA-safe)
+backgroundColor = "#0B1020"           # deep space navy
+secondaryBackgroundColor = "#151C30"  # panel slate
+codeBackgroundColor = "#151C30"
+textColor = "#E6EAF5"
+linkColor = "#A78BFA"                 # light violet, harmonizes with primary
+borderColor = "#232C44"
+codeTextColor = "#C7D0E6"
+showWidgetBorder = true
+showSidebarBorder = true
+baseRadius = "8px"
+buttonRadius = "8px"
+
+# Typography - Inter for UI, JetBrains Mono for code/numbers
+font = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+headingFont = "'Inter':https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap"
+codeFont = "'JetBrains Mono':https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+baseFontSize = 14
+baseFontWeight = 400
+codeFontSize = "13px"
+headingFontSizes = ["30px", "24px", "20px", "16px", "14px", "12px"]
+headingFontWeights = [700, 600, 600, 600, 500, 500]
+linkUnderline = false
+
+# Semantic colors (badges, status, prediction error highlighting)
+greenColor = "#34D399"
+redColor = "#F87171"
+yellowColor = "#FBBF24"
+orangeColor = "#FB923C"
+blueColor = "#60A5FA"
+violetColor = "#A78BFA"
+grayColor = "#94A3B8"
+
+# Categorical chart palette - distinguishable on dark, for the 5 gases + model series
+chartCategoricalColors = ["#A78BFA", "#22D3EE", "#34D399", "#FBBF24", "#F472B6", "#60A5FA", "#FB923C", "#94A3B8"]
+
+# Sequential palette (indigo gradient) for spectra / heatmaps - exactly 10 colors
+chartSequentialColors = ["#1E1B4B", "#312E81", "#3730A3", "#4338CA", "#4F46E5", "#6366F1", "#818CF8", "#A5B4FC", "#C7D2FE", "#E0E7FF"]
+
+# Dataframe styling
+dataframeBorderColor = "#232C44"
+dataframeHeaderBackgroundColor = "#151C30"
+
+# Sidebar - slightly deeper than the main panel for visual depth
+[theme.sidebar]
+backgroundColor = "#090D1C"
+secondaryBackgroundColor = "#151C30"
+codeBackgroundColor = "#151C30"
+textColor = "#E6EAF5"
+borderColor = "#232C44"
+primaryColor = "#7C3AED"
+
+[browser]
+gatherUsageStats = false
