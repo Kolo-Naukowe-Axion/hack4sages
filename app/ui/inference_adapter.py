@@ -27,7 +27,25 @@ from app.data.types import GASES, ComparisonRow, GroundTruth, PlanetRecord, Pred
 
 CLASSICAL_MODEL_NAME = "model (głowica klasyczna)"
 QUANTUM_MODEL_NAME = "model kwantowy (pełny)"
+BASELINE_MODEL_NAME = "baseline (średnia treningowa)"
 VALIDATION_CSV = "validation_predictions.csv"
+
+# Per-gas mean log-VMR over the ADC2023 training set (FM_Parameter_Table). A
+# constant "null model": predict the prior mean for every planet, ignoring the
+# spectrum entirely. If the trained model beats it, it actually read the
+# spectrum. mRMSE of this baseline on the validation set is ~1.49 (model: ~0.31).
+BASELINE_LOG_VMR: dict[str, float] = {
+    "log_H2O": -5.983,
+    "log_CO2": -6.522,
+    "log_CO": -4.492,
+    "log_CH4": -5.997,
+    "log_NH3": -6.494,
+}
+
+
+def baseline_prediction() -> Prediction:
+    """The constant prior-mean baseline (null model) as a Prediction."""
+    return Prediction(BASELINE_MODEL_NAME, dict(BASELINE_LOG_VMR))
 
 
 @dataclass(frozen=True)
