@@ -1,49 +1,21 @@
 """Compatibility shim for the historical ``models.ariel_quantum_regression`` package.
 
-The original ``ariel_quantum_regression`` core package is no longer present in
-the tree, but several call sites still import it under that name:
-
-* ``models.garnet_ariel_quantum_regression.checkpoint`` (the frozen inference
-  bridge that loads ``artifacts/ariel_quantum_best_v4_epoch6``),
-* ``models.garnet_ariel_quantum_regression.runtime`` (the Garnet port runtime),
-* the TauREx runners in ``models.taurex_exobiome``,
-* the ``tests/test_ariel_quantum_*`` suites.
-
-The current implementation lives in :mod:`models.taurex_exobiome` (same
-checkpoint lineage: 8-qubit hybrid, ``lightning.gpu``). This package re-exports
-that module's submodules under the historical dotted path so every
-``from models.ariel_quantum_regression.<sub> import ...`` resolves to the exact
-same objects (identity preserved) without editing each call site.
-
-All re-exported submodules import their heavy/quantum dependencies lazily, so
-importing this shim does NOT pull in PennyLane/TauREx — the lightweight
-inference path keeps working with only ``torch``/``numpy``/``h5py``.
+The current implementation lives in :mod:`models.taurex_exobiome`, but older
+app, test, and Garnet-port call sites still import the historical dotted path.
+Submodules are exposed as small lazy re-export files so importing
+``models.ariel_quantum_regression.training`` does not also import optional
+cross-validation dependencies.
 """
 
 from __future__ import annotations
 
-import sys
-
-from models.taurex_exobiome import (
-    constants,
-    cross_validation,
-    dataset,
-    model,
-    training,
-)
-
-# Register the submodules under the old dotted path so that both
-# ``import models.ariel_quantum_regression.<sub>`` and
-# ``from models.ariel_quantum_regression.<sub> import X`` resolve correctly.
-for _name, _module in (
-    ("constants", constants),
-    ("cross_validation", cross_validation),
-    ("dataset", dataset),
-    ("model", model),
-    ("training", training),
-):
-    sys.modules[f"{__name__}.{_name}"] = _module
-
-del _name, _module
+from importlib import import_module
+from typing import Any
 
 __all__ = ["constants", "cross_validation", "dataset", "model", "training"]
+
+
+def __getattr__(name: str) -> Any:
+    if name in __all__:
+        return import_module(f"{__name__}.{name}")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

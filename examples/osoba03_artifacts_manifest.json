@@ -1,0 +1,38 @@
+{
+  "artifacts": {
+    "artifacts_manifest.json": "outputs/osoba03_two_stage/stage2_hybrid/artifacts_manifest.json",
+    "best_model.pt": "outputs/osoba03_two_stage/stage2_hybrid/best_model.pt",
+    "config.json": "outputs/osoba03_two_stage/stage2_hybrid/config.json",
+    "history.csv": "outputs/osoba03_two_stage/stage2_hybrid/history.csv",
+    "holdout_metrics.json": "outputs/osoba03_two_stage/stage2_hybrid/holdout_metrics.json",
+    "run_summary.json": "outputs/osoba03_two_stage/stage2_hybrid/run_summary.json",
+    "validation_metrics.json": "outputs/osoba03_two_stage/stage2_hybrid/validation_metrics.json"
+  },
+  "best_checkpoint": "outputs/osoba03_two_stage/stage2_hybrid/best_model.pt",
+  "config": {
+    "classical_only": false,
+    "init_checkpoint_path": "outputs/osoba03_two_stage/stage1_classical/best_model.pt",
+    "output_dir": "outputs/osoba03_two_stage/stage2_hybrid"
+  },
+  "metrics": {
+    "holdout": {
+      "mae_mean": 0.25,
+      "rmse_mean": 0.55
+    },
+    "summary": {
+      "holdout_mae_mean": 0.25,
+      "holdout_rmse_mean": 0.55,
+      "validation_mae_mean": 0.18,
+      "validation_rmse_mean": 0.45
+    },
+    "validation": {
+      "mae_mean": 0.18,
+      "rmse_mean": 0.45
+    }
+  },
+  "output_dir": "outputs/osoba03_two_stage/stage2_hybrid",
+  "run_summary": {
+    "example": true
+  },
+  "stage_name": "stage2_hybrid"
+}

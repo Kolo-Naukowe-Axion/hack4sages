@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, is_dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
@@ -80,6 +80,22 @@ class TwoStageResult:
     @property
     def best_checkpoint(self) -> Path:
         return self.stage2.best_checkpoint
+
+
+@dataclass(frozen=True)
+class TwoStagePlan:
+    """Dry-run preview of the default two-stage workflow."""
+
+    stage1: StageSpec
+    stage2: StageSpec
+
+    @property
+    def stages(self) -> tuple[StageSpec, StageSpec]:
+        return (self.stage1, self.stage2)
+
+    @property
+    def expected_best_checkpoint(self) -> Path:
+        return Path(self.stage2.config.output_dir) / "best_model.pt"
 
 
 @dataclass(frozen=True)
@@ -213,6 +229,8 @@ def collect_artifacts(output_dir: str | Path) -> Mapping[str, Path]:
         "holdout_predictions.csv",
         "testdata_predictions.csv",
         "run_summary.json",
+        "artifacts_manifest.json",
+        "failed_stage.json",
     )
     return {name: root / name for name in names if (root / name).exists()}
 
@@ -274,6 +292,76 @@ def make_jsonl_logger(path: str | Path) -> Callback:
     return log_event
 
 
+def stage_spec_to_json_dict(spec: StageSpec) -> dict[str, Any]:
+    """Serialize a stage spec for dry-run previews and manifests."""
+
+    return {
+        "name": spec.name,
+        "description": spec.description,
+        "config": _config_payload(spec.config),
+    }
+
+
+def plan_to_json_dict(plan: TwoStagePlan) -> dict[str, Any]:
+    """Serialize a two-stage plan without running any training."""
+
+    return {
+        "stages": [stage_spec_to_json_dict(stage) for stage in plan.stages],
+        "expected_best_checkpoint": str(plan.expected_best_checkpoint),
+    }
+
+
+def artifact_manifest_payload(result: StageResult) -> dict[str, Any]:
+    """Build the reproducibility manifest for one completed stage."""
+
+    artifacts = {name: str(path) for name, path in sorted(result.artifacts.items())}
+    artifacts.setdefault("artifacts_manifest.json", str(result.output_dir / "artifacts_manifest.json"))
+    return {
+        "stage_name": result.stage_name,
+        "output_dir": str(result.output_dir),
+        "best_checkpoint": str(result.best_checkpoint),
+        "artifacts": artifacts,
+        "metrics": {
+            "validation": dict(result.validation_metrics),
+            "holdout": dict(result.holdout_metrics),
+            "summary": flatten_result_metrics(result),
+        },
+        "run_summary": dict(result.run_summary),
+        "config": _config_payload(result.config),
+    }
+
+
+def write_artifact_manifest(result: StageResult, path: str | Path | None = None) -> Path:
+    """Write ``artifacts_manifest.json`` for downstream app/demo consumers."""
+
+    target = Path(path) if path is not None else result.output_dir / "artifacts_manifest.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(_json_ready(artifact_manifest_payload(result)), indent=2, sort_keys=True) + "\n")
+    return target
+
+
+def failure_report_payload(stage_name: str, output_dir: str | Path, config: TrainingConfig, exc: Exception) -> dict[str, Any]:
+    """Build a deterministic failure report for one failed stage."""
+
+    return {
+        "stage_name": stage_name,
+        "output_dir": str(Path(output_dir)),
+        "error_type": type(exc).__name__,
+        "message": str(exc),
+        "config": _config_payload(config),
+    }
+
+
+def write_failure_report(stage_name: str, output_dir: str | Path, config: TrainingConfig, exc: Exception) -> Path:
+    """Persist ``failed_stage.json`` before re-raising a training error."""
+
+    root = Path(output_dir)
+    root.mkdir(parents=True, exist_ok=True)
+    target = root / "failed_stage.json"
+    target.write_text(json.dumps(_json_ready(failure_report_payload(stage_name, root, config, exc)), indent=2, sort_keys=True) + "\n")
+    return target
+
+
 class Trainer:
     """OOP coordinator for the app-facing two-stage training workflow."""
 
@@ -290,13 +378,32 @@ class Trainer:
         self.stage_runner = stage_runner or default_stage_runner
         self.callbacks = tuple(callbacks)
 
+    def plan_two_stage(self) -> TwoStagePlan:
+        prepared_cache_dir = self._prepared_cache_dir()
+        stage1 = make_classical_pretrain_spec(
+            self.base_config,
+            self.run_root / "stage1_classical",
+            prepared_cache_dir=prepared_cache_dir,
+        )
+        stage2 = make_hybrid_finetune_spec(
+            self.base_config,
+            self.run_root / "stage2_hybrid",
+            Path(stage1.config.output_dir) / "best_model.pt",
+            prepared_cache_dir=prepared_cache_dir,
+        )
+        return TwoStagePlan(stage1=stage1, stage2=stage2)
+
     def run_stage(self, spec: StageSpec) -> StageResult:
         output_dir = Path(spec.config.output_dir)
         self._emit(TrainingEvent(spec.name, "started", output_dir, spec.description))
         try:
             self.stage_runner(spec.config)
             result = build_stage_result(spec.name, output_dir, spec.config)
+            write_artifact_manifest(result)
+            result = build_stage_result(spec.name, output_dir, spec.config)
+            write_artifact_manifest(result)
         except Exception as exc:
+            write_failure_report(spec.name, output_dir, spec.config, exc)
             self._emit(TrainingEvent(spec.name, "failed", output_dir, str(exc)))
             raise
         self._emit(
@@ -311,18 +418,13 @@ class Trainer:
         return result
 
     def run_two_stage(self) -> TwoStageResult:
-        prepared_cache_dir = self._prepared_cache_dir()
-        stage1_spec = make_classical_pretrain_spec(
-            self.base_config,
-            self.run_root / "stage1_classical",
-            prepared_cache_dir=prepared_cache_dir,
-        )
-        stage1 = self.run_stage(stage1_spec)
+        plan = self.plan_two_stage()
+        stage1 = self.run_stage(plan.stage1)
         stage2_spec = make_hybrid_finetune_spec(
             self.base_config,
             self.run_root / "stage2_hybrid",
             stage1.best_checkpoint,
-            prepared_cache_dir=prepared_cache_dir,
+            prepared_cache_dir=self._prepared_cache_dir(),
         )
         stage2 = self.run_stage(stage2_spec)
         return TwoStageResult(stage1=stage1, stage2=stage2)
@@ -356,6 +458,27 @@ def _freeze_mapping(mapping: Mapping[str, Any]) -> Mapping[str, Any]:
     return MappingProxyType(dict(mapping))
 
 
+def _config_payload(config: TrainingConfig) -> Mapping[str, Any]:
+    to_json_dict = getattr(config, "to_json_dict", None)
+    if callable(to_json_dict):
+        return to_json_dict()
+    if is_dataclass(config):
+        return asdict(config)
+    return {key: value for key, value in vars(config).items() if not key.startswith("_")}
+
+
+def _json_ready(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Mapping):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_json_ready(item) for item in value]
+    if isinstance(value, list):
+        return [_json_ready(item) for item in value]
+    return value
+
+
 def _resolve_run_root(config: TrainingConfig, run_root: str | Path | None) -> Path:
     if run_root is None:
         return config.resolved_output_dir().resolve()
@@ -376,13 +499,16 @@ __all__ = [
     "StageRunner",
     "StageSpec",
     "StageResult",
+    "TwoStagePlan",
     "TwoStageResult",
     "TrainingEvent",
     "Trainer",
+    "artifact_manifest_payload",
     "build_stage_result",
     "clone_config",
     "collect_artifacts",
     "default_stage_runner",
+    "failure_report_payload",
     "flatten_result_metrics",
     "format_metric_summary",
     "has_nonfinite_metric",
@@ -390,7 +516,11 @@ __all__ = [
     "make_fail_on_nan_callback",
     "make_hybrid_finetune_spec",
     "make_jsonl_logger",
+    "plan_to_json_dict",
     "read_json_file",
     "read_stage_metrics",
     "select_best_checkpoint",
+    "stage_spec_to_json_dict",
+    "write_artifact_manifest",
+    "write_failure_report",
 ]
