@@ -55,7 +55,7 @@ def make_quantum_input(
     aux_scaler: pp.Scaler, spectral_scaler: pp.Scaler
 ) -> Callable[[PlanetRecord], tuple[np.ndarray, np.ndarray]]:
     """Build the model-ready input transform for a single planet.
-
+    one because it ax=1 for the channel
     Returns a closure ``record -> (aux_n (1, 8), spectra_n (1, 4, 52))`` that
     captures the two checkpoint scalers. Composed from the pure preprocessing
     steps via ``pipe``.

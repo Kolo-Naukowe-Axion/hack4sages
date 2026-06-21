@@ -51,13 +51,13 @@ _SPLIT_DIRS = {"train": "TrainingData", "test": "TestData"}
 # for the app's dropdown. All verified to exist in TrainingData
 CURATED_IDS: tuple[str, ...] = (
     "train37",    # H2O-rich
-    "train1500",  # H2O-rich
+    "train13860",
     "train47",    # H2O + CO2 present
     "train28",    # CH4-rich
-    "train999",   # CH4-rich (very high)
-    "train100",   # CH4-rich, depleted H2O
+    "train3244",
+    "train34274",
     "train12",    # CO-rich
-    "train3000",  # CO-rich
+    "train5875",
 )
 
 def _resolve_data_root(data_root: str | Path | None = None) -> Path:
