@@ -113,7 +113,9 @@ def input_controls() -> PlanetRecord | None:
         return _safe_parse(io.StringIO(options[choice].read_text()))
 
     cols = st.columns([3, 1], vertical_alignment="bottom")
-    upload = cols[0].file_uploader("Plik CSV (1 wiersz: 8 cech aux + flux_0..51 + noise_0..51)", type=["csv"])
+    upload = cols[0].file_uploader(
+        "Wczytaj widmo (CSV)", type=["csv"], help="1 wiersz: 8 cech aux + flux_0..51 + noise_0..51"
+    )
     examples = example_files()
     if examples:
         cols[1].download_button(
