@@ -33,31 +33,38 @@ def _x_axis(record: PlanetRecord) -> tuple[np.ndarray, str]:
 
 
 def spectrum_dataframe(record: PlanetRecord) -> pd.DataFrame:
-    x, xlabel = _x_axis(record)
+    x, _ = _x_axis(record)
     flux = np.asarray(record.spectrum.flux, dtype=float)
     noise = np.abs(np.asarray(record.spectrum.noise, dtype=float))
-    return pd.DataFrame({xlabel: x, "flux": flux, "lo": flux - noise, "hi": flux + noise})
+    # Keep the x column name simple: Vega-Lite reads "[" / "]" in a field name as
+    # a nested accessor, which silently breaks the x encoding. The human label
+    # ("długość fali [µm]") is applied as the axis title in spectrum_chart.
+    return pd.DataFrame({"x": x, "flux": flux, "lo": flux - noise, "hi": flux + noise})
 
 
 def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
-    """Transmission spectrum: flux line with a +/- noise band."""
+    """Transmission spectrum: flux line with a +/- noise band.
+
+    The y-axis is zoomed to the data (``zero=False``) so the spectral features -
+    the absorption signal the model actually reads - are visible; transit depths
+    vary by < 1e-3 around ~0.018, so a zero-based axis flattens them to a line.
+    """
     df = spectrum_dataframe(record)
-    xlabel = df.columns[0]
+    _, xtitle = _x_axis(record)
+    x = alt.X("x:Q", title=xtitle, scale=alt.Scale(zero=False, nice=False))
     base = alt.Chart(df)
-    band = base.mark_area(opacity=0.18).encode(
-        x=alt.X(f"{xlabel}:Q", title=xlabel, scale=alt.Scale(zero=False)),
-        y=alt.Y("lo:Q", title="natężenie widma"),
-        y2="hi:Q",
+    band = base.mark_area(opacity=0.2, color="#22D3EE").encode(
+        x=x, y=alt.Y("lo:Q", scale=alt.Scale(zero=False)), y2="hi:Q"
     )
-    line = base.mark_line(strokeWidth=2).encode(
-        x=alt.X(f"{xlabel}:Q", scale=alt.Scale(zero=False)),
-        y="flux:Q",
+    line = base.mark_line(strokeWidth=2, color="#67E8F9").encode(
+        x=x,
+        y=alt.Y("flux:Q", title="natężenie widma (transit depth)", scale=alt.Scale(zero=False)),
         tooltip=[
-            alt.Tooltip(f"{xlabel}:Q", format=".3f"),
-            alt.Tooltip("flux:Q", format=".4f"),
+            alt.Tooltip("x:Q", title="λ [µm]", format=".3f"),
+            alt.Tooltip("flux:Q", format=".5f"),
         ],
     )
-    return (band + line).properties(height=260)
+    return (band + line).properties(height=280)
 
 
 def comparison_long(rows: list[ComparisonRow]) -> pd.DataFrame:
