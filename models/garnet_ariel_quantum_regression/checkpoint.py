@@ -114,6 +114,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _load_model(checkpoint_payload: dict[str, Any], config: dict[str, Any]) -> tuple[Any, Any]:
     torch = import_torch()
+    from models.ariel_quantum_regression.constants import TARGET_COLUMNS
     from models.ariel_quantum_regression.model import (
         AuxEncoder,
         FusionEncoder,
@@ -121,7 +122,6 @@ def _load_model(checkpoint_payload: dict[str, Any], config: dict[str, Any]) -> t
         QuantumProjector,
         RegressionHead,
         SpectralEncoder,
-        TARGET_COLUMNS,
     )
 
     class FrozenHybridModules(torch.nn.Module):
