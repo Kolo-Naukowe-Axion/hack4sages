@@ -112,9 +112,10 @@ def pick_record() -> PlanetRecord | None:
 
 
 def header() -> None:
-    cols = st.columns([1, 11], vertical_alignment="center", gap="small")
-    cols[0].image(_PLANET, width=52)
-    cols[1].title("ExoBiome")
+    with st.container(key="appheader"):
+        cols = st.columns([1, 11], vertical_alignment="center", gap="small")
+        cols[0].image(_PLANET, width=64)
+        cols[1].title("ExoBiome")
 
 
 def intro() -> None:
@@ -225,7 +226,9 @@ def whatif_section(
 def main() -> None:
     st.html(
         "<style>@keyframes exobiomeReveal{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}"
-        '[data-testid="stVerticalBlockBorderWrapper"]{animation:exobiomeReveal .4s ease both}</style>'
+        '[data-testid="stVerticalBlockBorderWrapper"]{animation:exobiomeReveal .4s ease both}'
+        '[data-testid="stMain"]{scrollbar-gutter:stable}'
+        ".st-key-appheader img{margin-top:10px}</style>"
     )
     try:
         engine = get_engine()
