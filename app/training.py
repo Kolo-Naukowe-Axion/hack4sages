@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import asdict, dataclass, is_dataclass, replace
+from dataclasses import asdict, dataclass, field, is_dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Mapping, Protocol, Sequence
@@ -106,7 +106,7 @@ class TrainingEvent:
     status: str
     output_dir: Path
     message: str = ""
-    metrics: MetricMap = MappingProxyType({})
+    metrics: MetricMap = field(default_factory=lambda: MappingProxyType({}))
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "output_dir", Path(self.output_dir))
@@ -401,7 +401,6 @@ class Trainer:
             result = build_stage_result(spec.name, output_dir, spec.config)
             write_artifact_manifest(result)
             result = build_stage_result(spec.name, output_dir, spec.config)
-            write_artifact_manifest(result)
         except Exception as exc:
             write_failure_report(spec.name, output_dir, spec.config, exc)
             self._emit(TrainingEvent(spec.name, "failed", output_dir, str(exc)))
