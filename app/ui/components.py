@@ -49,7 +49,7 @@ def spectrum_dataframe(record: PlanetRecord) -> pd.DataFrame:
     return pd.DataFrame({"x": x, "flux": flux, "lo": flux - noise, "hi": flux + noise})
 
 
-def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
+def spectrum_chart(record: PlanetRecord, height: int = 300) -> alt.LayerChart:
     """Transmission spectrum: flux line with a +/- noise band and gas-band markers.
 
     The y-axis zooms to the data (``zero=False``) because transit depths vary by
@@ -59,10 +59,10 @@ def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
     _, xtitle, is_wl = _x_axis(record)
     x = alt.X("x:Q", title=xtitle, scale=alt.Scale(zero=False, nice=False))
     base = alt.Chart(df)
-    band = base.mark_area(opacity=0.16, color="#B66E79").encode(
+    band = base.mark_area(opacity=0.16, color="#A6C5D7").encode(
         x=x, y=alt.Y("lo:Q", scale=alt.Scale(zero=False)), y2="hi:Q"
     )
-    line = base.mark_line(strokeWidth=2, color="#8C4E4F").encode(
+    line = base.mark_line(strokeWidth=2, color="#0F52BA").encode(
         x=x,
         y=alt.Y("flux:Q", title="głębokość tranzytu", scale=alt.Scale(zero=False)),
         tooltip=[
@@ -82,7 +82,7 @@ def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
             ).encode(x="x:Q", y=alt.value(6), text="gaz:N")
 
         layers += [rules, _labels(bands.iloc[::2], 2), _labels(bands.iloc[1::2], 16)]
-    return alt.layer(*layers).properties(height=300)
+    return alt.layer(*layers).properties(height=height)
 
 
 def comparison_long(rows: list[ComparisonRow]) -> pd.DataFrame:
@@ -97,7 +97,7 @@ def comparison_long(rows: list[ComparisonRow]) -> pd.DataFrame:
     return pd.DataFrame.from_records(records, columns=["gaz", "seria", "log-VMR"])
 
 
-def comparison_chart(rows: list[ComparisonRow]) -> alt.Chart:
+def comparison_chart(rows: list[ComparisonRow], height: int = 380) -> alt.Chart:
     """Grouped bars per gas - ground truth and every model are bars, rising from a
     shared floor so a taller bar means more gas. Narrow bars, one row, legend on top.
     """
@@ -107,7 +107,7 @@ def comparison_chart(rows: list[ComparisonRow]) -> alt.Chart:
     order = [GROUND_TRUTH] + [s for s in dict.fromkeys(df["seria"]) if s != GROUND_TRUTH]
     return (
         alt.Chart(df)
-        .mark_bar(size=14, cornerRadiusTopLeft=2, cornerRadiusTopRight=2, stroke="#8C4E4F", strokeWidth=0.6)
+        .mark_bar(size=14, cornerRadiusTopLeft=2, cornerRadiusTopRight=2)
         .encode(
             x=alt.X("gaz:N", title=None, sort=GAS_ORDER, scale=alt.Scale(paddingInner=0.3)),
             xOffset=alt.XOffset("seria:N", sort=order),
@@ -116,7 +116,7 @@ def comparison_chart(rows: list[ComparisonRow]) -> alt.Chart:
             color=alt.Color("seria:N", title=None, sort=order, legend=alt.Legend(orient="top", labelLimit=240)),
             tooltip=["gaz:N", "seria:N", alt.Tooltip("log-VMR:Q", format=".2f")],
         )
-        .properties(height=380)
+        .properties(height=height)
     )
 
 
