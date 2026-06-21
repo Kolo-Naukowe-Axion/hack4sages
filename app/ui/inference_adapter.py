@@ -13,6 +13,7 @@ helpers stay importable and testable without them.
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -152,3 +153,50 @@ def compare(
     mapping = {pred.model_name: pred for pred in preds}
     rows = build_comparison(truth, mapping)
     return rows, aggregate(rows)
+
+
+class Predictor(ABC):
+    """A comparison series: one way of producing a Prediction for a planet.
+    Concrete predictors are interchangeable (Strategy), so the UI iterates them
+    polymorphically instead of branching per model."""
+
+    name: str
+
+    @abstractmethod
+    def predict(self, record: PlanetRecord) -> Prediction | None: ...
+
+
+class RandomForestPredictor(Predictor):
+    name = BASELINE_MODEL_NAME
+
+    def predict(self, record: PlanetRecord) -> Prediction | None:
+        return rf_prediction(record)
+
+
+class ClassicalHeadPredictor(Predictor):
+    name = CLASSICAL_MODEL_NAME
+
+    def __init__(self, engine: InferenceEngine) -> None:
+        self._engine = engine
+
+    def predict(self, record: PlanetRecord) -> Prediction | None:
+        return self._engine.predict(record)
+
+
+class ReferenceQuantumPredictor(Predictor):
+    name = QUANTUM_MODEL_NAME
+
+    def __init__(self, checkpoint_dir: str | Path) -> None:
+        self._checkpoint_dir = checkpoint_dir
+
+    def predict(self, record: PlanetRecord) -> Prediction | None:
+        return full_quantum_prediction(self._checkpoint_dir, record.planet_id)
+
+
+def build_predictors(engine: InferenceEngine) -> list[Predictor]:
+    """Assemble the comparison's predictors: baseline, classical head, quantum."""
+    return [
+        RandomForestPredictor(),
+        ClassicalHeadPredictor(engine),
+        ReferenceQuantumPredictor(engine.checkpoint_dir),
+    ]
