@@ -1,11 +1,11 @@
 <svg width="86" height="86" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Egzoplaneta z pierscieniem">
   <g transform="rotate(-20 60 60)">
-    <ellipse cx="60" cy="60" rx="54" ry="13" fill="none" stroke="#8C4E4F" stroke-width="3" opacity="0.55"/>
+    <ellipse cx="60" cy="60" rx="54" ry="13" fill="none" stroke="#0F52BA" stroke-width="3" opacity="0.5"/>
   </g>
-  <circle cx="60" cy="60" r="26" fill="#B11226"/>
-  <circle cx="51" cy="51" r="7.5" fill="#FADADD" opacity="0.55"/>
-  <circle cx="68" cy="66" r="4.5" fill="#3B1F1B" opacity="0.3"/>
-  <circle cx="101" cy="21" r="2.6" fill="#B66E79"/>
-  <circle cx="18" cy="33" r="1.8" fill="#8C4E4F" opacity="0.9"/>
-  <circle cx="96" cy="97" r="1.6" fill="#B66E79" opacity="0.75"/>
+  <circle cx="60" cy="60" r="26" fill="#0F52BA"/>
+  <circle cx="51" cy="51" r="7.5" fill="#D6E6F3" opacity="0.6"/>
+  <circle cx="68" cy="66" r="4.5" fill="#000926" opacity="0.35"/>
+  <circle cx="101" cy="21" r="2.6" fill="#A6C5D7"/>
+  <circle cx="18" cy="33" r="1.8" fill="#0F52BA" opacity="0.9"/>
+  <circle cx="96" cy="97" r="1.6" fill="#A6C5D7" opacity="0.8"/>
 </svg>

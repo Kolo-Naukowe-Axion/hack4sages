@@ -1,18 +1,17 @@
-# ExoBiome - light theme with a minimal crimson/bordeaux accent.
-# Clean near-white scientific canvas + a refined crimson accent and a whisper of
-# blush, drawn from the "Soft Blush / Crimson Silk / Ruby Red / Deep Bordeaux"
-# palette. Native theming only - no custom CSS (per developing-with-streamlit skill).
+# ExoBiome - professional light theme with a navy / sapphire accent.
+# Drawn from the "Ice Blue / Powder Blue / Sapphire / Deep Navy" palette.
+# Native theming only - no custom CSS (per developing-with-streamlit skill).
 
 [theme]
 base = "light"
-primaryColor = "#B11226"              # refined crimson (Crimson Silk family) - white button text is AA-safe
-backgroundColor = "#FEFAFA"           # whisper-of-blush near-white
-secondaryBackgroundColor = "#F8F0F1"  # soft blush-grey - cards / widgets / sidebar
-codeBackgroundColor = "#F8F0F1"
-textColor = "#241C1E"                 # warm dark slate
-linkColor = "#B11226"
-borderColor = "#EBDFE1"               # soft warm hairline
-codeTextColor = "#4A3B3E"
+primaryColor = "#0F52BA"              # sapphire - white button text is AA-safe
+backgroundColor = "#FBFCFE"           # cool near-white (whisper of ice blue)
+secondaryBackgroundColor = "#EAF1F8"  # light ice/powder blue - cards / widgets / sidebar
+codeBackgroundColor = "#EAF1F8"
+textColor = "#0E1B36"                 # deep navy text
+linkColor = "#0F52BA"
+borderColor = "#D2DEEC"               # soft blue-grey hairline
+codeTextColor = "#28344F"
 showWidgetBorder = true
 showSidebarBorder = true
 baseRadius = "8px"
@@ -29,33 +28,33 @@ headingFontSizes = ["30px", "24px", "20px", "16px", "14px", "12px"]
 headingFontWeights = [700, 600, 600, 600, 500, 500]
 linkUnderline = false
 
-# Semantic colors - red drawn from the palette (Crimson Silk), green kept for deltas
+# Semantic colors - blue from the palette, green/red kept for status
 greenColor = "#1A7F5A"
-redColor = "#D72638"
+redColor = "#C0392B"
 yellowColor = "#B7791F"
 orangeColor = "#C2641A"
-blueColor = "#2D6CC0"
-violetColor = "#6D5BD0"
-grayColor = "#6B6065"
+blueColor = "#0F52BA"
+violetColor = "#5B5BD6"
+grayColor = "#5B6675"
 
-# Categorical chart palette - crimson reference (truth) + distinguishable, muted model hues + a bordeaux accent.
-chartCategoricalColors = ["#3B1F1B", "#FADADD", "#B66E79", "#8C4E4F", "#6E3B43", "#C99CA2", "#5A2E2E"]
+# Categorical chart palette - navy reference (truth) + distinguishable blues, all readable as solid bars on white.
+chartCategoricalColors = ["#000926", "#A6C5D7", "#4F86C6", "#0F52BA", "#2459AE", "#7FA9CE", "#3D6FB8"]
 
-# Sequential palette (soft blush -> deep bordeaux) for spectra / heatmaps - exactly 10 colors
-chartSequentialColors = ["#FADADD", "#F2C3C8", "#E3A3AC", "#D08490", "#B66E79", "#A05863", "#8C4E4F", "#6E3B43", "#52302D", "#3B1F1B"]
+# Sequential palette (ice blue -> deep navy) for spectra / heatmaps - exactly 10 colors
+chartSequentialColors = ["#D6E6F3", "#BCD4E8", "#A6C5D7", "#7FA9CE", "#5E8CC4", "#3D6FB8", "#2459AE", "#0F52BA", "#073A86", "#000926"]
 
 # Dataframe styling
-dataframeBorderColor = "#EBDFE1"
-dataframeHeaderBackgroundColor = "#F8F0F1"
+dataframeBorderColor = "#D2DEEC"
+dataframeHeaderBackgroundColor = "#EAF1F8"
 
-# Sidebar - blush-tinted, one notch deeper than the canvas for quiet depth
+# Sidebar - ice-blue tinted (unused in the current layout but kept consistent)
 [theme.sidebar]
-backgroundColor = "#F8F0F1"
-secondaryBackgroundColor = "#F0E3E4"
-codeBackgroundColor = "#F0E3E4"
-textColor = "#241C1E"
-borderColor = "#EBDFE1"
-primaryColor = "#B11226"
+backgroundColor = "#EAF1F8"
+secondaryBackgroundColor = "#DCE7F3"
+codeBackgroundColor = "#DCE7F3"
+textColor = "#0E1B36"
+borderColor = "#D2DEEC"
+primaryColor = "#0F52BA"
 
 [browser]
 gatherUsageStats = false
