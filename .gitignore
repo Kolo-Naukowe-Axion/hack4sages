@@ -11,6 +11,7 @@ web/presentation-lab/tsconfig.tsbuildinfo
 
 # Python
 .venv/
+.venv
 .venv-ariel-eval/
 .venv-app/
 local_runs/
