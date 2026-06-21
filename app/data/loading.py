@@ -47,17 +47,18 @@ WAVELENGTH_DS = "instrument_wlgrid"
 # split name -> directory on disk
 _SPLIT_DIRS = {"train": "TrainingData", "test": "TestData"}
 
-# A small, hand-picked set of validation planets with diverse chemistry, used
-# for the app's dropdown. All verified to exist in TrainingData
+# A small, hand-picked set of planets with diverse chemistry, used for the app's
+# dropdown. All live in the held-out validation split (the model never trained on
+# them) yet carry ground truth, since that split is a slice of TrainingData.
 CURATED_IDS: tuple[str, ...] = (
-    "train37",    # H2O-rich
-    "train13860",
-    "train47",    # H2O + CO2 present
-    "train28",    # CH4-rich
-    "train3244",
-    "train34274",
-    "train12",    # CO-rich
-    "train5875",
+    "train37",     # H2O-rich
+    "train13860",  # H2O-rich
+    "train47",     # H2O + CO2 present
+    "train28",     # CH4-rich
+    "train3244",   # CH4-rich
+    "train34274",  # CH4-rich
+    "train12",     # CO-rich
+    "train5975",   # CO-rich
 )
 
 def _resolve_data_root(data_root: str | Path | None = None) -> Path:
@@ -165,9 +166,9 @@ def load_by_id(planet_id: str, data_root: str | Path | None = None) -> PlanetRec
 
 def list_curated_planets(data_root: str | Path | None = None) -> list[CuratedPlanet]:
     """Curated dropdown: real planets with diverse chemistry, labelled by the
-    dominant gas. Reads only the (cached) ground-truth table — no HDF5 is opened,
+    dominant gas. Reads only the (cached) ground-truth table - no HDF5 is opened,
     since the label needs truth, not the spectrum. The curated ids live in the
-    training split (which carries ground truth)."""
+    held-out validation split, stored under TrainingData (which carries truth)."""
     root = _resolve_data_root(data_root)
     truth_path = root / "TrainingData" / "Ground Truth Package" / "FM_Parameter_Table.csv"
     if not truth_path.exists():
@@ -180,7 +181,7 @@ def list_curated_planets(data_root: str | Path | None = None) -> list[CuratedPla
         row = table.loc[planet_id, list(GASES)]
         dominant = max(GASES, key=lambda gas: float(row[gas]))
         gas = dominant.replace("log_", "")
-        out.append(CuratedPlanet(planet_id=planet_id, dominant_gas=gas, label=f"{planet_id} — {gas}-rich"))
+        out.append(CuratedPlanet(planet_id=planet_id, dominant_gas=gas, label=f"{planet_id} - {gas}-rich"))
     return out
 
 
@@ -237,7 +238,7 @@ def parse_upload(source: str | Path | io.IOBase) -> PlanetRecord:
     """Parse a user-uploaded one-row CSV into a PlanetRecord.
 
     Validates that the spectrum (52), noise (52) and all 8 aux features are
-    present — a bare spectrum is rejected, because the model needs aux too.
+    present - a bare spectrum is rejected, because the model needs aux too.
     Ground-truth columns are optional.
     """
     frame = pd.read_csv(source)
@@ -249,7 +250,7 @@ def parse_upload(source: str | Path | io.IOBase) -> PlanetRecord:
     if missing_aux:
         raise DataError(
             "Upload is missing required auxiliary columns: "
-            f"{missing_aux}. A spectrum alone is not enough — the model needs "
+            f"{missing_aux}. A spectrum alone is not enough - the model needs "
             "the 8 stellar/planetary features."
         )
 
