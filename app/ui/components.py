@@ -78,10 +78,14 @@ def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
     if is_wl:
         bands = pd.DataFrame(ABSORPTION_BANDS, columns=["x", "gaz"])
         rules = alt.Chart(bands).mark_rule(strokeDash=[3, 3], opacity=0.4).encode(x="x:Q")
-        labels = alt.Chart(bands).mark_text(
-            align="left", baseline="top", dx=3, dy=2, fontSize=10, opacity=0.8
-        ).encode(x="x:Q", y=alt.value(6), text="gaz:N")
-        layers += [rules, labels]
+
+        def _labels(frame: pd.DataFrame, dy: int) -> alt.Chart:
+            # alternate label heights so close bands (e.g. CO2 4.3 / CO 4.6) don't collide
+            return alt.Chart(frame).mark_text(
+                align="left", baseline="top", dx=3, dy=dy, fontSize=10, opacity=0.8
+            ).encode(x="x:Q", y=alt.value(6), text="gaz:N")
+
+        layers += [rules, _labels(bands.iloc[::2], 2), _labels(bands.iloc[1::2], 16)]
     return alt.layer(*layers).properties(height=300)
 
 

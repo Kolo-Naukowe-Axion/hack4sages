@@ -154,7 +154,7 @@ def kpi_row(record: PlanetRecord, truth: GroundTruth | None, agg: dict) -> None:
     cols[1].metric(
         "Dominujący gaz", dominant_gas(truth) or "-", border=True, help="Gaz o najwyższym udziale wg prawdy"
     )
-    cols[2].metric("Ground truth", "tak" if truth is not None else "nie", border=True)
+    cols[2].metric("Prawda znana", "tak" if truth is not None else "nie", border=True)
     cols[3].metric(
         "Najlepszy mRMSE", f"{best[1]['rmse_mean']:.3f}" if best else "-", border=True, help=best[0] if best else None
     )
