@@ -1,8 +1,9 @@
 """ExoBiome - Streamlit UI (Osoba 4).
 
 Biosignature-retrieval demo: pick or upload an exoplanet transmission spectrum,
-run live inference, and compare the predicted atmospheric composition against
-ground truth and the full-quantum model. Run from the repo root:
+run live inference, and compare the predicted atmospheric composition against a
+prior-mean baseline, the full quantum model, and ground truth. Run from the repo
+root:
 
     .venv-app/bin/streamlit run app/ui/app.py
 """
@@ -22,14 +23,13 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 # Auto-wire the sibling data worktree (../hack4sages-data) when present, so the
-# curated dropdown works with zero env setup. Bundled examples + upload work
-# without any dataset.
+# curated dropdown works with zero env setup. Examples + upload work without it.
 _SIBLING_DATA = _ROOT.parent / "hack4sages-data" / "data" / "ariel-ml-dataset"
 if "EXOBIOME_DATA" not in os.environ and (_SIBLING_DATA / "TrainingData").is_dir():
     os.environ["EXOBIOME_DATA"] = str(_SIBLING_DATA)
 
 from app.data import loading  # noqa: E402
-from app.data.types import DataError, PlanetRecord  # noqa: E402
+from app.data.types import GASES, DataError, GroundTruth, PlanetRecord  # noqa: E402
 from app.ui import components  # noqa: E402
 from app.ui import inference_adapter as ia  # noqa: E402
 
@@ -58,15 +58,37 @@ def example_files() -> list[Path]:
     return sorted(_EXAMPLES_DIR.glob("*.csv")) if _EXAMPLES_DIR.is_dir() else []
 
 
-# --- input selection (sidebar) -----------------------------------------------
+def dominant_gas(truth: GroundTruth | None) -> str | None:
+    if truth is None:
+        return None
+    return components.gas_label(max(GASES, key=lambda gas: truth.log_vmr[gas]))
+
+
+# --- sidebar: source + about -------------------------------------------------
 
 
 def _safe_parse(source) -> PlanetRecord | None:
     try:
         return loading.parse_upload(source)
     except DataError as exc:
-        st.sidebar.error(f"Nieprawidłowy plik: {exc}")
+        st.sidebar.error(f"Nieprawidłowy plik: {exc}", icon=":material/error:")
         return None
+
+
+def _about() -> None:
+    st.space("medium")
+    with st.expander("Jak to działa?", icon=":material/help:"):
+        st.markdown(
+            "**Widmo transmisyjne** - gdy planeta przechodzi na tle gwiazdy, część "
+            "światła przenika przez jej atmosferę. Gazy pochłaniają wybrane długości "
+            "fali, zostawiając ślady w widmie. Model czyta te ślady i przewiduje skład.\n\n"
+            "**Skąd znamy prawdę?** Widma są symulowane (Ariel Data Challenge 2023): "
+            "sami ustawiamy skład atmosfery, liczymy i zaszumiamy widmo. Model rozwiązuje "
+            "problem odwrotny (widmo → skład), więc da się go porównać z prawdą.\n\n"
+            "**Baseline** = stała predykcja = średni skład w zbiorze treningowym. Jeśli "
+            "model bije baseline, naprawdę nauczył się czytać widmo."
+        )
+    st.caption("ExoBiome · Hack4SAGES 2026")
 
 
 def pick_record() -> PlanetRecord | None:
@@ -75,112 +97,146 @@ def pick_record() -> PlanetRecord | None:
 
     modes: list[str] = []
     if curated:
-        modes.append("Kuratowana planeta")
+        modes.append("Kuratowana")
     if examples:
         modes.append("Przykład")
-    modes.append("Wczytaj plik CSV")
+    modes.append("Upload CSV")
 
+    record: PlanetRecord | None = None
     with st.sidebar:
-        st.header(":material/biotech: ExoBiome")
+        st.subheader(":material/biotech: ExoBiome")
         st.caption("Retrieval składu atmosfery egzoplanety z widma transmisyjnego.")
-        mode = st.radio("Źródło widma", modes, label_visibility="collapsed")
+        st.space("small")
 
-        if mode == "Kuratowana planeta":
+        mode = st.segmented_control(
+            "Źródło widma", modes, default=modes[0], selection_mode="single", width="stretch"
+        ) or modes[0]
+
+        if mode == "Kuratowana":
             labels = {cp.label: cp.planet_id for cp in curated}
-            choice = st.selectbox(
-                "Planeta", list(labels), help="Realne planety ADC2023 o różnej chemii."
-            )
+            choice = st.selectbox("Planeta", list(labels), help="Realne planety ADC2023 o różnej chemii.")
             try:
-                return loading.load_by_id(labels[choice])
+                record = loading.load_by_id(labels[choice])
             except DataError as exc:
-                st.error(f"Nie udało się wczytać planety: {exc}")
-                return None
-
-        if mode == "Przykład":
+                st.error(f"Nie udało się wczytać: {exc}", icon=":material/error:")
+        elif mode == "Przykład":
             files = {path.stem: path for path in examples}
             choice = st.selectbox("Przykład", list(files))
-            return _safe_parse(io.StringIO(files[choice].read_text()))
+            record = _safe_parse(io.StringIO(files[choice].read_text()))
+        else:
+            st.caption("Jednowierszowy CSV: 8 cech aux + flux_0..51 + noise_0..51.")
+            if examples:
+                st.download_button(
+                    "Pobierz szablon",
+                    examples[0].read_text(),
+                    file_name="exobiome_template.csv",
+                    icon=":material/download:",
+                    width="stretch",
+                )
+            upload = st.file_uploader("Plik CSV", type=["csv"])
+            if upload is not None:
+                record = _safe_parse(io.StringIO(upload.getvalue().decode("utf-8")))
 
-        st.caption("Jednowierszowy CSV: 8 cech aux + flux_0..51 + noise_0..51.")
-        if examples:
-            st.download_button(
-                "Pobierz szablon CSV",
-                examples[0].read_text(),
-                file_name="exobiome_template.csv",
-                icon=":material/download:",
-                width="stretch",
-            )
-        upload = st.file_uploader("Plik CSV", type=["csv"])
-        if upload is None:
-            return None
-        return _safe_parse(io.StringIO(upload.getvalue().decode("utf-8")))
+        _about()
+    return record
 
 
-# --- rendering ---------------------------------------------------------------
+# --- main content ------------------------------------------------------------
 
 
-def render(record: PlanetRecord, engine: ia.InferenceEngine) -> None:
-    truth_known = record.truth is not None
-    st.subheader(f"Planeta `{record.planet_id}`")
+def hero() -> None:
+    st.title("ExoBiome")
+    st.markdown(
+        ":violet-badge[hybryda kwantowo-klasyczna] :blue-badge[Ariel ADC2023] :green-badge[5 gazów]"
+    )
     st.caption(
-        "Ground truth z danych" if truth_known else "Brak ground truth w rekordzie (zostanie pobrany z referencji, jeśli dostępny)."
+        "Przewidywanie składu atmosfery egzoplanety (H2O, CO2, CO, CH4, NH3) z jej widma "
+        "transmisyjnego - porównane z prawdą, baseline i pełnym modelem kwantowym."
     )
 
-    st.markdown("#### Widmo transmisyjne")
-    st.altair_chart(components.spectrum_chart(record), width="stretch")
 
-    classical = engine.predict(record)
-    preds = [classical]
-    quantum = ia.full_quantum_prediction(engine.checkpoint_dir, record.planet_id)
-    if quantum is not None:
-        preds.append(quantum)
-    truth = record.truth or ia.reference_truth(engine.checkpoint_dir, record.planet_id)
-    rows, agg = ia.compare(truth, preds)
+def kpi_row(record: PlanetRecord, truth: GroundTruth | None, agg: dict) -> None:
+    best = min(agg.items(), key=lambda kv: kv[1]["rmse_mean"]) if agg else None
+    cols = st.columns(4)
+    cols[0].metric("Planeta", record.planet_id, border=True)
+    cols[1].metric(
+        "Dominujący gaz", dominant_gas(truth) or "-", border=True, help="Gaz o najwyższym udziale wg prawdy"
+    )
+    cols[2].metric("Ground truth", "tak" if truth is not None else "nie", border=True)
+    cols[3].metric(
+        "Najlepszy mRMSE", f"{best[1]['rmse_mean']:.3f}" if best else "-", border=True, help=best[0] if best else None
+    )
 
-    st.markdown("#### Przewidziany skład atmosfery vs prawda")
-    st.altair_chart(components.comparison_chart(rows), width="stretch")
 
-    if agg:
-        st.markdown("##### Średni RMSE (5 gazów)")
-        cols = st.columns(len(agg))
-        for col, (model, metric) in zip(cols, agg.items()):
-            col.metric(model, f"{metric['rmse_mean']:.3f}", help="mRMSE względem ground truth")
-
-    with st.expander("Tabela porownania (log-VMR)", icon=":material/table:"):
-        st.dataframe(components.comparison_dataframe(rows), width="stretch")
-
-    if quantum is None:
+def spectrum_section(record: PlanetRecord) -> None:
+    with st.container(border=True):
+        st.markdown("##### :material/show_chart: Widmo transmisyjne")
         st.caption(
-            ":material/info: Brak referencyjnej predykcji pełnego modelu kwantowego dla tej "
-            "planety - pokazana jest sama głowica klasyczna vs prawda."
+            "Głębokość tranzytu vs długość fali. Wgłębienia i garby to ślady gazów "
+            "pochłaniających światło - to jest sygnał, który czyta model."
         )
+        st.altair_chart(components.spectrum_chart(record), width="stretch")
+
+
+def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
+    with st.container(border=True):
+        st.markdown("##### :material/query_stats: Skład atmosfery - modele vs prawda")
+        st.caption("Słupki = predykcje modeli · ◆ = prawda · baseline to model zerowy (średnia treningowa).")
+        st.altair_chart(components.comparison_chart(rows), width="stretch")
+
+        if agg:
+            st.markdown("**Średni błąd na planetę (mRMSE, mniej = lepiej)**")
+            base_rmse = agg.get(ia.BASELINE_MODEL_NAME, {}).get("rmse_mean")
+            cols = st.columns(len(agg))
+            for col, (model, metric) in zip(cols, agg.items()):
+                rmse = metric["rmse_mean"]
+                show_delta = base_rmse is not None and model != ia.BASELINE_MODEL_NAME
+                col.metric(
+                    model,
+                    f"{rmse:.3f}",
+                    delta=f"{rmse - base_rmse:+.2f}" if show_delta else None,
+                    delta_color="inverse",
+                    border=True,
+                    help="różnica vs baseline" if show_delta else "model zerowy",
+                )
+
+        with st.expander("Tabela porownania (log-VMR)", icon=":material/table_chart:"):
+            st.dataframe(components.comparison_dataframe(rows), width="stretch")
+
+        if not quantum_present:
+            st.caption(
+                ":material/info: Brak predykcji pełnego modelu kwantowego dla tej planety - "
+                "pokazane: baseline + głowica klasyczna vs prawda."
+            )
 
 
 def main() -> None:
-    st.title("ExoBiome")
-    st.caption(
-        "Hybrydowy kwantowo-klasyczny model przewiduje log-VMR pięciu gazów "
-        "(H2O, CO2, CO, CH4, NH3) z widma transmisyjnego Ariel."
-    )
-
     try:
         engine = get_engine()
-    except Exception as exc:  # noqa: BLE001 - surface any checkpoint/load failure to the UI
-        st.error(f"Nie udało się załadować modelu z checkpointu: {exc}")
+    except Exception as exc:  # noqa: BLE001 - surface any checkpoint/load failure
+        st.title("ExoBiome")
+        st.error(f"Nie udało się załadować modelu z checkpointu: {exc}", icon=":material/error:")
         st.stop()
 
     record = pick_record()
+    hero()
     if record is None:
-        st.info(
-            "Wybierz planetę, przykład albo wczytaj własny plik CSV w panelu po lewej.",
-            icon=":material/arrow_back:",
-        )
+        st.info("Wybierz planetę, przykład albo wczytaj plik CSV w panelu po lewej.", icon=":material/arrow_back:")
         return
 
     try:
-        render(record, engine)
+        classical = engine.predict(record)
+        quantum = ia.full_quantum_prediction(engine.checkpoint_dir, record.planet_id)
+        preds = [ia.baseline_prediction(), classical] + ([quantum] if quantum is not None else [])
+        truth = record.truth or ia.reference_truth(engine.checkpoint_dir, record.planet_id)
+        rows, agg = ia.compare(truth, preds)
     except DataError as exc:
-        st.error(f"Błąd danych: {exc}")
+        st.error(f"Błąd danych: {exc}", icon=":material/error:")
+        return
+
+    kpi_row(record, truth, agg)
+    spectrum_section(record)
+    results_section(rows, agg, quantum is not None)
 
 
 main()
