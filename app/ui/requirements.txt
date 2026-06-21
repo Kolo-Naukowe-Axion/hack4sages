@@ -1,0 +1,11 @@
+# ExoBiome UI (Osoba 4) - Streamlit demo dependencies.
+# Pinned to the team's app environment (../../requirements-app.lock.txt).
+# Install into .venv-app (Python 3.12):
+#   uv pip install --python ../../.venv-app/bin/python -r requirements.txt
+streamlit==1.58.0
+altair==6.2.1
+pandas==2.2.3
+numpy==2.1.3
+scikit-learn==1.6.1
+h5py==3.16.0
+torch==2.5.1
