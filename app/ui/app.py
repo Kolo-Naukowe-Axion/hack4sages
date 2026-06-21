@@ -2,8 +2,8 @@
 
 Biosignature-retrieval demo: pick or upload an exoplanet transmission spectrum,
 run live inference, and compare the predicted atmospheric composition against a
-prior-mean baseline, the full quantum model, and ground truth. Run from the repo
-root:
+Random Forest baseline, the full quantum model, and ground truth. Run from the
+repo root:
 
     .venv-app/bin/streamlit run app/ui/app.py
 """
@@ -33,7 +33,7 @@ from app.data.types import GASES, DataError, GroundTruth, PlanetRecord  # noqa: 
 from app.ui import components  # noqa: E402
 from app.ui import inference_adapter as ia  # noqa: E402
 
-st.set_page_config(page_title="ExoBiome", page_icon="🪐", layout="wide")
+st.set_page_config(page_title="ExoBiome", page_icon=":material/science:", layout="wide")
 
 _EXAMPLES_DIR = Path(__file__).resolve().parent / "examples"
 
@@ -64,7 +64,7 @@ def dominant_gas(truth: GroundTruth | None) -> str | None:
     return components.gas_label(max(GASES, key=lambda gas: truth.log_vmr[gas]))
 
 
-# --- sidebar: source + about -------------------------------------------------
+# --- sidebar: source only ----------------------------------------------------
 
 
 def _safe_parse(source) -> PlanetRecord | None:
@@ -73,22 +73,6 @@ def _safe_parse(source) -> PlanetRecord | None:
     except DataError as exc:
         st.sidebar.error(f"Nieprawidłowy plik: {exc}", icon=":material/error:")
         return None
-
-
-def _about() -> None:
-    st.space("medium")
-    with st.expander("Jak to działa?", icon=":material/help:"):
-        st.markdown(
-            "**Widmo transmisyjne** - gdy planeta przechodzi na tle gwiazdy, część "
-            "światła przenika przez jej atmosferę. Gazy pochłaniają wybrane długości "
-            "fali, zostawiając ślady w widmie. Model czyta te ślady i przewiduje skład.\n\n"
-            "**Skąd znamy prawdę?** Widma są symulowane (Ariel Data Challenge 2023): "
-            "sami ustawiamy skład atmosfery, liczymy i zaszumiamy widmo. Model rozwiązuje "
-            "problem odwrotny (widmo → skład), więc da się go porównać z prawdą.\n\n"
-            "**Baseline** = stała predykcja = średni skład w zbiorze treningowym. Jeśli "
-            "model bije baseline, naprawdę nauczył się czytać widmo."
-        )
-    st.caption("ExoBiome · Hack4SAGES 2026")
 
 
 def pick_record() -> PlanetRecord | None:
@@ -104,13 +88,13 @@ def pick_record() -> PlanetRecord | None:
 
     record: PlanetRecord | None = None
     with st.sidebar:
-        st.subheader(":material/biotech: ExoBiome")
-        st.caption("Retrieval składu atmosfery egzoplanety z widma transmisyjnego.")
-        st.space("small")
-
-        mode = st.segmented_control(
-            "Źródło widma", modes, default=modes[0], selection_mode="single", width="stretch"
-        ) or modes[0]
+        st.markdown("### Dane wejściowe")
+        mode = (
+            st.segmented_control(
+                "Źródło widma", modes, default=modes[0], selection_mode="single", width="stretch"
+            )
+            or modes[0]
+        )
 
         if mode == "Kuratowana":
             labels = {cp.label: cp.planet_id for cp in curated}
@@ -137,7 +121,8 @@ def pick_record() -> PlanetRecord | None:
             if upload is not None:
                 record = _safe_parse(io.StringIO(upload.getvalue().decode("utf-8")))
 
-        _about()
+        st.space("medium")
+        st.caption("ExoBiome · Hack4SAGES 2026")
     return record
 
 
@@ -147,11 +132,18 @@ def pick_record() -> PlanetRecord | None:
 def hero() -> None:
     st.title("ExoBiome")
     st.markdown(
-        ":violet-badge[hybryda kwantowo-klasyczna] :blue-badge[Ariel ADC2023] :green-badge[5 gazów]"
+        ":violet-badge[hybryda kwantowo-klasyczna] :blue-badge[Ariel ADC2023] :gray-badge[5 gazów]"
     )
-    st.caption(
-        "Przewidywanie składu atmosfery egzoplanety (H2O, CO2, CO, CH4, NH3) z jej widma "
-        "transmisyjnego - porównane z prawdą, baseline i pełnym modelem kwantowym."
+
+
+def intro() -> None:
+    st.markdown(
+        "Aplikacja przewiduje **skład atmosfery egzoplanety** z jej **widma transmisyjnego**. "
+        "Gdy planeta przechodzi na tle gwiazdy, gazy pochłaniają światło w swoich pasmach - to "
+        "chemiczny odcisk palca, który czyta model. Prawdę znamy, bo widma są **symulowane** "
+        "(Ariel Data Challenge 2023): sami ustawiamy skład, a model rozwiązuje zadanie odwrotne "
+        "(widmo → skład). Porównujemy trzy modele - **baseline Random Forest**, naszą **głowicę "
+        "klasyczną** i **pełny model kwantowy** - z prawdą."
     )
 
 
@@ -172,8 +164,9 @@ def spectrum_section(record: PlanetRecord) -> None:
     with st.container(border=True):
         st.markdown("##### :material/show_chart: Widmo transmisyjne")
         st.caption(
-            "Głębokość tranzytu vs długość fali. Wgłębienia i garby to ślady gazów "
-            "pochłaniających światło - to jest sygnał, który czyta model."
+            "Linia = głębokość tranzytu vs długość fali, pasmo = szum pomiaru. Przerywane "
+            "znaczniki pokazują, gdzie pochłaniają gazy (np. zafalowanie pod „CO2” to ślad CO2). "
+            "Te wzory to sygnał, który czyta model."
         )
         st.altair_chart(components.spectrum_chart(record), width="stretch")
 
@@ -181,7 +174,10 @@ def spectrum_section(record: PlanetRecord) -> None:
 def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
     with st.container(border=True):
         st.markdown("##### :material/query_stats: Skład atmosfery - modele vs prawda")
-        st.caption("Słupki = predykcje 3 modeli · ◆ = prawda · log-VMR: wyżej = więcej gazu.")
+        st.caption(
+            "Wszystko jako słupki: prawda + 3 modele, pogrupowane po gazie. Wyższy słupek = "
+            "więcej gazu (log-VMR). Im bliżej słupka „prawda”, tym lepiej."
+        )
         st.altair_chart(components.comparison_chart(rows), width="stretch")
 
         if agg:
@@ -197,12 +193,11 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
                     delta=f"{rmse - base_rmse:+.2f}" if show_delta else None,
                     delta_color="inverse",
                     border=True,
-                    help="różnica vs baseline" if show_delta else "model zerowy",
+                    help="różnica vs baseline" if show_delta else "klasyczny Random Forest",
                 )
             st.caption(
-                "baseline = model zerowy (średnia treningowa) · "
-                "klasyczny = głowica klasyczna (na żywo) · "
-                "kwantowy = pełny model kwantowy (z checkpointu)"
+                "baseline (RF) = klasyczny Random Forest · klasyczny = głowica klasyczna naszej "
+                "hybrydy (na żywo) · kwantowy = pełny model kwantowy (z checkpointu)"
             )
 
         with st.expander("Tabela porównania (log-VMR)", icon=":material/table_chart:"):
@@ -211,7 +206,7 @@ def results_section(rows: list, agg: dict, quantum_present: bool) -> None:
         if not quantum_present:
             st.caption(
                 ":material/info: Brak predykcji pełnego modelu kwantowego dla tej planety - "
-                "pokazane: baseline + klasyczny vs prawda."
+                "pokazane: baseline (RF) + klasyczny vs prawda."
             )
 
 
@@ -228,6 +223,7 @@ def main() -> None:
     _, center, _ = st.columns([1, 22, 1])
     with center:
         hero()
+        intro()
         if record is None:
             st.info(
                 "Wybierz planetę, przykład albo wczytaj plik CSV w panelu po lewej.",
@@ -238,7 +234,9 @@ def main() -> None:
         try:
             classical = engine.predict(record)
             quantum = ia.full_quantum_prediction(engine.checkpoint_dir, record.planet_id)
-            preds = [ia.baseline_prediction(), classical] + ([quantum] if quantum is not None else [])
+            baseline = ia.rf_prediction(record)
+            preds = ([baseline] if baseline is not None else []) + [classical]
+            preds += [quantum] if quantum is not None else []
             truth = record.truth or ia.reference_truth(engine.checkpoint_dir, record.planet_id)
             rows, agg = ia.compare(truth, preds)
         except DataError as exc:
