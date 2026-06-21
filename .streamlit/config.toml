@@ -39,10 +39,10 @@ violetColor = "#6D5BD0"
 grayColor = "#6B6065"
 
 # Categorical chart palette - crimson reference (truth) + distinguishable, muted model hues + a bordeaux accent.
-chartCategoricalColors = ["#B11226", "#7A8699", "#3D52A0", "#2F8F84", "#C98A3A", "#3F0D12", "#9B5DE0", "#C25A6B"]
+chartCategoricalColors = ["#3B1F1B", "#FADADD", "#B66E79", "#8C4E4F", "#6E3B43", "#C99CA2", "#5A2E2E"]
 
 # Sequential palette (soft blush -> deep bordeaux) for spectra / heatmaps - exactly 10 colors
-chartSequentialColors = ["#FBE4E3", "#F4C9C8", "#E9A6A6", "#DD8384", "#CF5F62", "#BE3F44", "#A8252D", "#8A171F", "#651016", "#3F0D12"]
+chartSequentialColors = ["#FADADD", "#F2C3C8", "#E3A3AC", "#D08490", "#B66E79", "#A05863", "#8C4E4F", "#6E3B43", "#52302D", "#3B1F1B"]
 
 # Dataframe styling
 dataframeBorderColor = "#EBDFE1"

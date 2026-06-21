@@ -63,10 +63,10 @@ def spectrum_chart(record: PlanetRecord) -> alt.LayerChart:
     _, xtitle, is_wl = _x_axis(record)
     x = alt.X("x:Q", title=xtitle, scale=alt.Scale(zero=False, nice=False))
     base = alt.Chart(df)
-    band = base.mark_area(opacity=0.18).encode(
+    band = base.mark_area(opacity=0.16, color="#B66E79").encode(
         x=x, y=alt.Y("lo:Q", scale=alt.Scale(zero=False)), y2="hi:Q"
     )
-    line = base.mark_line(strokeWidth=2).encode(
+    line = base.mark_line(strokeWidth=2, color="#8C4E4F").encode(
         x=x,
         y=alt.Y("flux:Q", title="głębokość tranzytu", scale=alt.Scale(zero=False)),
         tooltip=[
@@ -111,7 +111,7 @@ def comparison_chart(rows: list[ComparisonRow]) -> alt.Chart:
     order = [GROUND_TRUTH] + [s for s in dict.fromkeys(df["seria"]) if s != GROUND_TRUTH]
     return (
         alt.Chart(df)
-        .mark_bar(size=14, cornerRadiusTopLeft=2, cornerRadiusTopRight=2)
+        .mark_bar(size=14, cornerRadiusTopLeft=2, cornerRadiusTopRight=2, stroke="#8C4E4F", strokeWidth=0.6)
         .encode(
             x=alt.X("gaz:N", title=None, sort=GAS_ORDER, scale=alt.Scale(paddingInner=0.3)),
             xOffset=alt.XOffset("seria:N", sort=order),
