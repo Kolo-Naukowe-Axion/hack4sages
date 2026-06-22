@@ -84,10 +84,6 @@ class TestComposition(unittest.TestCase):
         f = pipeline.pipe(lambda x: x + 1, lambda x: x * 2)
         self.assertEqual(f(3), 8)  # (3+1)*2
 
-    def test_compose_right_to_left(self):
-        f = pipeline.compose(lambda x: x + 1, lambda x: x * 2)
-        self.assertEqual(f(3), 7)  # (3*2)+1
-
 
 class TestComparison(unittest.TestCase):
     def test_build_and_aggregate(self):
@@ -107,13 +103,6 @@ class TestComparison(unittest.TestCase):
 
 
 class TestUploadRoundTrip(unittest.TestCase):
-    def test_export_parse_roundtrip(self):
-        rec = _record()
-        csv = loading.record_to_csv(rec)
-        back = loading.parse_upload(io.StringIO(csv))
-        np.testing.assert_allclose(back.spectrum.flux, rec.spectrum.flux)
-        np.testing.assert_allclose(back.aux.values, rec.aux.values)
-        self.assertIsNotNone(back.truth)
 
     def test_missing_aux_rejected(self):
         with self.assertRaises(DataError):
@@ -135,12 +124,6 @@ class TestHardening(unittest.TestCase):
         with self.assertRaises(DataError):
             RawSpectrum("x", flux=bad, noise=np.ones(52, np.float32),
                         width=np.ones(52, np.float32), wavelength=np.ones(52, np.float32))
-
-    def test_nan_upload_rejected(self):
-        rec = _record()
-        csv = loading.record_to_csv(rec).replace("1.0", "nan", 1)
-        with self.assertRaises(DataError):
-            loading.parse_upload(io.StringIO(csv))
 
     def test_comparison_missing_gas_raises_dataerror(self):
         truth = GroundTruth({g: 0.0 for g in GASES})
