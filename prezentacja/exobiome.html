@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExoBiome - Paradygmaty Programowania</title>
+
+<!-- Fonts: Inter + JetBrains Mono == exactly the app/ui (.streamlit/config.toml) typography. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+<style>
+/* ===========================================
+   THEME TOKENS  (mirrors app/ui .streamlit/config.toml palette)
+   =========================================== */
+:root{
+    --night:#00040f; --deep:#000926; --navy:#04122e; --navy-2:#073a86;
+    --paper:#fbfcfe; --powder:#eaf1f8; --powder-2:#dce7f3; --ice:#d6e6f3;
+    --ink:#0e1b36; --ink-soft:#28344f; --muted:#5b6675;
+    --sapphire:#0f52ba; --sky:#4f86c6; --ice-line:#a6c5d7; --hair:#d2deec;
+    --green:#1a7f5a; --amber:#b7791f; --red:#c0392b; --violet:#5b5bd6;
+    --font-body:'Inter',system-ui,sans-serif; --font-mono:'JetBrains Mono',ui-monospace,monospace;
+    --title-size:clamp(2rem,6.2vw,5rem); --h2-size:clamp(1.4rem,3.6vw,2.7rem);
+    --h3-size:clamp(1rem,2vw,1.5rem); --body-size:clamp(0.8rem,1.25vw,1.05rem);
+    --small-size:clamp(0.66rem,0.95vw,0.85rem); --mono-eyebrow:clamp(0.6rem,0.85vw,0.78rem);
+    --slide-padding:clamp(1.1rem,4vw,4rem); --content-gap:clamp(0.6rem,1.8vw,1.6rem); --element-gap:clamp(0.3rem,1vw,0.9rem);
+    --ease-out-expo:cubic-bezier(0.16,1,0.3,1); --ease-spring:cubic-bezier(0.34,1.56,0.64,1); --duration-normal:0.6s;
+    --radius:12px; --shadow:0 18px 50px -24px rgba(7,58,134,.45);
+}
+
+/* ===========================================
+   MANDATORY VIEWPORT-BASE  (frontend-slides skill - included in full)
+   =========================================== */
+html, body { height:100%; overflow-x:hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+.slide{ width:100vw; height:100vh; height:100dvh; overflow:hidden; scroll-snap-align:start; display:flex; flex-direction:column; position:relative; }
+.slide-content{ flex:1; display:flex; flex-direction:column; justify-content:center; max-height:100%; overflow:hidden; padding:var(--slide-padding); }
+.card, .container, .content-box{ max-width:min(94vw,1180px); }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr)); gap:clamp(.5rem,1.5vw,1rem); }
+img, .image-container{ max-width:100%; max-height:min(50vh,400px); object-fit:contain; }
+@media (max-height:700px){ :root{ --slide-padding:clamp(.75rem,3vw,2rem); --content-gap:clamp(.4rem,1.5vw,1rem); --title-size:clamp(1.4rem,4.8vw,2.8rem); --h2-size:clamp(1.1rem,3vw,1.9rem); }}
+@media (max-height:600px){ :root{ --slide-padding:clamp(.5rem,2.5vw,1.5rem); --content-gap:clamp(.3rem,1vw,.75rem); --title-size:clamp(1.2rem,4vw,2.1rem); --body-size:clamp(.68rem,1.1vw,.9rem); } .nav-dots,.keyboard-hint,.decorative{ display:none; } }
+@media (max-height:500px){ :root{ --slide-padding:clamp(.4rem,2vw,1rem); --title-size:clamp(1rem,3.5vw,1.5rem); --h2-size:clamp(.9rem,2.5vw,1.25rem); --body-size:clamp(.64rem,1vw,.82rem); }}
+@media (max-width:600px){ :root{ --title-size:clamp(1.3rem,7vw,2.5rem); } .grid{ grid-template-columns:1fr; } }
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.2s!important; } html{ scroll-behavior:auto; } }
+
+/* ===========================================
+   BASE
+   =========================================== */
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{ font-family:var(--font-body); color:var(--ink); background:var(--deep); -webkit-font-smoothing:antialiased; }
+.slide.light{ background:radial-gradient(120% 90% at 100% 0%, #fff 0%, var(--paper) 42%, var(--powder) 100%); color:var(--ink); }
+.slide.dark{ background:radial-gradient(120% 120% at 18% 12%, #0b1f4a 0%, var(--deep) 45%, var(--night) 100%); color:#eaf1f8; }
+.slide.light .slide-content::before{ content:""; position:absolute; inset:clamp(.6rem,1.6vw,1.5rem); border:1px solid var(--hair); border-radius:var(--radius); pointer-events:none; opacity:.7; }
+
+/* ===========================================
+   SHARED COMPONENTS
+   =========================================== */
+.eyebrow{ font-family:var(--font-mono); font-size:var(--mono-eyebrow); font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--sapphire); display:inline-flex; align-items:center; gap:.6em; }
+.dark .eyebrow{ color:var(--ice-line); }
+.eyebrow::before{ content:""; width:clamp(18px,2vw,34px); height:2px; background:currentColor; opacity:.8; }
+h1.title{ font-size:var(--title-size); font-weight:800; line-height:1.02; letter-spacing:-.02em; }
+h2.head{ font-size:var(--h2-size); font-weight:800; line-height:1.05; letter-spacing:-.015em; }
+h2.head .accent{ color:var(--sapphire); }
+.dark h2.head .accent{ color:#6ea8ff; }
+.lead{ font-size:var(--body-size); line-height:1.55; color:var(--ink-soft); max-width:62ch; }
+.dark .lead{ color:#b9c8e6; }
+.muted{ color:var(--muted); }
+.tag{ font-family:var(--font-mono); font-size:clamp(.56rem,.8vw,.72rem); font-weight:600; letter-spacing:.04em; padding:.28em .62em; border-radius:999px; display:inline-flex; gap:.4em; align-items:center; border:1px solid transparent; white-space:nowrap; }
+.tag.oop{ color:var(--sapphire); background:rgba(15,82,186,.1); border-color:rgba(15,82,186,.28); }
+.tag.fp{ color:var(--green); background:rgba(26,127,90,.1); border-color:rgba(26,127,90,.28); }
+.tag.solid{ color:var(--violet); background:rgba(91,91,214,.1); border-color:rgba(91,91,214,.28); }
+.tag.io{ color:var(--amber); background:rgba(183,121,31,.1); border-color:rgba(183,121,31,.28); }
+.cards{ display:grid; gap:clamp(.5rem,1.3vw,1rem); width:min(94vw,1180px); }
+.card-x{ background:rgba(255,255,255,.72); border:1px solid var(--hair); border-radius:var(--radius); padding:clamp(.7rem,1.5vw,1.3rem); box-shadow:var(--shadow); position:relative; overflow:hidden; }
+.card-x .num{ font-family:var(--font-mono); font-size:clamp(.62rem,.85vw,.78rem); color:var(--sapphire); font-weight:700; }
+.card-x h3{ font-size:var(--h3-size); font-weight:700; letter-spacing:-.01em; margin:.15em 0 .25em; }
+.card-x p{ font-size:var(--small-size); line-height:1.45; color:var(--ink-soft); }
+.card-x .ic{ font-family:var(--font-mono); font-weight:700; color:var(--sapphire); }
+.card-x::after{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--sapphire),var(--sky)); opacity:0; transition:.4s; }
+.slide.visible .card-x::after{ opacity:.9; }
+.code{ background:linear-gradient(160deg,#06122c,#020816); border:1px solid #1d3463; border-radius:var(--radius); box-shadow:0 24px 60px -28px rgba(0,9,38,.8); overflow:hidden; width:min(94vw,1060px); }
+.code .bar{ display:flex; align-items:center; gap:.5em; padding:.55em .9em; border-bottom:1px solid #16294f; background:#060f24; }
+.code .bar i{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+.code .bar .fn{ font-family:var(--font-mono); font-size:clamp(.6rem,.85vw,.76rem); color:#8fb2e8; margin-left:.4em; }
+.code pre{ margin:0; padding:clamp(.7rem,1.4vw,1.2rem) clamp(.8rem,1.5vw,1.4rem); overflow:hidden; }
+.code code{ font-family:var(--font-mono); font-size:clamp(.6rem,1vw,.92rem); line-height:1.5; color:#cdd9f4; white-space:pre; display:block; }
+.code .k{ color:#79b0ff; } .code .f{ color:#74e3c0; } .code .t{ color:#ffd479; } .code .s{ color:#ff9fb3; } .code .n{ color:#c3a0ff; } .code .c{ color:#5e7099; font-style:italic; } .code .d{ color:#9aa7c7; }
+.flow{ display:flex; align-items:center; flex-wrap:wrap; gap:clamp(.35rem,.9vw,.7rem); justify-content:center; }
+.node{ font-family:var(--font-mono); font-size:clamp(.58rem,.85vw,.8rem); font-weight:600; padding:.5em .8em; border-radius:10px; border:1px solid var(--hair); background:#fff; color:var(--ink); box-shadow:0 8px 22px -16px rgba(7,58,134,.5); white-space:nowrap; }
+.node.accent{ background:var(--sapphire); color:#fff; border-color:var(--sapphire); }
+.node.ghost{ background:var(--powder); }
+.arrow{ color:var(--sky); font-weight:700; font-size:1.1em; }
+.stat{ text-align:center; padding:clamp(.5rem,1.2vw,1rem) clamp(.6rem,1.4vw,1.2rem); background:rgba(255,255,255,.7); border:1px solid var(--hair); border-radius:var(--radius); box-shadow:var(--shadow); }
+.stat .v{ font-family:var(--font-mono); font-weight:800; font-size:clamp(1.4rem,3.6vw,3rem); color:var(--sapphire); line-height:1; letter-spacing:-.02em; }
+.stat .l{ font-size:var(--small-size); color:var(--ink-soft); margin-top:.45em; line-height:1.3; }
+.dark .stat{ background:rgba(255,255,255,.05); border-color:#22386a; }
+.dark .stat .v{ color:#7fb0ff; } .dark .stat .l{ color:#b9c8e6; }
+.blist{ list-style:none; display:flex; flex-direction:column; gap:clamp(.4rem,1vw,.85rem); max-width:64ch; }
+.blist li{ position:relative; padding-left:1.6em; font-size:var(--body-size); line-height:1.5; color:var(--ink-soft); }
+.blist li::before{ content:"\25B8"; position:absolute; left:0; top:0; color:var(--sapphire); font-weight:800; }
+.blist li b{ color:var(--ink); font-weight:700; }
+.dark .blist li{ color:#c4d2ee; } .dark .blist li b{ color:#fff; } .dark .blist li::before{ color:#6ea8ff; }
+.meta{ position:absolute; z-index:5; font-family:var(--font-mono); font-size:var(--mono-eyebrow); letter-spacing:.12em; color:var(--muted); }
+.meta.tl{ top:clamp(.9rem,2.4vw,2rem); left:clamp(1.1rem,3vw,3rem); }
+.dark .meta{ color:#6f86b8; }
+
+/* reveal animations */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s var(--ease-out-expo), transform .7s var(--ease-out-expo); }
+.slide.visible .reveal{ opacity:1; transform:none; }
+.reveal-scale{ opacity:0; transform:scale(.94); transition:opacity .7s, transform .7s var(--ease-spring); }
+.slide.visible .reveal-scale{ opacity:1; transform:none; }
+.slide.visible .reveal:nth-child(1){ transition-delay:.06s; } .slide.visible .reveal:nth-child(2){ transition-delay:.14s; }
+.slide.visible .reveal:nth-child(3){ transition-delay:.22s; } .slide.visible .reveal:nth-child(4){ transition-delay:.30s; }
+.slide.visible .reveal:nth-child(5){ transition-delay:.38s; } .slide.visible .reveal:nth-child(6){ transition-delay:.46s; }
+.stagger > *{ opacity:0; transform:translateY(22px); transition:opacity .6s var(--ease-out-expo), transform .6s var(--ease-out-expo); }
+.slide.visible .stagger > *{ opacity:1; transform:none; }
+.slide.visible .stagger > *:nth-child(1){ transition-delay:.10s; } .slide.visible .stagger > *:nth-child(2){ transition-delay:.18s; }
+.slide.visible .stagger > *:nth-child(3){ transition-delay:.26s; } .slide.visible .stagger > *:nth-child(4){ transition-delay:.34s; }
+.slide.visible .stagger > *:nth-child(5){ transition-delay:.42s; } .slide.visible .stagger > *:nth-child(6){ transition-delay:.50s; }
+.slide.visible .stagger > *:nth-child(7){ transition-delay:.58s; } .slide.visible .stagger > *:nth-child(8){ transition-delay:.66s; }
+.slide.visible .stagger > *:nth-child(9){ transition-delay:.74s; } .slide.visible .stagger > *:nth-child(10){ transition-delay:.82s; }
+@keyframes float{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-12px); } }
+@keyframes twinkle{ 0%,100%{ opacity:.2; } 50%{ opacity:1; } }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@keyframes drawline{ to{ stroke-dashoffset:0; } }
+.stars{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.stars span{ position:absolute; border-radius:50%; background:#bcd4e8; animation:twinkle 4s infinite; }
+.progress-bar{ position:fixed; top:0; left:0; height:3px; width:0; z-index:9999; background:linear-gradient(90deg,var(--sapphire),var(--sky),var(--ice-line)); transition:width .15s linear; }
+.nav-dots{ position:fixed; right:clamp(.6rem,1.4vw,1.4rem); top:50%; transform:translateY(-50%); z-index:9000; display:flex; flex-direction:column; gap:.5rem; }
+.nav-dots button{ width:9px; height:9px; border-radius:50%; border:1px solid var(--sapphire); background:transparent; cursor:pointer; padding:0; transition:.3s; opacity:.55; }
+.nav-dots button.active{ background:var(--sapphire); opacity:1; transform:scale(1.35); }
+.nav-dots button:hover{ opacity:1; }
+.keyboard-hint{ position:fixed; bottom:clamp(.7rem,1.8vw,1.4rem); left:50%; transform:translateX(-50%); z-index:9000; font-family:var(--font-mono); font-size:var(--mono-eyebrow); color:var(--muted); letter-spacing:.1em; background:rgba(255,255,255,.65); border:1px solid var(--hair); padding:.3em .8em; border-radius:999px; backdrop-filter:blur(6px); }
+
+/* hero / planet */
+.hero-wrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(.6rem,1.6vw,1.4rem); text-align:center; flex:1; padding:var(--slide-padding); position:relative; z-index:2; }
+.planet{ width:clamp(96px,16vw,180px); height:clamp(96px,16vw,180px); position:relative; animation:float 7s ease-in-out infinite; }
+.planet svg{ width:100%; height:100%; overflow:visible; filter:drop-shadow(0 0 30px rgba(15,82,186,.5)); }
+.ring{ transform-origin:60px 60px; animation:spin 26s linear infinite; }
+.byline{ display:flex; gap:clamp(.5rem,1.4vw,1.4rem); flex-wrap:wrap; justify-content:center; font-family:var(--font-mono); font-size:var(--small-size); color:#9fb4dc; }
+.byline b{ color:#eaf1f8; font-weight:600; }
+.bignum{ font-family:var(--font-mono); font-weight:800; font-size:clamp(3rem,16vw,12rem); line-height:.85; color:transparent; -webkit-text-stroke:1.5px rgba(127,176,255,.5); letter-spacing:-.04em; }
+.split{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(1rem,3vw,3rem); align-items:center; width:min(96vw,1200px); }
+@media (max-width:860px){ .split{ grid-template-columns:1fr; gap:1rem; } }
+.viz{ width:min(94vw,1080px); border:1px solid var(--hair); border-radius:var(--radius); background:rgba(255,255,255,.7); box-shadow:var(--shadow); padding:clamp(.6rem,1.3vw,1.1rem); }
+.draw{ stroke-dasharray:2600; stroke-dashoffset:2600; }
+.slide.visible .draw{ animation:drawline 2.4s var(--ease-out-expo) .2s forwards; }
+.bandlbl{ font-family:var(--font-mono); font-size:11px; fill:var(--muted); }
+.bars{ display:flex; align-items:flex-end; gap:clamp(.5rem,1.5vw,1.4rem); height:clamp(120px,22vh,210px); }
+.bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:.5em; height:100%; justify-content:flex-end; }
+.bar-fill{ width:clamp(34px,6vw,72px); border-radius:8px 8px 0 0; height:0; transition:height 1.1s var(--ease-out-expo); display:flex; align-items:flex-start; justify-content:center; }
+.bar-fill span{ font-family:var(--font-mono); font-weight:700; color:#fff; font-size:clamp(.6rem,.9vw,.82rem); padding-top:.4em; }
+.bar-name{ font-size:var(--small-size); color:var(--ink-soft); text-align:center; line-height:1.2; }
+.tgrid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(.45rem,1.1vw,.85rem); width:min(96vw,1180px); }
+@media (max-width:760px){ .tgrid{ grid-template-columns:1fr; } }
+.trow{ background:rgba(255,255,255,.7); border:1px solid var(--hair); border-radius:10px; padding:.55em .8em; display:flex; gap:.7em; align-items:baseline; }
+.trow .mod{ font-family:var(--font-mono); font-size:clamp(.6rem,.85vw,.76rem); color:var(--sapphire); font-weight:700; min-width:34%; }
+.trow .desc{ font-size:clamp(.62rem,.85vw,.78rem); color:var(--ink-soft); line-height:1.35; }
+.heading-row{ display:flex; flex-direction:column; gap:.5em; align-items:flex-start; margin-bottom:clamp(.5rem,1.5vw,1.3rem); }
+.center{ align-items:center; text-align:center; }
+.section-stack{ display:flex; flex-direction:column; gap:var(--content-gap); align-items:flex-start; width:100%; }
+.fill{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--content-gap); flex:1; width:100%; }
+code{ font-family:var(--font-mono); }
+
+/* ===========================================
+   APP MOCK + AREA COMPONENTS (added for the restructure)
+   =========================================== */
+.area{ font-family:var(--font-mono); font-size:var(--mono-eyebrow); font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--sapphire); display:inline-flex; align-items:center; gap:.6em; }
+.area .b{ background:var(--sapphire); color:#fff; border-radius:6px; padding:.16em .55em; letter-spacing:.12em; }
+.appwin{ width:min(94vw,1000px); border:1px solid var(--hair); border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 30px 70px -32px rgba(7,58,134,.55); }
+.appwin .chrome{ display:flex; align-items:center; gap:.5em; padding:.5em .9em; background:var(--powder); border-bottom:1px solid var(--hair); }
+.appwin .chrome i{ width:11px; height:11px; border-radius:50%; }
+.appwin .chrome .url{ margin-left:.6em; font-family:var(--font-mono); font-size:clamp(.56rem,.8vw,.72rem); color:var(--muted); background:#fff; border:1px solid var(--hair); border-radius:6px; padding:.22em .8em; }
+.appwin .body{ padding:clamp(.7rem,1.7vw,1.5rem); display:flex; flex-direction:column; gap:clamp(.5rem,1.2vw,1rem); }
+.app-head{ display:flex; align-items:center; gap:.6em; }
+.app-head .pl{ width:clamp(28px,3.4vw,38px); height:clamp(28px,3.4vw,38px); }
+.app-head h3{ font-size:clamp(1rem,1.9vw,1.5rem); font-weight:800; letter-spacing:-.02em; }
+.seg{ display:inline-flex; border:1px solid var(--hair); border-radius:8px; overflow:hidden; font-family:var(--font-mono); font-size:clamp(.56rem,.8vw,.74rem); width:fit-content; }
+.seg span{ padding:.42em .9em; color:var(--muted); }
+.seg span.on{ background:var(--sapphire); color:#fff; }
+.kpi-mini{ display:flex; gap:.6em; }
+.kpi-mini .k{ flex:1; border:1px solid var(--hair); border-radius:10px; padding:.45em .8em; background:var(--paper); }
+.kpi-mini .k .t{ font-family:var(--font-mono); font-size:clamp(.52rem,.72vw,.64rem); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+.kpi-mini .k .val{ font-weight:800; font-size:clamp(.9rem,1.6vw,1.25rem); color:var(--ink); }
+.panel-tag{ font-family:var(--font-mono); font-size:clamp(.58rem,.82vw,.74rem); color:var(--sapphire); font-weight:700; }
+.cmp{ display:flex; align-items:flex-end; justify-content:space-around; height:clamp(96px,15vh,150px); }
+.cmp .grp{ display:flex; flex-direction:column; align-items:center; gap:.4em; height:100%; justify-content:flex-end; }
+.cmp .gbars{ display:flex; align-items:flex-end; gap:clamp(2px,.4vw,4px); height:100%; }
+.cmp .gbars i{ width:clamp(7px,1vw,12px); border-radius:3px 3px 0 0; align-self:flex-end; }
+.cmp .glabel{ font-family:var(--font-mono); font-size:clamp(.54rem,.76vw,.7rem); color:var(--ink-soft); }
+.cmp-legend{ display:flex; gap:1em; flex-wrap:wrap; justify-content:center; font-size:clamp(.58rem,.8vw,.74rem); color:var(--ink-soft); }
+.cmp-legend span{ display:inline-flex; align-items:center; gap:.4em; }
+.cmp-legend i{ width:11px; height:11px; border-radius:3px; }
+.whatif{ display:flex; gap:.7em; flex-wrap:wrap; }
+.whatif .s{ flex:1; min-width:120px; border:1px solid var(--hair); border-radius:8px; padding:.4em .7em; background:var(--paper); }
+.whatif .s .t{ font-family:var(--font-mono); font-size:clamp(.52rem,.72vw,.64rem); color:var(--muted); }
+.whatif .track{ height:4px; border-radius:2px; background:var(--powder-2); margin-top:.4em; position:relative; }
+.whatif .track::after{ content:""; position:absolute; top:50%; transform:translateY(-50%); width:13px; height:13px; border-radius:50%; background:var(--sapphire); border:2px solid #fff; box-shadow:0 1px 4px rgba(7,58,134,.4); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar"></div>
+<nav class="nav-dots" aria-label="Nawigacja slajdow"></nav>
+<div class="keyboard-hint">&larr; &rarr; / spacja / scroll</div>
+
+<!-- ============================================================
+     PART 1 (1/3) - PROBLEM + APLIKACJA
+     ============================================================ -->
+
+<!-- SLIDE 1 - TITLE -->
+<section class="slide dark title-slide" data-label="ExoBiome">
+    <div class="stars" data-stars="70"></div>
+    <div class="hero-wrap">
+        <div class="planet reveal-scale" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+                <g class="ring"><ellipse cx="60" cy="60" rx="54" ry="13" fill="none" stroke="#4f86c6" stroke-width="3" opacity=".7" transform="rotate(-20 60 60)"/></g>
+                <circle cx="60" cy="60" r="26" fill="url(#pg)"/>
+                <circle cx="51" cy="51" r="7.5" fill="#d6e6f3" opacity=".6"/>
+                <circle cx="68" cy="66" r="4.5" fill="#000926" opacity=".4"/>
+                <defs><radialGradient id="pg" cx="38%" cy="35%"><stop offset="0%" stop-color="#6ea8ff"/><stop offset="60%" stop-color="#0f52ba"/><stop offset="100%" stop-color="#073a86"/></radialGradient></defs>
+            </svg>
+        </div>
+        <div class="eyebrow reveal">Paradygmaty Programowania &nbsp;&middot;&nbsp; Grupa 67</div>
+        <h1 class="title reveal">ExoBiome</h1>
+        <p class="lead reveal" style="text-align:center;color:#c4d2ee;max-width:56ch">
+            Retrieval biosygnatur z widm transmisyjnych egzoplanet -
+            <b style="color:#eaf1f8">hybrydowy regresor kwantowo-klasyczny</b> jako studium przypadku
+            paradygmatu <b style="color:#eaf1f8">OOP + funkcyjnego</b>.
+        </p>
+        <div class="byline reveal" style="opacity:.85"><span>Python 3.11</span><span>&middot;</span><span>Hybryda OOP + Funkcyjny</span><span>&middot;</span><span>PyTorch &middot; PennyLane &middot; Streamlit</span><span>&middot;</span><span>18.06.2026</span></div>
+    </div>
+</section>
+
+<!-- SLIDE 2 - PROBLEM -->
+<section class="slide light" data-label="Problem">
+    <div class="meta tl">PROBLEM &middot; CO I DLACZEGO</div>
+    <div class="slide-content">
+        <div class="split">
+            <div class="section-stack">
+                <div class="eyebrow reveal">Otwarty problem astrofizyki</div>
+                <h2 class="head reveal">Czytamy <span class="accent">skład atmosfery</span> egzoplanety z jej światła</h2>
+                <p class="lead reveal">Gdy planeta przechodzi przed tarczą gwiazdy, gazy pochłaniają światło w swoich pasmach. To
+                    <b>chemiczny odcisk palca</b>. Z jednego zaszumionego, niskorozdzielczego widma trzeba wyprowadzić zawartości
+                    gazów - klasyczne <b>zadanie odwrotne</b>.</p>
+                <ul class="blist reveal">
+                    <li>Cel: 5 zawartości gazów <b>H2O &middot; CO2 &middot; CO &middot; CH4 &middot; NH3</b> (log-VMR)</li>
+                    <li>Mówią o chemii, klimacie i potencjalnej <b>zamieszkiwalności</b></li>
+                    <li>Dane <b>symulowane</b> (Ariel Data Challenge 2023) - prawdę znamy</li>
+                </ul>
+            </div>
+            <div class="viz reveal-scale" aria-label="Tranzyt planety przed gwiazda i krzywa blasku">
+                <svg viewBox="0 0 460 300" width="100%" role="img">
+                    <defs><radialGradient id="star" cx="50%" cy="50%"><stop offset="0%" stop-color="#fff7e0"/><stop offset="55%" stop-color="#ffd479"/><stop offset="100%" stop-color="#f0a830"/></radialGradient></defs>
+                    <circle cx="150" cy="92" r="60" fill="url(#star)"/>
+                    <g><circle cx="120" cy="92" r="15" fill="#0f52ba"><animate attributeName="cx" values="80;230;80" dur="6s" repeatCount="indefinite"/></circle></g>
+                    <text x="30" y="195" class="bandlbl">krzywa blasku</text>
+                    <path d="M30,225 H150 C170,225 175,255 200,255 H250 C275,255 280,225 300,225 H430" fill="none" stroke="#a6c5d7" stroke-width="6" opacity=".35"/>
+                    <path class="draw" d="M30,225 H150 C170,225 175,255 200,255 H250 C275,255 280,225 300,225 H430" fill="none" stroke="#0f52ba" stroke-width="3" stroke-linecap="round"/>
+                    <text x="205" y="285" class="bandlbl" text-anchor="middle">spadek jasnosci = tranzyt</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 3 - SPECTRUM EXPLAINER -->
+<section class="slide light" data-label="Widmo">
+    <div class="meta tl">PROBLEM &middot; WIDMO TRANSMISYJNE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Chemiczny odcisk palca</div>
+            <h2 class="head">Każdy gaz pochłania we <span class="accent">własnym paśmie</span></h2>
+        </div>
+        <div class="viz reveal-scale" aria-label="Widmo transmisyjne z pasmami absorpcji gazow">
+            <svg viewBox="0 0 1000 320" width="100%" role="img">
+                <g stroke="#a6c5d7" stroke-dasharray="3 4" opacity=".55">
+                    <line x1="171" y1="40" x2="171" y2="270"/><line x1="300" y1="40" x2="300" y2="270"/>
+                    <line x1="560" y1="40" x2="560" y2="270"/><line x1="600" y1="40" x2="600" y2="270"/>
+                </g>
+                <g class="bandlbl" text-anchor="middle" font-weight="700">
+                    <text x="171" y="32" fill="#0f52ba">H2O</text><text x="300" y="32" fill="#0f52ba">CH4</text>
+                    <text x="560" y="32" fill="#0f52ba">CO2</text><text x="618" y="56" fill="#0f52ba">CO</text>
+                </g>
+                <path d="M40,210 Q110,150 171,150 T300,180 Q430,205 470,190 Q520,140 560,150 Q585,140 600,150 Q720,200 820,190 T960,205" fill="none" stroke="#a6c5d7" stroke-width="16" opacity=".18" stroke-linecap="round"/>
+                <path class="draw" d="M40,210 Q110,150 171,150 T300,180 Q430,205 470,190 Q520,140 560,150 Q585,140 600,150 Q720,200 820,190 T960,205" fill="none" stroke="#0f52ba" stroke-width="3.2" stroke-linecap="round"/>
+                <text x="500" y="305" class="bandlbl" text-anchor="middle">dlugosc fali [um]  -  52 biny . 4 kanaly</text>
+                <text x="20" y="150" class="bandlbl" transform="rotate(-90 20 150)" text-anchor="middle">glebokosc tranzytu</text>
+            </svg>
+        </div>
+        <p class="lead reveal center" style="max-width:74ch">Zafalowanie pod znacznikiem gazu to ślad jego absorpcji. Pasmo wokół linii = <b>szum</b> pomiaru. Model uczy się odwzorować ten kształt na zawartości chemiczne.</p>
+    </div>
+</section>
+
+<!-- SLIDE 4 - APP SHOWCASE #1 -->
+<section class="slide light" data-label="Aplikacja">
+    <div class="meta tl">APLIKACJA &middot; WIDOK GŁÓWNY</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Tak działa aplikacja</div>
+            <h2 class="head">Wybierz planetę, a model liczy skład <span class="accent">na żywo</span></h2>
+        </div>
+        <div class="appwin reveal-scale">
+            <div class="chrome"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="url">localhost:8501 &middot; ExoBiome (Streamlit)</span></div>
+            <div class="body">
+                <div class="app-head">
+                    <svg class="pl" viewBox="0 0 120 120"><ellipse cx="60" cy="60" rx="54" ry="13" fill="none" stroke="#0f52ba" stroke-width="3" opacity=".5" transform="rotate(-20 60 60)"/><circle cx="60" cy="60" r="26" fill="#0f52ba"/><circle cx="51" cy="51" r="7.5" fill="#d6e6f3" opacity=".6"/></svg>
+                    <h3>ExoBiome</h3>
+                </div>
+                <div class="seg"><span class="on">Planeta z listy</span><span>Wczytaj plik CSV</span></div>
+                <div class="kpi-mini">
+                    <div class="k"><div class="t">Planeta</div><div class="val">train37</div></div>
+                    <div class="k"><div class="t">Dominujący gaz</div><div class="val">H2O</div></div>
+                </div>
+                <div class="panel-tag">:: Widmo transmisyjne</div>
+                <svg viewBox="0 0 1000 200" width="100%" role="img" aria-label="Widmo w aplikacji">
+                    <g stroke="#a6c5d7" stroke-dasharray="3 4" opacity=".5"><line x1="171" y1="20" x2="171" y2="170"/><line x1="300" y1="20" x2="300" y2="170"/><line x1="560" y1="20" x2="560" y2="170"/><line x1="600" y1="20" x2="600" y2="170"/></g>
+                    <path d="M40,130 Q110,80 171,82 T300,108 Q430,128 470,116 Q520,72 560,82 Q585,74 600,82 Q720,124 820,116 T960,128" fill="none" stroke="#a6c5d7" stroke-width="12" opacity=".18" stroke-linecap="round"/>
+                    <path class="draw" d="M40,130 Q110,80 171,82 T300,108 Q430,128 470,116 Q520,72 560,82 Q585,74 600,82 Q720,124 820,116 T960,128" fill="none" stroke="#0f52ba" stroke-width="2.6" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+        <p class="lead reveal center" style="max-width:78ch">Realne planety ADC2023 z listy albo <b>własne widmo CSV</b>. Inferencja klasycznej głowicy modelu liczy się na żywo na CPU.</p>
+    </div>
+</section>
+
+<!-- SLIDE 5 - APP SHOWCASE #2 -->
+<section class="slide light" data-label="Aplikacja">
+    <div class="meta tl">APLIKACJA &middot; CO POKAZUJE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Skład atmosfery - 3 modele vs prawda</div>
+            <h2 class="head">Porównanie modeli i <span class="accent">eksperyment what-if</span></h2>
+        </div>
+        <div class="appwin reveal-scale">
+            <div class="chrome"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="url">localhost:8501 &middot; porównanie + what-if</span></div>
+            <div class="body">
+                <div class="panel-tag">:: log-VMR &middot; wyżej = więcej gazu &middot; im bliżej słupka „prawda", tym lepiej</div>
+                <div class="cmp" aria-label="Grupowane slupki: prawda i 3 modele na gaz">
+                    <div class="grp"><div class="gbars"><i style="height:82%;background:#000926"></i><i style="height:52%;background:#7fa9ce"></i><i style="height:74%;background:#4f86c6"></i><i style="height:79%;background:#0f52ba"></i></div><div class="glabel">H2O</div></div>
+                    <div class="grp"><div class="gbars"><i style="height:60%;background:#000926"></i><i style="height:40%;background:#7fa9ce"></i><i style="height:55%;background:#4f86c6"></i><i style="height:58%;background:#0f52ba"></i></div><div class="glabel">CO2</div></div>
+                    <div class="grp"><div class="gbars"><i style="height:34%;background:#000926"></i><i style="height:46%;background:#7fa9ce"></i><i style="height:38%;background:#4f86c6"></i><i style="height:35%;background:#0f52ba"></i></div><div class="glabel">CO</div></div>
+                    <div class="grp"><div class="gbars"><i style="height:52%;background:#000926"></i><i style="height:72%;background:#7fa9ce"></i><i style="height:56%;background:#4f86c6"></i><i style="height:53%;background:#0f52ba"></i></div><div class="glabel">CH4</div></div>
+                    <div class="grp"><div class="gbars"><i style="height:26%;background:#000926"></i><i style="height:42%;background:#7fa9ce"></i><i style="height:32%;background:#4f86c6"></i><i style="height:27%;background:#0f52ba"></i></div><div class="glabel">NH3</div></div>
+                </div>
+                <div class="cmp-legend"><span><i style="background:#000926"></i>prawda</span><span><i style="background:#7fa9ce"></i>baseline RF</span><span><i style="background:#4f86c6"></i>klasyczny</span><span><i style="background:#0f52ba"></i>kwantowy</span></div>
+                <div class="whatif">
+                    <div class="s"><div class="t">Głębokość cech ×</div><div class="track" style="--p:60%"></div></div>
+                    <div class="s"><div class="t">Szum ×</div><div class="track"></div></div>
+                    <div class="s"><div class="t">Nachylenie</div><div class="track"></div></div>
+                </div>
+            </div>
+        </div>
+        <p class="lead reveal center" style="max-width:82ch">Każdy ruch suwaka buduje nowe, niemutowalne widmo i od nowa odpala model. Skuteczność też na <b>całym zbiorze 4142 planet</b> (mRMSE per gaz + wykres parity).</p>
+    </div>
+</section>
+
+<!-- SLIDE 6 - STATE OF THE ART + INNOVATION -->
+<section class="slide light" data-label="Kontekst">
+    <div class="meta tl">PROBLEM &middot; STAN ISTNIEJĄCY</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Co już jest i co wnosimy</div>
+            <h2 class="head">Dlaczego to <span class="accent">interesujące</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(3,1fr)">
+            <div class="card-x"><div class="num">PODEJŚCIE A</div><h3>Kody transferu promieniowania</h3><p>TauREx, petitRADTRANS - dokładne, ale <b>kosztowne i powolne</b> przy interpretacji wielu widm.</p></div>
+            <div class="card-x"><div class="num">PODEJŚCIE B</div><h3>Modele uczenia maszynowego</h3><p>Konkurs <b>Ariel Data Challenge 2023</b> - głównie sieci CNN. Szybkie, ale czarne skrzynki.</p></div>
+            <div class="card-x" style="border-color:var(--sapphire)"><div class="num" style="color:var(--green)">NASZ WKŁAD</div><h3>Hybryda + warstwa demo</h3><p>Hybrydowy regresor <b>kwantowo-klasyczny</b> + warstwa porównująca 3 modele z prawdą na żywo.</p></div>
+        </div>
+        <p class="lead reveal center" style="max-width:78ch;margin-top:.6rem">Liczba widm rośnie gwałtownie (Ariel, JWST) - potrzeba szybkich, powtarzalnych i testowalnych narzędzi do wstępnej interpretacji sygnałów chemicznych.</p>
+    </div>
+</section>
+
+<!-- SLIDE 7 - FUNCTIONAL GOALS -->
+<section class="slide light" data-label="Cele">
+    <div class="meta tl">PROBLEM &middot; CELE FUNKCJONALNE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Mierzalne cele systemu</div>
+            <h2 class="head">Co system <span class="accent">musi</span> robić</h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(3,1fr)">
+            <div class="card-x"><div class="ic">01</div><h3>Wczytanie</h3><p>Widmo ADC2023 po ID + walidacja struktury: <b>52 biny, 4 kanały, 8 cech</b>.</p></div>
+            <div class="card-x"><div class="ic">02</div><h3>Upload CSV</h3><p>Samowystarczalny rekord; odrzuca niekompletne i <b>NaN/inf</b> czytelnym błędem.</p></div>
+            <div class="card-x"><div class="ic">03</div><h3>Preprocessing</h3><p>Surowe widmo do wejścia modelu <b>1:1 z treningiem</b> (normalizacja + standaryzacja).</p></div>
+            <div class="card-x"><div class="ic">04</div><h3>Predykcja</h3><p>5 zawartości gazów w <b>log-VMR</b>: H2O, CO2, CO, CH4, NH3.</p></div>
+            <div class="card-x"><div class="ic">05</div><h3>Porównanie</h3><p>3 modele dla tej samej planety: <b>RF &middot; klasyczny &middot; kwantowy</b> vs prawda.</p></div>
+            <div class="card-x" style="border-color:var(--sapphire)"><div class="ic" style="color:var(--green)">06</div><h3>Walidacja zbiorcza</h3><p>Skuteczność na <b>4142 planetach</b>: mRMSE per gaz + wykres parity (predykcja-prawda).</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     PART 2 (2/3) - OMÓWIENIE TECHNICZNE IMPLEMENTACJI
+     ============================================================ -->
+
+<!-- SLIDE 8 - DIVIDER: TECHNICAL -->
+<section class="slide dark" data-label="Część techniczna">
+    <div class="stars" data-stars="55"></div>
+    <div class="slide-content fill">
+        <div class="bignum reveal">&lt;/&gt;</div>
+        <div class="eyebrow reveal">Implementacja - omówienie techniczne</div>
+        <h2 class="head reveal" style="text-align:center">Kod, paradygmaty i <span class="accent">wzorce</span></h2>
+        <p class="lead reveal" style="text-align:center;color:#c4d2ee;max-width:62ch">Cztery obszary implementacji, każdy demonstruje inny zestaw konceptów: rdzeń modelu (OOP), warstwa danych (FP), orkiestracja treningu i warstwa demo (OOP + FP).</p>
+    </div>
+</section>
+
+<!-- SLIDE 9 - HYBRID SPLIT (why) -->
+<section class="slide light" data-label="Hybryda">
+    <div class="meta tl">TECHNIKA &middot; DLACZEGO HYBRYDA</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Dwie natury problemu</div>
+            <h2 class="head">Podział odpowiedzialności <span class="accent">OOP / FP</span></h2>
+        </div>
+        <div class="split" style="align-items:stretch">
+            <div class="card-x reveal">
+                <div class="num"><span class="tag oop">OOP</span> &nbsp; STANOWY PROCES</div>
+                <h3>Obiektowa orkiestracja</h3>
+                <ul class="blist" style="margin-top:.4rem">
+                    <li>Długowieczny stan: trening, modele, artefakty, konfiguracje</li>
+                    <li>Wspólne kontrakty: <b>ABC + Strategia + Fabryka</b></li>
+                    <li>Dobre miejsce na enkapsulację, polimorfizm i SRP</li>
+                </ul>
+            </div>
+            <div class="card-x reveal">
+                <div class="num"><span class="tag fp">FP</span> &nbsp; BEZSTANOWE TRANSFORMACJE</div>
+                <h3>Funkcyjne przekształcenia</h3>
+                <ul class="blist" style="margin-top:.4rem">
+                    <li>Czyste funkcje: preprocessing, porównania, wykresy</li>
+                    <li>Niemutowalne kontrakty danych przekazywane jawnie</li>
+                    <li>Kompozycja przez <b>pipe</b> - jeden przepis wejścia modelu</li>
+                </ul>
+            </div>
+        </div>
+        <p class="lead reveal center" style="max-width:80ch;margin-top:.5rem">Analogia z zajęć: wzorzec <b>Strategia</b> + <b>potoki przetwarzania</b>. OOP porządkuje proces i zależności, FP - transformacje danych. Uzupełniają się, nie kolidują.</p>
+    </div>
+</section>
+
+<!-- SLIDE 10 - 4 AREAS OVERVIEW (per-area map, no names) -->
+<section class="slide light" data-label="Obszary">
+    <div class="meta tl">TECHNIKA &middot; OBSZARY IMPLEMENTACJI</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Cztery obszary &middot; jeden wspólny kontrakt</div>
+            <h2 class="head">Mapa kodu &middot; <span class="accent">paradygmat na warstwę</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(4,1fr)">
+            <div class="card-x"><div class="num">OBSZAR A</div><h3>Rdzeń modelu</h3><p><span class="tag oop">OOP</span><br><code class="ic">models/hybrid_core</code><br>ABC, Strategia + Fabryka, polimorficzny <code>forward()</code>, enkapsulowane warstwy PyTorch/PennyLane.</p></div>
+            <div class="card-x"><div class="num">OBSZAR B</div><h3>Warstwa danych</h3><p><span class="tag fp">FP</span><br><code class="ic">app/data</code><br>Niemutowalne kontrakty, czyste funkcje, potok <code>pipe</code> (HOF + domknięcia), dekoratory.</p></div>
+            <div class="card-x"><div class="num">OBSZAR C</div><h3>Orkiestracja treningu</h3><p><span class="tag oop">OOP</span> <span class="tag fp">FP</span><br><code class="ic">app/training.py</code><br>Trainer, dwuetapowy workflow, callbacki Obserwator, dry-run, niemutowalne wyniki.</p></div>
+            <div class="card-x"><div class="num">OBSZAR D</div><h3>Warstwa demo</h3><p><span class="tag oop">OOP</span> <span class="tag fp">FP</span><br><code class="ic">app/ui</code><br>Predictor ABC + Strategia + Fabryka, fasada InferenceEngine, czyste buildery, what-if.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 11 - AREA A: OOP PILLARS + SOLID -->
+<section class="slide light" data-label="A · Model">
+    <div class="meta tl">OBSZAR A &middot; RDZEŃ MODELU</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">A</span> Rdzeń modelu &middot; <span class="tag oop">OOP</span></div>
+            <h2 class="head">Enkapsulacja &middot; dziedziczenie &middot; <span class="accent">polimorfizm</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(3,1fr)">
+            <div class="card-x"><div class="num">ENKAPSULACJA</div><h3>Warstwy domenowe</h3><p><code class="ic">SpectralEncoder</code>, <code class="ic">AuxEncoder</code>, <code class="ic">FusionEncoder</code>, <code class="ic">QuantumBlock</code> ukrywają sieć i obliczenia kwantowe za <code class="ic">forward()</code>.</p></div>
+            <div class="card-x"><div class="num">DZIEDZICZENIE</div><h3>Wspólny kontrakt</h3><p><code class="ic">HybridRegressorBase(nn.Module, ABC)</code> rozszerzają <code class="ic">ClassicalOnlyHybridRegressor</code> i <code class="ic">HybridArielRegressor</code>.</p></div>
+            <div class="card-x"><div class="num">POLIMORFIZM</div><h3>Jeden typ, dwa zachowania</h3><p><code class="ic">forward()</code> - trening pracuje z typem bazowym, nie wiedząc, czy wariant jest klasyczny czy hybrydowy.</p></div>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(4,1fr);margin-top:.3rem">
+            <div class="trow"><span class="mod"><span class="tag solid">SRP</span></span><span class="desc">enkodery / głowice / blok kwantowy / strategie</span></div>
+            <div class="trow"><span class="mod"><span class="tag solid">OCP</span></span><span class="desc">nowa strategia lub wariant bez zmian w treningu</span></div>
+            <div class="trow"><span class="mod"><span class="tag solid">DIP</span></span><span class="desc">trening zależy od <code>HybridRegressorBase</code></span></div>
+            <div class="trow"><span class="mod"><span class="tag solid">ISP</span></span><span class="desc"><code>backbone_</code>/<code>quantum_parameters()</code></span></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 12 - AREA A: STRATEGY + FACTORY -->
+<section class="slide light" data-label="A · Wzorce">
+    <div class="meta tl">OBSZAR A &middot; WZORCE PROJEKTOWE</div>
+    <div class="slide-content fill">
+        <div class="split">
+            <div class="section-stack">
+                <div class="area reveal"><span class="b">A</span> Rdzeń modelu &middot; <span class="tag oop">OOP</span></div>
+                <h2 class="head reveal"><span class="accent">Strategia</span> + Fabryka</h2>
+                <ul class="blist reveal">
+                    <li><b>Strategia</b> rozdziela sposób predykcji: <code style="color:var(--sapphire)">ClassicalBranchStrategy</code> vs <code style="color:var(--sapphire)">QuantumBranchStrategy</code> - zamiast jednego dużego <code>if</code> w <code>forward()</code></li>
+                    <li><b>Fabryka</b> <code style="color:var(--sapphire)">build_model(config, device)</code> składa właściwy wariant wg <code>ModelConfig.classical_only</code></li>
+                    <li><code>PredictionContext</code> przenosi dane wejściowe strategii (lekka dataclass - styk z FP)</li>
+                </ul>
+            </div>
+            <div class="viz reveal-scale" style="padding:clamp(1rem,2vw,1.5rem)">
+                <div style="display:flex;flex-direction:column;gap:.7rem;align-items:center">
+                    <div class="node accent">HybridArielRegressor &middot; forward()</div>
+                    <div class="arrow">&darr;</div>
+                    <div class="node ghost">_select_branch_strategy(enable_quantum)</div>
+                    <div class="flow" style="gap:1rem;margin-top:.3rem">
+                        <div class="node" style="border-color:var(--sky)">ClassicalBranchStrategy</div>
+                        <div class="node" style="border-color:var(--sapphire);color:var(--sapphire)">QuantumBranchStrategy</div>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:.66rem;color:var(--muted);margin-top:.4rem">build_model(config) &rarr; właściwy wariant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 13 - AREA A: LISTING STRATEGY -->
+<section class="slide light" data-label="A · Listing">
+    <div class="meta tl">OBSZAR A &middot; LISTING 1 . STRATEGIA</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">A</span> Ścieżka klasyczna vs kwantowa</div>
+            <h2 class="head">Strategia zamiast <span class="accent">if w forward()</span></h2>
+        </div>
+        <div class="code reveal-scale">
+            <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="fn">models/hybrid_core/model.py</span></div>
+            <pre><code><span class="k">class</span> <span class="t">PredictionBranchStrategy</span>(<span class="t">ABC</span>):
+    <span class="d">@abstractmethod</span>
+    <span class="k">def</span> <span class="f">apply</span>(self, ctx: <span class="t">PredictionContext</span>) -&gt; torch.Tensor: ...
+
+<span class="k">class</span> <span class="t">ClassicalBranchStrategy</span>(<span class="t">PredictionBranchStrategy</span>):
+    <span class="k">def</span> <span class="f">apply</span>(self, ctx):
+        <span class="k">return</span> ctx.classical_pred.<span class="f">float</span>()
+
+<span class="k">class</span> <span class="t">QuantumBranchStrategy</span>(<span class="t">PredictionBranchStrategy</span>):
+    <span class="k">def</span> <span class="f">apply</span>(self, ctx):
+        angles = ctx.regressor.<span class="f">projector</span>(ctx.fused)
+        q     = ctx.regressor.<span class="f">quantum_block</span>(angles)
+        gate  = torch.<span class="f">tanh</span>(ctx.regressor.quantum_gate)
+        <span class="k">return</span> ctx.classical_pred + ctx.quantum_scale * gate * q  <span class="c"># bramkowana korekta</span></code></pre>
+        </div>
+        <p class="lead reveal center" style="max-width:84ch"><b>Analiza:</b> interfejs Strategii + dwie konkretne klasy - logika klasyczna i kwantowa zamknięte osobno. <code>HybridArielRegressor</code> nie musi znać szczegółów korekty kwantowej, co wzmacnia <b>OCP</b>.</p>
+    </div>
+</section>
+
+<!-- SLIDE 14 - AREA A: LISTING ABC + FACTORY -->
+<section class="slide light" data-label="A · Listing">
+    <div class="meta tl">OBSZAR A &middot; LISTING 2 . ABC + FABRYKA</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">A</span> Wspólny kontrakt + składanie</div>
+            <h2 class="head">Polimorficzny <span class="accent">forward()</span>, jeden konstruktor</h2>
+        </div>
+        <div class="code reveal-scale">
+            <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="fn">models/hybrid_core/model.py</span></div>
+            <pre><code><span class="k">class</span> <span class="t">HybridRegressorBase</span>(nn.<span class="t">Module</span>, <span class="t">ABC</span>):
+    <span class="d">@abstractmethod</span>
+    <span class="k">def</span> <span class="f">forward</span>(self, aux, spectra, enable_quantum=<span class="k">True</span>, quantum_scale=<span class="n">1.0</span>): ...
+    <span class="d">@abstractmethod</span>
+    <span class="k">def</span> <span class="f">backbone_parameters</span>(self) -&gt; <span class="t">Iterable</span>[nn.<span class="t">Parameter</span>]: ...
+
+<span class="k">class</span> <span class="t">HybridArielRegressor</span>(<span class="t">HybridRegressorBase</span>):
+    <span class="k">def</span> <span class="f">forward</span>(self, aux, spectra, enable_quantum=<span class="k">True</span>, quantum_scale=<span class="n">1.0</span>):
+        fused, head_ctx, classical = self.<span class="f">_compute_classical</span>(aux, spectra)
+        strategy = self.<span class="f">_select_branch_strategy</span>(enable_quantum, quantum_scale)
+        <span class="k">return</span> strategy.<span class="f">apply</span>(<span class="t">PredictionContext</span>(fused, head_ctx, classical, ...))
+
+<span class="k">def</span> <span class="f">build_model</span>(config: <span class="t">ModelConfig</span>, device) -&gt; <span class="t">HybridRegressorBase</span>:   <span class="c"># Fabryka</span>
+    <span class="k">return</span> <span class="t">ClassicalOnlyHybridRegressor</span>(...) <span class="k">if</span> config.classical_only \
+           <span class="k">else</span> <span class="t">HybridArielRegressor</span>(...)</code></pre>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 15 - AREA B: IMMUTABILITY + PURE -->
+<section class="slide light" data-label="B · Dane">
+    <div class="meta tl">OBSZAR B &middot; WARSTWA DANYCH</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">B</span> Warstwa danych &middot; <span class="tag fp">FP</span></div>
+            <h2 class="head">Niemutowalność i <span class="accent">czyste funkcje</span></h2>
+        </div>
+        <div class="split" style="align-items:stretch">
+            <div class="card-x reveal">
+                <div class="num">NIEMUTOWALNOŚĆ (GŁĘBOKA)</div>
+                <p style="margin:.3rem 0 .5rem">Kontrakty w <code class="ic">app/data/types.py</code> to <b>frozen, slotted dataclasses</b>:</p>
+                <ul class="blist">
+                    <li><code style="color:var(--sapphire)">PlanetRecord, RawSpectrum, Prediction, ComparisonRow</code></li>
+                    <li>Tablice NumPy zamrażane (<code>writeable=False</code>), słowniki w <code>MappingProxyType</code></li>
+                    <li>Rekord raz zwalidowany w <code>__post_init__</code> - bez ukrytej mutacji</li>
+                </ul>
+            </div>
+            <div class="card-x reveal">
+                <div class="num">FUNKCJE CZYSTE</div>
+                <p style="margin:.3rem 0 .5rem">Bezstanowe transformacje - te same wejścia, to samo wyjście:</p>
+                <ul class="blist">
+                    <li><code style="color:var(--sapphire)">log_scale_aux &middot; normalize_sample_spectra</code></li>
+                    <li><code style="color:var(--sapphire)">standardize_* &middot; denormalize_targets</code></li>
+                    <li><code style="color:var(--sapphire)">build_comparison &middot; aggregate</code> + buildery wykresów (Altair)</li>
+                </ul>
+                <p style="margin-top:.4rem;font-size:var(--small-size)">Testowane w izolacji, składane w potoki, wiernie odtwarzające preprocessing z treningu.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 16 - AREA B: HOF / CLOSURES / DECORATORS -->
+<section class="slide light" data-label="B · FP">
+    <div class="meta tl">OBSZAR B &middot; HOF . DOMKNIĘCIA . DEKORATORY</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">B</span> Techniki funkcyjne</div>
+            <h2 class="head">HOF &middot; domknięcia &middot; <span class="accent">dekoratory</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(3,1fr)">
+            <div class="card-x"><div class="num">FUNKCJE WYŻSZEGO RZĘDU</div><p><code class="ic">pipe(*funcs)</code> na <code>functools.reduce</code> zwraca nową funkcję; <code class="ic">make_quantum_input(...)</code> zwraca gotowe przekształcenie. UI iteruje polimorficznie po <code>build_predictors</code>.</p></div>
+            <div class="card-x"><div class="num">DOMKNIĘCIA</div><p><code class="ic">make_quantum_input</code> <b>zamyka</b> dwa scalery (<code>aux_scaler</code>, <code>spectral_scaler</code>) z checkpointu - wstrzyknięte raz, pamiętane bez przekazywania przy każdym wywołaniu.</p></div>
+            <div class="card-x"><div class="num">DEKORATORY</div><p><code class="ic">@lru_cache</code> (odczyt CSV), <code class="ic">@dataclass(frozen,slots)</code>, <code class="ic">@st.cache_data/resource</code> - funkcja poboczna (cache, niemutowalność) bez zmiany logiki.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 17 - AREA B: LISTING PIPE -->
+<section class="slide light" data-label="B · Listing">
+    <div class="meta tl">OBSZAR B &middot; LISTING 3 . HOF + DOMKNIĘCIE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">B</span> Kompozycja potoku</div>
+            <h2 class="head">Domknięcie pamiętające <span class="accent">scalery</span></h2>
+        </div>
+        <div class="code reveal-scale">
+            <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="fn">app/data/pipeline.py</span></div>
+            <pre><code><span class="k">def</span> <span class="f">pipe</span>(*funcs: <span class="t">Func</span>) -&gt; <span class="t">Func</span>:           <span class="c"># HOF: kompozycja lewo-do-prawa</span>
+    <span class="k">def</span> <span class="f">run</span>(value):
+        <span class="k">return</span> <span class="f">reduce</span>(<span class="k">lambda</span> acc, fn: <span class="f">fn</span>(acc), funcs, value)
+    <span class="k">return</span> run                              <span class="c"># domkniecie nad `funcs`</span>
+
+<span class="k">def</span> <span class="f">make_quantum_input</span>(aux_scaler, spectral_scaler):
+    aux_path = <span class="f">pipe</span>(log_scale_aux,
+                   <span class="k">lambda</span> a: <span class="f">standardize_aux</span>(a, aux_scaler))   <span class="c"># zamyka scaler</span>
+    spectra_path = <span class="f">pipe</span>(to_channels_first, normalize_sample_spectra,
+                       <span class="k">lambda</span> s: <span class="f">standardize_spectra</span>(s, spectral_scaler))
+    <span class="k">def</span> <span class="f">transform</span>(rec: <span class="t">PlanetRecord</span>):
+        <span class="k">return</span> <span class="f">aux_path</span>(rec.aux), <span class="f">spectra_path</span>(rec.spectrum)
+    <span class="k">return</span> transform</code></pre>
+        </div>
+        <p class="lead reveal center" style="max-width:84ch"><b>Analiza:</b> <code>pipe</code> zbudowany na <code>functools.reduce</code>; <code>make_quantum_input</code> wstrzykuje scalery <b>raz</b> i zwraca bezstanowy potok. Cały przepis preprocessingu w jednym miejscu.</p>
+    </div>
+</section>
+
+<!-- SLIDE 18 - AREA B: DATA FLOW PIPELINE -->
+<section class="slide light" data-label="B · Potok">
+    <div class="meta tl">OBSZAR B &middot; POTOK PRZETWARZANIA</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">B</span> Diagram przepływu danych (FP)</div>
+            <h2 class="head">Jeden niemutowalny <span class="accent">potok</span>: rekord do predykcji</h2>
+        </div>
+        <div class="viz reveal-scale" style="padding:clamp(1rem,2vw,1.6rem)">
+            <div style="display:flex;flex-direction:column;gap:clamp(.5rem,1.4vw,1rem)">
+                <div class="flow reveal"><span class="node accent">PlanetRecord</span><span class="arrow">&rarr;</span><span class="node ghost">aux: log_scale_aux &rarr; standardize_aux</span><span class="arrow">&rarr;</span><span class="node">aux_n (1,8)</span></div>
+                <div class="flow reveal"><span class="node accent" style="visibility:hidden">PlanetRecord</span><span class="node ghost">widmo: to_channels_first &rarr; normalize_sample_spectra &rarr; standardize_spectra</span><span class="arrow">&rarr;</span><span class="node">spectra_n (1,4,52)</span></div>
+                <div class="flow reveal"><span class="node">aux_n + spectra_n</span><span class="arrow">&rarr;</span><span class="node accent">model O1</span><span class="arrow">&rarr;</span><span class="node ghost">denormalize_targets</span><span class="arrow">&rarr;</span><span class="node">Prediction</span></div>
+                <div class="flow reveal" style="margin-top:.2rem;border-top:1px dashed var(--hair);padding-top:.8rem"><span class="node">Prediction(kwant)</span><span class="node">Prediction(winner)</span><span class="node">GroundTruth</span><span class="arrow">&rarr;</span><span class="node ghost">build_comparison &rarr; aggregate</span><span class="arrow">&rarr;</span><span class="node accent">RMSE</span></div>
+            </div>
+        </div>
+        <p class="lead reveal center" style="max-width:82ch">Dwie ścieżki (aux i widmo) przetwarzane <b>niezależnie</b> i składane funkcją <code>pipe</code>. Zmiana normalizacji = edycja w jednym miejscu.</p>
+    </div>
+</section>
+
+<!-- SLIDE 19 - AREA C: TRAINER OOP + SOLID -->
+<section class="slide light" data-label="C · Trening">
+    <div class="meta tl">OBSZAR C &middot; ORKIESTRACJA TRENINGU</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">C</span> Orkiestracja treningu &middot; <span class="tag oop">OOP</span> <span class="tag fp">FP</span></div>
+            <h2 class="head">Trener jako <span class="accent">koordynator</span> procesu</h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(4,1fr);width:min(96vw,1120px)">
+            <div class="card-x"><div class="num">ENKAPSULACJA (OOP)</div><p>Trainer trzyma stan uruchomienia: katalogi, kolejność etapów, runner, callbacki, artefakty.</p></div>
+            <div class="card-x"><div class="num">DWUETAPOWO</div><p>Klasyczny <b>pretrain</b> &rarr; <b>fine-tune hybrydowy</b> z przekazaniem best_model.pt.</p></div>
+            <div class="card-x"><div class="num">DRY-RUN</div><p><code class="ic">plan_two_stage()</code> - podgląd planu bez uruchamiania treningu.</p></div>
+            <div class="card-x"><div class="num">WYNIKI (FP)</div><p>Niemutowalne <code class="ic">StageSpec</code>, <code class="ic">StageResult</code>, <code class="ic">TrainingEvent</code>.</p></div>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:1fr;gap:clamp(.4rem,.9vw,.6rem);width:min(96vw,1000px)">
+            <div class="trow"><span class="mod" style="min-width:128px"><span class="tag solid">SRP</span></span><span class="desc">tylko orkiestracja - nie preprocessing ani model</span></div>
+            <div class="trow"><span class="mod" style="min-width:128px"><span class="tag solid">OCP</span></span><span class="desc">inny backend treningu/logger bez zmiany Trenera</span></div>
+            <div class="trow"><span class="mod" style="min-width:128px"><span class="tag solid">DIP</span></span><span class="desc">zależy od protokołów <code>StageRunner</code> / <code>Callback</code></span></div>
+            <div class="trow"><span class="mod" style="min-width:128px"><span class="tag solid">ISP</span></span><span class="desc">wąskie interfejsy runnera i callbacku</span></div>
+            <div class="trow"><span class="mod" style="min-width:128px"><span class="tag fp">FakeRunner</span></span><span class="desc">testy bez GPU i PennyLane (wstrzykiwana zależność)</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 20 - AREA C: ARCHITECTURE FLOW -->
+<section class="slide light" data-label="C · Przepływ">
+    <div class="meta tl">OBSZAR C &middot; DIAGRAM ARCHITEKTURY</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">C</span> Dwuetapowy przepływ + Obserwator</div>
+            <h2 class="head">Od danych do <span class="accent">artefaktów i demo</span></h2>
+        </div>
+        <div class="viz reveal-scale" style="padding:clamp(1rem,2vw,1.6rem)">
+            <div style="display:flex;flex-direction:column;gap:clamp(.6rem,1.5vw,1.1rem)">
+                <div class="flow reveal"><span class="node ghost">app.data</span><span class="arrow">&rarr;</span><span class="node ghost">TrainingConfig</span><span class="arrow">&rarr;</span><span class="node accent">Trainer</span><span class="arrow">&rarr;</span><span class="node">stage1_classical</span><span class="arrow">&rarr;</span><span class="node" style="border-color:var(--green);color:var(--green)">best_model.pt</span><span class="arrow">&rarr;</span><span class="node">stage2_hybrid</span><span class="arrow">&rarr;</span><span class="node ghost">metryki</span><span class="arrow">&rarr;</span><span class="node accent">demo</span></div>
+                <div class="flow reveal"><span class="tag solid">Obserwator</span>&nbsp;<span class="node">Trainer</span><span class="arrow">&rarr;</span><span class="node ghost">TrainingEvent</span><span class="arrow">&rarr;</span><span class="node">JSONL logger</span><span class="node" style="border-color:var(--red);color:var(--red)">fail-on-NaN</span></div>
+                <div class="flow reveal" style="border-top:1px dashed var(--hair);padding-top:.7rem"><span class="bandlbl" style="font-family:var(--font-mono);color:var(--muted)">artefakty:</span><span class="node ghost">history.csv</span><span class="node ghost">validation_metrics.json</span><span class="node ghost">holdout_metrics.json</span><span class="node ghost">artifacts_manifest.json</span><span class="node ghost">failed_stage.json</span></div>
+            </div>
+        </div>
+        <p class="lead reveal center" style="max-width:80ch">Callbacki to wzorzec <b>Obserwator</b>: oddzielają logowanie i walidację metryk od pętli. Jawne artefakty czynią wyniki i awarie łatwymi do odtworzenia.</p>
+    </div>
+</section>
+
+<!-- SLIDE 21 - AREA D: UI INFERENCE LAYER -->
+<section class="slide light" data-label="D · Demo">
+    <div class="meta tl">OBSZAR D &middot; WARSTWA DEMO / INFERENCJA</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">D</span> Warstwa demo &middot; <span class="tag oop">OOP</span> <span class="tag fp">FP</span></div>
+            <h2 class="head">Fasada nad modelem + <span class="accent">czyste wykresy</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(2,1fr)">
+            <div class="card-x"><div class="num"><span class="tag oop">OOP</span> &nbsp; ADAPTER INFERENCJI</div><p><code class="ic">Predictor (ABC)</code> + trzy strategie (<code>RandomForest</code> / <code>ClassicalHead</code> / <code>ReferenceQuantum</code>) + Fabryka <code>build_predictors</code> oraz niemutowalna fasada <code>InferenceEngine</code> nad checkpointem.</p></div>
+            <div class="card-x"><div class="num"><span class="tag fp">FP</span> &nbsp; CZYSTE BUILDERY</div><p><code class="ic">components.py</code> - każda funkcja zwraca obiekt Altair, zero wywołań <code>st.*</code>, więc wykresy testujemy bez aplikacji.</p></div>
+            <div class="card-x"><div class="num"><span class="tag fp">FP</span> &nbsp; WHAT-IF</div><p><code class="ic">whatif.py</code> - każdy ruch suwaka buduje <b>nowy, niemutowalny</b> rekord widma (<code>scale_features</code>, <code>add_noise</code>, <code>tilt</code>), nie mutuje istniejącego.</p></div>
+            <div class="card-x"><div class="num"><span class="tag oop">OOP</span> &nbsp; ORKIESTRACJA</div><p><code class="ic">app.py</code> - wyłącznie wywołania <code>st.*</code>, cache (<code>@st.cache_resource</code> / <code>@st.cache_data</code>) i obsługa błędów; logikę deleguje niżej.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 22 - AREA D: LISTING PREDICTOR + FACTORY -->
+<section class="slide light" data-label="D · Listing">
+    <div class="meta tl">OBSZAR D &middot; LISTING 4 . STRATEGIA + FABRYKA W UI</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="area"><span class="b">D</span> Wymienne predyktory, jeden kontrakt</div>
+            <h2 class="head">UI iteruje predyktory <span class="accent">polimorficznie</span></h2>
+        </div>
+        <div class="code reveal-scale">
+            <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="fn">app/ui/inference_adapter.py</span></div>
+            <pre><code><span class="k">class</span> <span class="t">Predictor</span>(<span class="t">ABC</span>):                       <span class="c"># wspolny interfejs (Strategia)</span>
+    name: str
+    <span class="d">@abstractmethod</span>
+    <span class="k">def</span> <span class="f">predict</span>(self, record: <span class="t">PlanetRecord</span>) -&gt; <span class="t">Prediction</span> | <span class="k">None</span>: ...
+
+<span class="k">class</span> <span class="t">RandomForestPredictor</span>(<span class="t">Predictor</span>):
+    name = <span class="t">BASELINE_MODEL_NAME</span>
+    <span class="k">def</span> <span class="f">predict</span>(self, record): <span class="k">return</span> <span class="f">rf_prediction</span>(record)
+
+<span class="k">class</span> <span class="t">ClassicalHeadPredictor</span>(<span class="t">Predictor</span>):     <span class="c"># glowica klasyczna na zywo</span>
+    name = <span class="t">CLASSICAL_MODEL_NAME</span>
+    <span class="k">def</span> <span class="f">predict</span>(self, record): <span class="k">return</span> self._engine.<span class="f">predict</span>(record)
+
+<span class="k">def</span> <span class="f">build_predictors</span>(engine) -&gt; list[<span class="t">Predictor</span>]:    <span class="c"># Fabryka</span>
+    <span class="k">return</span> [<span class="t">RandomForestPredictor</span>(), <span class="t">ClassicalHeadPredictor</span>(engine),
+            <span class="t">ReferenceQuantumPredictor</span>(engine.checkpoint_dir)]</code></pre>
+        </div>
+        <p class="lead reveal center" style="max-width:84ch"><b>Analiza:</b> <code>predict()</code> zwraca <code>Prediction | None</code>, więc UI iteruje predyktory bez <code>if</code>-ów per model. Nowy model = nowa klasa + wpis w fabryce (<b>OCP</b>); <code>None</code> = czysta rezygnacja, gdy brak danych kwantowych.</p>
+    </div>
+</section>
+
+<!-- SLIDE 23 - TESTING -->
+<section class="slide light" data-label="Testy">
+    <div class="meta tl">TECHNIKA &middot; TESTOWANIE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Strategia testowania</div>
+            <h2 class="head">Jednostkowe &middot; integracyjne &middot; <span class="accent">smoke na GPU</span></h2>
+        </div>
+        <div class="cards stagger" style="grid-template-columns:repeat(4,1fr);width:min(96vw,1180px)">
+            <div class="stat"><div class="v" data-count="35">0</div><div class="l">testów OK<br>(5 skipped)</div></div>
+            <div class="stat"><div class="v" data-count="95" data-suffix="%">0</div><div class="l">pokrycie<br>app.training</div></div>
+            <div class="stat"><div class="v" data-count="19" data-prefix="TC-" data-pad="2">0</div><div class="l">przypadków<br>TC-01...TC-19 PASS</div></div>
+            <div class="stat"><div class="v" data-count="12">0</div><div class="l">testów warstwy<br>UI (test_o4_ui)</div></div>
+        </div>
+        <div class="split" style="margin-top:.4rem;align-items:stretch">
+            <div class="card-x reveal"><div class="num">RODZAJE TESTÓW</div>
+                <ul class="blist" style="margin-top:.3rem">
+                    <li><b>Jednostkowe:</b> app.data, app.training, warstwa UI, most Garnet</li>
+                    <li><b>Integracyjne:</b> <code>FakeRunner</code> - Trainer↔StageSpec↔StageResult bez GPU</li>
+                    <li><b>E2E/smoke:</b> realny RTX 4090 (torch 2.10+cu128, lightning.gpu)</li>
+                </ul></div>
+            <div class="card-x reveal"><div class="num">TESTY PARADYGMATU</div>
+                <p style="margin:.3rem 0"><span class="tag fp">FP</span> <code>TestImmutability &middot; TestHardening</code> - mutacja tablicy rzuca błąd.</p>
+                <p><span class="tag fp">FP</span> <code>TestPureFunctions &middot; TestComposition</code> - determinizm i <code>pipe</code>.</p>
+                <p style="margin-top:.3rem"><span class="tag oop">OOP</span> <code>ModelShapeTests &middot; TestComponents</code> - polimorficzny <code>forward()</code>, czyste buildery.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- SLIDE 24 - RESULTS -->
+<section class="slide dark" data-label="Wyniki">
+    <div class="stars" data-stars="40"></div>
+    <div class="meta tl" style="color:#7fb0ff">WYNIKI . MODEL KWANTOWY vs BASELINE</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">mRMSE na 4142 planetach walidacyjnych (mniej = lepiej)</div>
+            <h2 class="head" style="text-align:center">Kwantowy <span class="accent">4x bliżej prawdy</span> niż baseline</h2>
+        </div>
+        <div class="split" style="align-items:center">
+            <div class="bars reveal-scale" aria-label="Porownanie mRMSE">
+                <div class="bar-col"><div class="bar-fill" style="background:linear-gradient(var(--green),#0f7a52)" data-h="34"><span>0.294</span></div><div class="bar-name" style="color:#c4d2ee">kwantowy</div></div>
+                <div class="bar-col"><div class="bar-fill" style="background:linear-gradient(var(--sky),var(--sapphire))" data-h="46"><span>~0.40</span></div><div class="bar-name" style="color:#c4d2ee">klasyczny</div></div>
+                <div class="bar-col"><div class="bar-fill" style="background:linear-gradient(#7a8aa8,#5b6675)" data-h="100"><span>1.267</span></div><div class="bar-name" style="color:#c4d2ee">baseline RF</div></div>
+            </div>
+            <div class="cards stagger">
+                <div class="stat"><div class="v" data-count="0.294" data-dec="3">0</div><div class="l">mRMSE modelu kwantowego (4142 planety walidacyjne)</div></div>
+                <div class="stat"><div class="v">0.910<span style="font-size:.5em"> vs </span>0.989</div><div class="l">smoke RTX 4090: walidacja RMSE hybryda vs klasyczny (4096 train)</div></div>
+                <div class="stat"><div class="v">8<span style="font-size:.45em"> kubitow</span></div><div class="l">obwód kwantowy &middot; 52 biny &middot; 4 kanały &middot; 8 cech aux</div></div>
+            </div>
+        </div>
+        <p class="lead reveal center" style="color:#c4d2ee;max-width:80ch">Wszystkie cele funkcjonalne zrealizowane. Etap hybrydowy poprawił wynik względem klasycznego również na holdout (0.891 vs 0.990); skuteczność widoczna na wykresie parity per gaz.</p>
+    </div>
+</section>
+
+<!-- SLIDE 25 - CONCLUSIONS / PARADIGM EVAL -->
+<section class="slide light" data-label="Wnioski">
+    <div class="meta tl">WNIOSKI &middot; OCENA PARADYGMATU</div>
+    <div class="slide-content fill">
+        <div class="heading-row center reveal">
+            <div class="eyebrow">Retrospektywa</div>
+            <h2 class="head">Czy hybryda wniosła <span class="accent">wartość dodaną?</span></h2>
+        </div>
+        <div class="split" style="align-items:stretch">
+            <div class="card-x reveal"><div class="num" style="color:var(--green)">ZALETY</div>
+                <ul class="blist" style="margin-top:.3rem">
+                    <li><b>Trafny wybór:</b> zadanie ma dwie warstwy - stanowy proces vs bezstanowe transformacje</li>
+                    <li><b>Testowalność:</b> czyste funkcje i niemutowalne dane testujemy bez GPU i przeglądarki</li>
+                    <li><b>Modularność:</b> wymiana modelu/strategii bez zmian w reszcie systemu</li>
+                </ul></div>
+            <div class="card-x reveal"><div class="num" style="color:var(--amber)">OGRANICZENIA</div>
+                <ul class="blist" style="margin-top:.3rem">
+                    <li>Pokusa mieszania paradygmatów na styku z bibliotekami stanowymi (Streamlit, torch)</li>
+                    <li>Wymaga <b>dyscypliny</b> trzymania efektów ubocznych na brzegu (I/O w jednym module)</li>
+                    <li>Bez zbędnej złożoności: czysto imperatywne podejście splotłoby wybór modelu z renderowaniem</li>
+                </ul></div>
+        </div>
+        <p class="lead reveal center" style="max-width:82ch">OOP uporządkowało proces i zależności, FP - transformacje danych. Paradygmaty się <b>uzupełniają</b>, nie kolidują.</p>
+    </div>
+</section>
+
+<!-- SLIDE 26 - CLOSING -->
+<section class="slide dark" data-label="Dziękujemy">
+    <div class="stars" data-stars="80"></div>
+    <div class="hero-wrap">
+        <div class="planet reveal-scale" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+                <g class="ring"><ellipse cx="60" cy="60" rx="54" ry="13" fill="none" stroke="#4f86c6" stroke-width="3" opacity=".7" transform="rotate(-20 60 60)"/></g>
+                <circle cx="60" cy="60" r="26" fill="url(#pg2)"/>
+                <circle cx="51" cy="51" r="7.5" fill="#d6e6f3" opacity=".6"/>
+                <defs><radialGradient id="pg2" cx="38%" cy="35%"><stop offset="0%" stop-color="#6ea8ff"/><stop offset="60%" stop-color="#0f52ba"/><stop offset="100%" stop-color="#073a86"/></radialGradient></defs>
+            </svg>
+        </div>
+        <div class="eyebrow reveal">Dziękujemy za uwagę</div>
+        <h1 class="title reveal">ExoBiome</h1>
+        <p class="lead reveal" style="text-align:center;color:#c4d2ee;max-width:58ch">Hybryda OOP + funkcyjny jako odpowiedź na dwoistą naturę problemu retrievalu biosygnatur.</p>
+        <div class="byline reveal" style="font-size:var(--small-size);opacity:.85;max-width:80ch;justify-content:center">
+            <span>Ariel Data Challenge 2023</span><span>&middot;</span><span>arXiv:2009.02823</span><span>&middot;</span><span>ADC2023 CNN baseline</span><span>&middot;</span><span>scikit-learn</span><span>&middot;</span><span>Streamlit</span>
+        </div>
+        <div class="byline reveal" style="opacity:.7"><span>Grupa 67</span><span>&middot;</span><span>Paradygmaty Programowania</span><span>&middot;</span><span>18.06.2026</span></div>
+    </div>
+</section>
+
+<script>
+/* STARFIELD - twinkling dots on dark slides (safe DOM build) */
+document.querySelectorAll('.stars').forEach(field => {
+    const n = parseInt(field.dataset.stars || '50', 10);
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < n; i++){
+        const s = document.createElement('span');
+        const x = (i * 137.5) % 100, y = (i * 53.7 + (i % 7) * 11) % 100, size = (1 + (i % 3) * 0.7);
+        s.style.left = x + '%'; s.style.top = y + '%'; s.style.width = size + 'px'; s.style.height = size + 'px';
+        s.style.animationDuration = (2 + (i % 5)) + 's'; s.style.animationDelay = ((i % 9) * 0.4) + 's';
+        frag.appendChild(s);
+    }
+    field.appendChild(frag);
+});
+
+/* SLIDE CONTROLLER - keyboard / wheel / touch nav + progress + dots + reveal observer + counters */
+class SlidePresentation {
+    constructor(){
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.current = 0; this.locked = false;
+        this.setupObserver(); this.setupKeyboard(); this.setupWheel(); this.setupTouch(); this.setupDots(); this.setupProgress();
+    }
+    setupObserver(){
+        const io = new IntersectionObserver((entries)=>{
+            entries.forEach(e=>{
+                if (e.isIntersecting && e.intersectionRatio > 0.5){
+                    e.target.classList.add('visible');
+                    this.current = this.slides.indexOf(e.target); this.syncDots();
+                    if (!e.target.dataset.played){ e.target.dataset.played = '1'; this.runCounters(e.target); this.runBars(e.target); }
+                }
+            });
+        }, { threshold:[0.5] });
+        this.slides.forEach(s=>io.observe(s));
+        this.slides[0].classList.add('visible'); this.slides[0].dataset.played = '1';
+        this.runCounters(this.slides[0]); this.runBars(this.slides[0]);
+    }
+    runCounters(slide){
+        slide.querySelectorAll('[data-count]').forEach(el=>{
+            const target = parseFloat(el.dataset.count);
+            const dec = parseInt(el.dataset.dec || '0', 10), pad = parseInt(el.dataset.pad || '0', 10);
+            const prefix = el.dataset.prefix || '', suffix = el.dataset.suffix || '';
+            const dur = 1100, t0 = performance.now();
+            const fmt = v => { let s = dec ? v.toFixed(dec) : Math.round(v).toString(); if (pad) s = s.padStart(pad, '0'); return prefix + s + suffix; };
+            const step = (now)=>{ const p = Math.min(1, (now - t0) / dur), eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = fmt(target * eased); if (p < 1) requestAnimationFrame(step); else el.textContent = fmt(target); };
+            requestAnimationFrame(step);
+        });
+    }
+    runBars(slide){ slide.querySelectorAll('.bar-fill[data-h]').forEach((el, i)=>{ setTimeout(()=>{ el.style.height = el.dataset.h + '%'; }, 200 + i*120); }); }
+    goTo(i){ i = Math.max(0, Math.min(this.slides.length - 1, i)); this.slides[i].scrollIntoView({ behavior:'smooth' }); }
+    next(){ this.goTo(this.current + 1); } prev(){ this.goTo(this.current - 1); }
+    setupKeyboard(){
+        document.addEventListener('keydown', e=>{
+            if (['ArrowDown','ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); this.next(); }
+            else if (['ArrowUp','ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); this.prev(); }
+            else if (e.key === 'Home'){ e.preventDefault(); this.goTo(0); }
+            else if (e.key === 'End'){ e.preventDefault(); this.goTo(this.slides.length-1); }
+        });
+    }
+    setupWheel(){
+        window.addEventListener('wheel', e=>{
+            if (this.locked) return; if (Math.abs(e.deltaY) < 18) return;
+            this.locked = true; (e.deltaY > 0) ? this.next() : this.prev(); setTimeout(()=>{ this.locked = false; }, 750);
+        }, { passive:true });
+    }
+    setupTouch(){
+        let y0 = null;
+        window.addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, { passive:true });
+        window.addEventListener('touchend', e=>{ if (y0 === null) return; const dy = y0 - e.changedTouches[0].clientY;
+            if (Math.abs(dy) > 50){ (dy > 0) ? this.next() : this.prev(); } y0 = null; }, { passive:true });
+    }
+    setupDots(){
+        const nav = document.querySelector('.nav-dots');
+        this.slides.forEach((s, i)=>{ const b = document.createElement('button'); const label = s.dataset.label || ('Slajd ' + (i+1));
+            b.setAttribute('aria-label', label); b.title = label; b.addEventListener('click', ()=> this.goTo(i)); nav.appendChild(b); });
+        this.dots = Array.from(nav.children); this.syncDots();
+    }
+    syncDots(){ if (this.dots) this.dots.forEach((d, i)=> d.classList.toggle('active', i === this.current)); }
+    setupProgress(){
+        const bar = document.querySelector('.progress-bar');
+        const update = ()=>{ const max = document.body.scrollHeight - window.innerHeight; bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%'; };
+        window.addEventListener('scroll', update, { passive:true }); update();
+    }
+}
+new SlidePresentation();
+</script>
+</body>
+</html>
