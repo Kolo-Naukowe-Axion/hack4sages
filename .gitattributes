@@ -1,3 +1,4 @@
 models/adc_winner_on_ariel/trained_run/*.pt filter=lfs diff=lfs merge=lfs -text
 "data/TauREx set/*.h5" filter=lfs diff=lfs merge=lfs -text
 "data/TauREx set/*.parquet" filter=lfs diff=lfs merge=lfs -text
+models/adc_baseline/*.h5 filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,24 @@
+# CNN / ADC2023 baseline env — Python 3.11.
+#
+# These versions are frozen from the ACTUAL working env that trained the CNN:
+#   /Users/mariaplatek/projects/AXION/model_cool/ADC2023-baseline/.venv
+# All imports resolve cleanly there (numpy 2 + TensorFlow 2.21 + Keras 3 + taurex/nestle).
+#
+# Key lesson: on Python 3.11, TensorFlow only supports numpy>=2 from **2.21** (NOT 2.15/2.17).
+# Keras 3 loads the legacy cnn_*.weights.h5 via load_weights -> no tf-keras / legacy flag needed.
+#
+# Easiest path: just use that existing venv directly. This file is for a clean rebuild if needed.
+#
+numpy==2.4.3
+tensorflow==2.21.0
+keras>=3.13,<4
+pandas==3.0.1
+h5py==3.14.0
+scikit-learn==1.8.0
+matplotlib>=3.7
+tqdm>=4.66
+scipy>=1.11
+# ADC2023 baseline retrieval stack (imported at top of FM_utils_final.py / posterior_utils.py):
+nestle==0.2.1
+taurex==3.3.2
+astropy==7.2.0   # working env has 7.2.0 (NOT 8; astropy 8 forced the numpy-2-only conflict)

@@ -12,6 +12,9 @@ web/presentation-lab/tsconfig.tsbuildinfo
 # Python
 .venv/
 .venv-ariel-eval/
+.venv-qml/
+.venv-cnn/
+.venv-poseidon/
 local_runs/
 __pycache__/
 *.pyc
@@ -40,8 +43,15 @@ data/petitradtrans-adc2023-validation/
 data/reference_data/
 data/eda/
 data/published/
-data/TauREx set/
+data/TauREx set/*
+!data/TauREx set/*.json
+!data/TauREx set/*.md
+!data/TauREx set/baseline_poseidon_predictions.csv
+!data/TauREx set/baseline_smoke.json
 
 # EDA local assets
 data/eda/data/
 data/eda/.venv/
+
+# Skonsolidowane wagi/artefakty z rozproszonych folderów lokalnych (2026-07) — nie commitować
+artifacts/imported_weights/
