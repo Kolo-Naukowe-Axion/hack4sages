@@ -1,0 +1,18 @@
+# Reproduces the environment that generated data/petitradtrans-adc2023-validation/
+# (manifest.json: software_versions). Requires Python 3.9.x specifically (petitRADTRANS 2.6.7
+# does not support newer Python at time of generation) — use a dedicated venv, not .venv-qml/-cnn.
+#
+# meson-python / ninja are petitRADTRANS's build backend (Fortran extension compilation);
+# molmass is a runtime dependency of petitRADTRANS itself. Neither is physics-critical, so left
+# unpinned; the four below are, and are pinned exactly to manifest.json's recorded versions.
+h5py==3.10.0
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.11.4
+petitRADTRANS==2.6.7
+taurex==3.2.4
+pyarrow
+tables
+meson-python
+molmass
+ninja

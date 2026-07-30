@@ -1,0 +1,7 @@
+# Reproduces the environment that generated the TauREx side of data/crossgen_biosignatures
+# (data/TauREx set/, manifest.json: software_versions.tau = "3.2.4").
+h5py>=3.10,<4
+numpy>=1.26,<3
+pandas>=2.2,<3
+pyarrow>=16
+taurex==3.2.4
