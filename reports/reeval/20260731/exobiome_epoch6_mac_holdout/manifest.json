@@ -1,0 +1,64 @@
+{
+  "model": "exobiome_epoch6_mac_holdout",
+  "method": "recompute-from-artifact-predictions",
+  "timestamp_utc": "2026-07-31T05:50:40.467470+00:00",
+  "git_commit": "77013c937af33a98780982d05864eebbc82d2fb0-dirty",
+  "python": "3.12.13",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "pennylane-lightning": "0.44.0",
+    "zuko": "1.6.0",
+    "tensorflow": "not-installed",
+    "scikit-learn": "1.9.0",
+    "h5py": "3.16.0"
+  },
+  "checkpoint": {
+    "path": "/Users/mariaplatek/projects/AXION/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+    "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6",
+    "declared": true,
+    "present": true
+  },
+  "inputs": {
+    "source_predictions": {
+      "path": "/Users/mariaplatek/projects/AXION/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/mac_holdout_predictions.csv",
+      "sha256": "7876974c2a22f2e72774007fff076ebbc077571cb0f333f9e834393969bfe88b"
+    }
+  },
+  "truth_check": {
+    "label_source": "data/ariel-ml-dataset/TrainingData/Ground Truth Package/FM_Parameter_Table.csv",
+    "label_source_sha256": "c544a12872d1899abb8539170cda1f370d30da97f91e878d7eacb17e98a9334b",
+    "n_rows_compared": 4143,
+    "n_ids_unmatched": 0,
+    "max_abs_diff_per_gas": {
+      "log_H2O": 9.104091578393536e-07,
+      "log_CO2": 8.988129227560648e-07,
+      "log_CO": 4.569208353899512e-07,
+      "log_CH4": 8.906704511701946e-07,
+      "log_NH3": 9.302520798115665e-07
+    },
+    "max_abs_diff": 9.302520798115665e-07,
+    "tolerance": 1e-05,
+    "verified": true,
+    "what_this_establishes": "the CSV's true_* column equals an independent load of the labels; without it, recomputation only proves internal consistency of the CSV"
+  },
+  "data_root": "data/ariel-ml-dataset",
+  "split_manifest": null,
+  "seed": 42,
+  "quantum_scale": 1.0,
+  "rmse_mean": 0.298692656545864,
+  "rows": 4143,
+  "reported": 0.29869264364242554,
+  "delta_vs_reported": 1e-08,
+  "status": "verified",
+  "tolerance": 5e-05,
+  "tolerance_kind": "fixed",
+  "outputs": {
+    "metrics": "metrics.json",
+    "predictions": null
+  },
+  "notes": "#3 mac re-eval holdout. This is the one artifact that pins the scale exactly, which is why this is the only case here that asserts a quantum_scale: 0.29869264364242554 equals the a04 sweep at 1.0 to the last digit (matches_mac_reeval = true at 1.0 and at no other scale)."
+}

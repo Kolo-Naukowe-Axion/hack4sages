@@ -1,0 +1,276 @@
+{
+  "check": "a11_pairing_audit",
+  "finding": "P3 \u2014 the quantum-vs-noquant comparison is unmatched on ~10 axes, including two different losses under one name",
+  "question": "Which configuration fields differ between two runs presented as an ablation pair?",
+  "pass_criterion": "differences confined to the declared factor under study",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:55.732995+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "reports/ariel_quantum_taurex_snapshot_20260312_1003/config.json",
+      "sha256": "992d4c789c28c302f1c3bbb8828e029a80ed4f1676ca4a1810f9e2f5e5c5e9f1"
+    },
+    {
+      "path": "reports/taurex_noquant_taurex_snapshot_20260312_133054/config.json",
+      "sha256": "69dcff648feaa086fe5c2b9ddde1739942de16ab78949772b20f5dae6e09f678"
+    }
+  ],
+  "payload": {
+    "run_a": "reports/ariel_quantum_taurex_snapshot_20260312_1003",
+    "run_b": "reports/taurex_noquant_taurex_snapshot_20260312_133054",
+    "n_differing_fields": 19,
+    "differences": {
+      "batch_size": {
+        "a": 128,
+        "b": 256,
+        "declared_factor": false
+      },
+      "classical_lr": {
+        "a": 5e-05,
+        "b": 0.001,
+        "declared_factor": false
+      },
+      "early_stop_patience": {
+        "a": 5,
+        "b": 12,
+        "declared_factor": false
+      },
+      "init_checkpoint_path": {
+        "a": "/workspace/hack4sages/outputs/ariel_quantum_taurex_20260312_0957/stage1_classical/best_model.pt",
+        "b": null,
+        "declared_factor": false
+      },
+      "log_every_batches": {
+        "a": 10,
+        "b": 50,
+        "declared_factor": false
+      },
+      "max_epochs": {
+        "a": 20,
+        "b": 60,
+        "declared_factor": false
+      },
+      "quantum_backbone_freeze_epochs": {
+        "a": 4,
+        "b": 0,
+        "declared_factor": false
+      },
+      "quantum_device": {
+        "a": "lightning.gpu",
+        "b": "classical_refiner",
+        "declared_factor": true
+      },
+      "quantum_lr": {
+        "a": 0.0002,
+        "b": 0.0005,
+        "declared_factor": false
+      },
+      "quantum_ramp_epochs": {
+        "a": 8,
+        "b": 6,
+        "declared_factor": false
+      },
+      "quantum_use_async": {
+        "a": true,
+        "b": false,
+        "declared_factor": false
+      },
+      "quantum_warmup_epochs": {
+        "a": 0,
+        "b": 3,
+        "declared_factor": false
+      },
+      "refinement_layers": {
+        "a": null,
+        "b": 2,
+        "declared_factor": false
+      },
+      "refinement_lr": {
+        "a": null,
+        "b": 0.0005,
+        "declared_factor": false
+      },
+      "refinement_width": {
+        "a": null,
+        "b": 32,
+        "declared_factor": false
+      },
+      "scheduler_patience": {
+        "a": 2,
+        "b": 4,
+        "declared_factor": false
+      },
+      "taurex_ignore_poseidon": {
+        "a": null,
+        "b": true,
+        "declared_factor": false
+      },
+      "state.best_epoch": {
+        "a": 5,
+        "b": 59,
+        "declared_factor": false
+      },
+      "state.quantum_scale": {
+        "a": 0.625,
+        "b": null,
+        "declared_factor": false
+      }
+    },
+    "confounding_differences": {
+      "batch_size": {
+        "a": 128,
+        "b": 256,
+        "declared_factor": false
+      },
+      "classical_lr": {
+        "a": 5e-05,
+        "b": 0.001,
+        "declared_factor": false
+      },
+      "early_stop_patience": {
+        "a": 5,
+        "b": 12,
+        "declared_factor": false
+      },
+      "init_checkpoint_path": {
+        "a": "/workspace/hack4sages/outputs/ariel_quantum_taurex_20260312_0957/stage1_classical/best_model.pt",
+        "b": null,
+        "declared_factor": false
+      },
+      "log_every_batches": {
+        "a": 10,
+        "b": 50,
+        "declared_factor": false
+      },
+      "max_epochs": {
+        "a": 20,
+        "b": 60,
+        "declared_factor": false
+      },
+      "quantum_backbone_freeze_epochs": {
+        "a": 4,
+        "b": 0,
+        "declared_factor": false
+      },
+      "quantum_lr": {
+        "a": 0.0002,
+        "b": 0.0005,
+        "declared_factor": false
+      },
+      "quantum_ramp_epochs": {
+        "a": 8,
+        "b": 6,
+        "declared_factor": false
+      },
+      "quantum_use_async": {
+        "a": true,
+        "b": false,
+        "declared_factor": false
+      },
+      "quantum_warmup_epochs": {
+        "a": 0,
+        "b": 3,
+        "declared_factor": false
+      },
+      "refinement_layers": {
+        "a": null,
+        "b": 2,
+        "declared_factor": false
+      },
+      "refinement_lr": {
+        "a": null,
+        "b": 0.0005,
+        "declared_factor": false
+      },
+      "refinement_width": {
+        "a": null,
+        "b": 32,
+        "declared_factor": false
+      },
+      "scheduler_patience": {
+        "a": 2,
+        "b": 4,
+        "declared_factor": false
+      },
+      "taurex_ignore_poseidon": {
+        "a": null,
+        "b": true,
+        "declared_factor": false
+      },
+      "state.best_epoch": {
+        "a": 5,
+        "b": 59,
+        "declared_factor": false
+      },
+      "state.quantum_scale": {
+        "a": 0.625,
+        "b": null,
+        "declared_factor": false
+      },
+      "loss_function_behind_loss_name_mse": {
+        "a": "nn.MSELoss() na targetach z-scored (waga per-gaz 1/sigma_g^2)",
+        "b": "OriginalScaleMSELoss na targetach w skali oryginalnej (waga per-gaz rowna)",
+        "declared_factor": false,
+        "evidence": "oba markery obecne w kodzie obu pakietow (patrz loss_semantics)"
+      }
+    },
+    "n_confounding_differences": 19,
+    "loss_semantics": {
+      "models/taurex_exobiome/training.py": {
+        "marker_present": true,
+        "meaning": "MSE on z-scored targets -> implicit per-gas weight 1/sigma_g^2"
+      },
+      "models/taurex_exobiome_without_quant/training.py": {
+        "marker_present": true,
+        "meaning": "MSE on ORIGINAL-scale targets -> equal per-gas weight; package also offers 'mrmse', which directly optimises the reported metric"
+      }
+    },
+    "residual_branch_params": {
+      "quantum_arm": {
+        "modules": {
+          "projector": 17560,
+          "quantum_block": 24,
+          "quantum_head": 51845,
+          "quantum_gate": 5
+        },
+        "total": 69434,
+        "circuit_params": 24,
+        "gated": true,
+        "gate_init": "zeros",
+        "source": "measured from models.taurex_exobiome.build_model(named_parameters)"
+      },
+      "classical_control_arm": {
+        "modules": {
+          "refinement_projector": 20704,
+          "refinement_block": 8576,
+          "refinement_head": 56453
+        },
+        "total": 85733,
+        "gated": false,
+        "gate_init": null,
+        "source": "measured from models.taurex_exobiome_without_quant.build_model(named_parameters)"
+      },
+      "control_over_quantum_capacity": 1.2347409050321168,
+      "both_arms_measured": true,
+      "matches_previously_hardcoded": {
+        "quantum_arm": true,
+        "classical_control_arm": true
+      },
+      "note": "the 'control' carries 23.5% MORE residual capacity than the arm it controls for, and no gate"
+    },
+    "interpretation": "Every confounding difference is an alternative explanation for the measured delta. With this many, the delta is not attributable to the quantum branch at all."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "model": "sota_validation_mean",
+  "method": "reeval-from-weights (evaluate_point_metric, num_samples=128, mean; 5 noise seed(s))",
+  "timestamp_utc": "2026-07-31T05:51:01.997536+00:00",
+  "git_commit": "77013c937af33a98780982d05864eebbc82d2fb0-dirty",
+  "python": "3.12.13",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "pennylane-lightning": "0.44.0",
+    "zuko": "1.6.0",
+    "tensorflow": "not-installed",
+    "scikit-learn": "1.9.0",
+    "h5py": "3.16.0"
+  },
+  "checkpoint": {
+    "path": "/Users/mariaplatek/projects/AXION/hack4sages/models/adc_winner_on_ariel/trained_run/best_model_by_mrmse.pt",
+    "sha256": "93b13248c16813df7317ac026e1d935c72633c9f6f5f6c3942c76753520a2830",
+    "declared": true,
+    "present": true
+  },
+  "inputs": null,
+  "truth_check": null,
+  "data_root": "data/ariel-ml-dataset",
+  "split_manifest": "data/val_dataset/manifest.json",
+  "seed": 42,
+  "quantum_scale": null,
+  "rmse_mean": 0.5438315153121949,
+  "rows": 4142,
+  "reported": null,
+  "delta_vs_reported": null,
+  "status": null,
+  "tolerance": 0.003118990567313068,
+  "tolerance_kind": "seed-band",
+  "outputs": {
+    "metrics": "metrics.json",
+    "predictions": null
+  },
+  "notes": "ADC2023 winner-style INDEPENDENT NSF (5 gas marginals only), team reimplementation, NOT the winner's released weights and NOT the joint 7-target posterior. point_estimate=mean (plan \u00a76B mandates 'mean' for the inter-class benchmark; 'median' reproduces the as-reported number). Eval samples observation noise -> stochastic; device=cpu (original: cuda). band mean=0.543832 std=0.001559 over seeds [42, 1, 2, 3, 4]; no as-reported mean baseline."
+}

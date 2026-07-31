@@ -1,0 +1,64 @@
+{
+  "model": "exobiome_epoch6_val",
+  "method": "recompute-from-artifact-predictions",
+  "timestamp_utc": "2026-07-31T05:50:40.361888+00:00",
+  "git_commit": "77013c937af33a98780982d05864eebbc82d2fb0-dirty",
+  "python": "3.12.13",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "pennylane-lightning": "0.44.0",
+    "zuko": "1.6.0",
+    "tensorflow": "not-installed",
+    "scikit-learn": "1.9.0",
+    "h5py": "3.16.0"
+  },
+  "checkpoint": {
+    "path": "/Users/mariaplatek/projects/AXION/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+    "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6",
+    "declared": true,
+    "present": true
+  },
+  "inputs": {
+    "source_predictions": {
+      "path": "/Users/mariaplatek/projects/AXION/hack4sages/artifacts/ariel_quantum_best_v4_epoch6/validation_predictions.csv",
+      "sha256": "6e7886ba0c76c33ba912070702fc243f6831ef5c83f1a8465b8bb629f54d1a1c"
+    }
+  },
+  "truth_check": {
+    "label_source": "data/ariel-ml-dataset/TrainingData/Ground Truth Package/FM_Parameter_Table.csv",
+    "label_source_sha256": "c544a12872d1899abb8539170cda1f370d30da97f91e878d7eacb17e98a9334b",
+    "n_rows_compared": 4142,
+    "n_ids_unmatched": 0,
+    "max_abs_diff_per_gas": {
+      "log_H2O": 8.981799215490582e-07,
+      "log_CO2": 9.21018720845268e-07,
+      "log_CO": 4.6224044236709005e-07,
+      "log_CH4": 9.209581115499077e-07,
+      "log_NH3": 9.38398718730582e-07
+    },
+    "max_abs_diff": 9.38398718730582e-07,
+    "tolerance": 1e-05,
+    "verified": true,
+    "what_this_establishes": "the CSV's true_* column equals an independent load of the labels; without it, recomputation only proves internal consistency of the CSV"
+  },
+  "data_root": "data/ariel-ml-dataset",
+  "split_manifest": "artifacts/ariel_quantum_best_v4_epoch6/split_manifest.json",
+  "seed": 42,
+  "quantum_scale": null,
+  "rmse_mean": 0.29361368736850973,
+  "rows": 4142,
+  "reported": 0.29361358284950256,
+  "delta_vs_reported": 1e-07,
+  "status": "verified",
+  "tolerance": 5e-05,
+  "tolerance_kind": "fixed",
+  "outputs": {
+    "metrics": "metrics.json",
+    "predictions": null
+  },
+  "notes": "#2. What is recomputed here is the committed scalar 0.293614 from the committed CSV; the eval scale behind that number is NOT established and this record does not assert one. a04 swept the checkpoint at five scales and reports scales_reproducing_the_published_number = [] on this split: 0.294821 at scale 1.0 and 0.292237 at 0.5 both differ from 0.293614. CUDA+AMP at scale 1.0 is the most likely explanation for the ~1.2e-3 gap and stays a HYPOTHESIS (K4); a04:34-36 states outright that matching only the Mac re-eval does not establish the provenance of the published number. quantum_scale is therefore left null rather than guessed."
+}

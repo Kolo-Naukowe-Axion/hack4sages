@@ -1,0 +1,132 @@
+{
+  "check": "a12_significance_power",
+  "finding": "P7 / P4 \u2014 all 'significance' is row bootstrap on one checkpoint; no seed variance, no multiplicity control",
+  "question": "Is the resampling unit the right one for the claim, and can the set sizes resolve the claimed effects?",
+  "pass_criterion": "effect claims backed by >=5 seeds (derived from repo files) and larger than the across-seed spread",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:57.458917+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_predictions.csv",
+      "sha256": "99bf9fcc60202d849ca87de2c5ab13eebebd06559648c39c98fc6938daf61687"
+    },
+    {
+      "path": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_predictions.csv",
+      "sha256": "b1fc5275ccabba9800cd8a63c7f6289ef58c7b685f0fc231f4ba7ccfdf241712"
+    }
+  ],
+  "payload": {
+    "comparison": "quantum snapshot vs noquant snapshot on POSEIDON test (n=685)",
+    "row_bootstrap": {
+      "delta": -0.0639443431583131,
+      "boot_mean": -0.06409576828135125,
+      "ci95_lo": -0.09427547702264594,
+      "ci95_hi": -0.03308016605484395,
+      "boot_sd": 0.015570144661671963,
+      "p_delta_gt_0": 0.0,
+      "n_rows": 685,
+      "n_boot": 10000,
+      "resampling_unit": "test rows (NOT seeds)"
+    },
+    "sign_test": {
+      "a_worse_rows": 302,
+      "b_worse_rows": 383,
+      "fraction_a_worse": 0.4408759124087591
+    },
+    "per_row_sd_of_paired_difference": 0.4092764557115116,
+    "mde_per_row_estimand_n685": 0.04386453730357497,
+    "mde_per_row_estimand_n64": 0.1452911862594726,
+    "mde_aggregate_mrmse_n685": 0.043621087128020715,
+    "mde_aggregate_mrmse_n64": 0.1431719818244946,
+    "mde_note": "mde_per_row_* ogranicza SREDNIA PO WIERSZACH roznicy per-wierszowego RMSE. mde_aggregate_* ogranicza roznice AGREGATOWEGO mRMSE, czyli te wielkosc, ktora raporty faktycznie cytuja. To rozne funkcjonaly (Jensen); porownuj cytowane efekty z ta druga.",
+    "mde_sd_source": {
+      "sd_value": 0.4092764557115116,
+      "measured_on": "685 rows of the POSEIDON holdout pair, sd of the per-row paired RMSE difference",
+      "n685_is_the_matching_set": true,
+      "n64_is_the_matching_set": false,
+      "n64_refers_to": "fair_small_experiment_cpu data_64 cells; the repo stores no per-row predictions for them, so their own spread is not measurable here",
+      "consequence": "mde_per_row_estimand_n64 is INDICATIVE: correct arithmetic on a borrowed sd. mde_aggregate_mrmse_n64 bootstraps 64-row draws from the POSEIDON population, which is the right functional but still the wrong population",
+      "boot_sd_n64": 0.051103918202755685,
+      "n_boot_n64": 10000
+    },
+    "trivial_baseline_on_the_same_rows": 2.892340031140956,
+    "both_models_below_baseline": true,
+    "seeds_used_in_the_repo": 1,
+    "seed_inventory": [
+      "42"
+    ],
+    "seed_inventory_provenance": {
+      "method": "derived by scanning repository artefacts; NOT a literal in the source",
+      "globs": [
+        "**/settings_resolved.yaml",
+        "**/*_metrics.json",
+        "**/config.json"
+      ],
+      "excluded_path_fragments": [
+        ".git/",
+        ".claude/worktrees/",
+        "node_modules/",
+        "reports/audit/"
+      ],
+      "n_files_scanned": 112,
+      "n_files_unparseable": 0,
+      "n_seed_fields_found": 32,
+      "distinct_seed_values": [
+        42
+      ],
+      "n_distinct_seeds": 1,
+      "occurrences_per_seed": {
+        "42": 32
+      },
+      "examples": [
+        "artifacts/ariel_quantum_best_v4_epoch6/config.json/seed=42",
+        "artifacts/imported_weights/quantum_best/model_quant_sketch_crossgen/config.json/seed=42",
+        "artifacts/imported_weights/weights_13/config.json/seed=42"
+      ]
+    },
+    "what_the_interval_covers": "test-row sampling error for two fixed checkpoints",
+    "what_it_does_not_cover": [
+      "training/seed variance",
+      "checkpoint-selection variance",
+      "environment/numeric variance (see a13)",
+      "the fact that both arms have negative skill (see a02)"
+    ],
+    "numeric_noise_floor": {
+      "available": false,
+      "was_promised_by": "this check's own docstring and criterion, 'the numeric noise floor from a13'",
+      "reality": "a13's payload has no noise/floor field (keys: claims, documents, legend, missing_documents, note, unbacked_or_mismatched, untracked_documents) and a12 never computed one; the term is removed from the criterion rather than left as an unevaluable conjunct"
+    },
+    "multiplicity": {
+      "corrections_found_in_repo": 0,
+      "comparisons_made_without_correction": [
+        "3 rankings over the same 3 models (taurex_model_comparison.md)",
+        "5 per-gas t-tests + 1 overall + 5 per-gas CIs (qat Test 07)",
+        "11 runtime x data cells (fair_small_experiment_cpu)"
+      ]
+    },
+    "verdict_text": "The interval is narrow and correct for what it measures, and irrelevant to the claim it is used for. Replace with: >=5 training seeds per arm, delta computed per seed, CI over seeds, plus a pre-declared multiplicity correction.",
+    "status_terms": {
+      "seeds_required": 5,
+      "n_seeds_found": 1,
+      "n_seeds_source": "scan_seed_inventory() over repository artefacts",
+      "enough_seeds": false,
+      "seed_spread_measurable": false,
+      "effect_exceeds_seed_spread": null,
+      "numeric_noise_floor_in_criterion": false,
+      "decisive": "seed count: 1 distinct seed(s) measured across 32 seed fields in 112 artefacts, criterion requires 5"
+    }
+  }
+}

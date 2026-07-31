@@ -1,0 +1,206 @@
+{
+  "check": "a24_official_metrics",
+  "finding": "K10 \u2014 scored on the metrics the challenge actually used, a point estimate is at or near the worst attainable value",
+  "question": "What do ExoBiome and the NSF baseline score on the ADC2022/ADC2023 distributional metrics?",
+  "pass_criterion": "point model has positive KS skill against the PRIOR arm (beats a model that ignores the spectrum)",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:50:08.474847+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "n_planets": 663,
+    "n_available": 663,
+    "max_planets": null,
+    "n_planets_dropped_by_cap": 0,
+    "n_nsf": 663,
+    "nsf_samples": 128,
+    "posterior_sample_seed": 42,
+    "posterior_sample_seed_note": "global torch RNG seeded before the NSF sampling loop; the flow's sample() takes no generator (model.py:54), so the floor's rng_seed does NOT cover it. Makes the NSF arm reproducible, not more accurate: still one draw of nsf_samples samples.",
+    "prior_draws": 2000,
+    "prior_pool_size": 33138,
+    "floor_definition": {
+      "method": "mean over 5 independent random 50/50 splits of each planet's reference trace, one KS/W1/light_track per split",
+      "splits_per_planet": 5,
+      "was": "one split per planet, so each floor value carried the full variance of a single draw",
+      "residual_bias": "each half holds ~len(trace)/2 (~1442) samples against the ~2884 the model arms are scored on, so the floor remains INFLATED; that direction made the old PASS branch easier, not harder",
+      "rng_seed": 0
+    },
+    "scored_parameters": [
+      "log_H2O",
+      "log_CO2",
+      "log_CO",
+      "log_CH4",
+      "log_NH3"
+    ],
+    "not_scored": [
+      "planet_radius",
+      "planet_temp",
+      "ADC2023 spectral component"
+    ],
+    "metrics": {
+      "ks": {
+        "per_gas": {
+          "log_H2O": {
+            "exobiome": 0.7535014321608705,
+            "nsf": 0.41556354890341735,
+            "prior": 0.615733154971467,
+            "floor": 0.04444759246670662
+          },
+          "log_CO2": {
+            "exobiome": 0.7095290244041632,
+            "nsf": 0.38782800625378466,
+            "prior": 0.6028847740758403,
+            "floor": 0.04399763673530615
+          },
+          "log_CO": {
+            "exobiome": 0.7451827688814939,
+            "nsf": 0.5204978832252276,
+            "prior": 0.5876367934891286,
+            "floor": 0.04447423571170565
+          },
+          "log_CH4": {
+            "exobiome": 0.7611411188326069,
+            "nsf": 0.4264607666535548,
+            "prior": 0.6452550778849204,
+            "floor": 0.04441681306030254
+          },
+          "log_NH3": {
+            "exobiome": 0.7844758171596158,
+            "nsf": 0.4572585784794911,
+            "prior": 0.599132678837549,
+            "floor": 0.044464317488092216
+          }
+        },
+        "mean": {
+          "exobiome": 0.7507660322877501,
+          "nsf": 0.441521756703095,
+          "prior": 0.610128495851781,
+          "floor": 0.044360119092422635
+        }
+      },
+      "w1_dex": {
+        "per_gas": {
+          "log_H2O": {
+            "exobiome": 1.1888320052884596,
+            "nsf": 0.9649080476052623,
+            "prior": 2.434534004803043,
+            "floor": 0.05743831008392174
+          },
+          "log_CO2": {
+            "exobiome": 0.914600090506518,
+            "nsf": 0.7544295779416148,
+            "prior": 1.9477670437651253,
+            "floor": 0.04392333962336713
+          },
+          "log_CO": {
+            "exobiome": 1.914524418989575,
+            "nsf": 1.8076017066514345,
+            "prior": 2.1923793610313496,
+            "floor": 0.09573913809076305
+          },
+          "log_CH4": {
+            "exobiome": 0.8676297701094259,
+            "nsf": 0.7653827368724998,
+            "prior": 2.3541716564443567,
+            "floor": 0.041453287756598976
+          },
+          "log_NH3": {
+            "exobiome": 1.260760842969263,
+            "nsf": 1.0663071993479722,
+            "prior": 2.1642764473674476,
+            "floor": 0.05732241323670004
+          }
+        },
+        "mean": {
+          "exobiome": 1.2292694255726482,
+          "nsf": 1.0717258536837568,
+          "prior": 2.2186257026822642,
+          "floor": 0.059175297758270184
+        }
+      },
+      "light_track": {
+        "per_gas": {
+          "log_H2O": {
+            "exobiome": 0.13551370546061992,
+            "nsf": 0.10997064289915966,
+            "prior": 0.38947841495351937,
+            "floor": 0.007169584381160003
+          },
+          "log_CO2": {
+            "exobiome": 0.1832116254781227,
+            "nsf": 0.15033115495254018,
+            "prior": 0.3425678229484332,
+            "floor": 0.005783663284738096
+          },
+          "log_CO": {
+            "exobiome": 0.25950575243943225,
+            "nsf": 0.24682446461793162,
+            "prior": 0.34320048242397205,
+            "floor": 0.01479201862889238
+          },
+          "log_CH4": {
+            "exobiome": 0.0978322725900596,
+            "nsf": 0.08760609904238813,
+            "prior": 0.3823714641661226,
+            "floor": 0.004961328818928479
+          },
+          "log_NH3": {
+            "exobiome": 0.133863008014055,
+            "nsf": 0.1159123661829835,
+            "prior": 0.2970854708420774,
+            "floor": 0.006780502012846861
+          }
+        },
+        "mean": {
+          "exobiome": 0.16198527279645789,
+          "nsf": 0.14212894553900063,
+          "prior": 0.35094073106682494,
+          "floor": 0.007897419425313164
+        }
+      }
+    },
+    "skill_vs_prior": {
+      "ks": {
+        "exobiome": -0.23050478283206477,
+        "nsf": 0.27634627835780634
+      },
+      "w1_dex": {
+        "exobiome": 0.4459320361760474,
+        "nsf": 0.5169415677515741
+      },
+      "light_track": {
+        "exobiome": 0.5384255560645845,
+        "nsf": 0.5950058429896616
+      }
+    },
+    "interpretation": "A point estimate enters a KS test as a Dirac delta, so its KS statistic against any continuous reference is >= 0.5 by construction; measured mean 0.751 vs finite-sample floor 0.044. mRMSE ranks the point model first; every distributional metric the challenge actually used ranks it at or near the worst attainable value. This is not a tuning gap \u2014 it is a category difference in the output object.",
+    "floor_comparison_is_a_statement_about_the_metric": {
+      "retired_criterion": "point model's distributional score within 2x of the finite-sample floor",
+      "would_pass": false,
+      "n_gas_planet_pairs": 3315,
+      "min_ks_exobiome_over_pairs": 0.500134911920928,
+      "max_two_times_floor_over_pairs": 0.16790006700243618,
+      "n_pairs_satisfying_the_retired_criterion": 0,
+      "why_retired": "a Dirac delta has KS >= 0.5 against any continuous reference BY CONSTRUCTION, while the floor is ~0.04, so 2x floor cannot reach 0.5 for any data. The branch could not fire, which makes the check a theorem about the KS statistic rather than a measurement of the model. Retained as a reported quantity, removed from the verdict."
+    },
+    "status_terms": {
+      "criterion": "skill_vs_prior['ks']['exobiome'] > 0",
+      "ks_skill_vs_prior_exobiome": -0.23050478283206477,
+      "ks_skill_vs_prior_nsf": 0.27634627835780634,
+      "falsifiable_both_ways": "yes \u2014 the NSF arm is scored on the identical references in this same run and lands on the other side of zero",
+      "evaluable": true
+    }
+  }
+}

@@ -1,0 +1,280 @@
+{
+  "check": "a15_target_completeness",
+  "finding": "K9 \u2014 the model predicts 5 of its benchmark's 7 parameters; T is leaked by aux on ADC and wholly absent on cross-generator",
+  "question": "What does omitting temperature and planet radius from the target vector cost, per dataset?",
+  "pass_criterion": "model predicts the full benchmark parameter vector, or omitted params are both weakly coupled and input-determined",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:49:38.120885+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "model_targets": [
+      "log_H2O",
+      "log_CO2",
+      "log_CO",
+      "log_CH4",
+      "log_NH3"
+    ],
+    "benchmark_targets": [
+      "planet_radius",
+      "planet_temp",
+      "log_H2O",
+      "log_CO2",
+      "log_CO",
+      "log_CH4",
+      "log_NH3"
+    ],
+    "n_predicted": 5,
+    "n_required": 7,
+    "posterior_coupling": {
+      "n_planets": 663,
+      "per_gas": {
+        "log_H2O": {
+          "radius": {
+            "med_abs_r": 0.07666578149295444,
+            "median_r": -0.026669270955894834,
+            "p10": -0.23353313510542784,
+            "p90": 0.2941735971469804
+          },
+          "temperature": {
+            "med_abs_r": 0.0814195848831364,
+            "median_r": -0.026721805348480093,
+            "p10": -0.7738333059522555,
+            "p90": 0.08237425903199924
+          }
+        },
+        "log_CO2": {
+          "radius": {
+            "med_abs_r": 0.16662242039139744,
+            "median_r": 0.16033475051209076,
+            "p10": -0.003948716325982129,
+            "p90": 0.6853767111936239
+          },
+          "temperature": {
+            "med_abs_r": 0.3479904831790445,
+            "median_r": -0.33973343564779257,
+            "p10": -0.8553262401385002,
+            "p90": -0.047948177700807115
+          }
+        },
+        "log_CO": {
+          "radius": {
+            "med_abs_r": 0.09656984274807373,
+            "median_r": 0.09406941895872267,
+            "p10": -0.0012849890179941518,
+            "p90": 0.3832371101864325
+          },
+          "temperature": {
+            "med_abs_r": 0.119798873582204,
+            "median_r": -0.11255245579675999,
+            "p10": -0.37089967511352734,
+            "p90": -0.0030241304718038407
+          }
+        },
+        "log_CH4": {
+          "radius": {
+            "med_abs_r": 0.1299199530378654,
+            "median_r": 0.07589215054244729,
+            "p10": -0.13044937675574267,
+            "p90": 0.41237028558439653
+          },
+          "temperature": {
+            "med_abs_r": 0.4451509861400953,
+            "median_r": -0.4451509861400953,
+            "p10": -0.7383679208933465,
+            "p90": -0.03964028202491882
+          }
+        },
+        "log_NH3": {
+          "radius": {
+            "med_abs_r": 0.06763365909717022,
+            "median_r": 0.018822525552252663,
+            "p10": -0.16380446664221518,
+            "p90": 0.23985826578147587
+          },
+          "temperature": {
+            "med_abs_r": 0.11176557238957678,
+            "median_r": -0.10529804774739954,
+            "p10": -0.6941026496083443,
+            "p90": 0.011397940583973816
+          }
+        }
+      },
+      "summary": {
+        "mean_med_abs_r_temperature_gas": 0.2212251000348114,
+        "mean_med_abs_r_radius_gas": 0.10748233135349225,
+        "mean_med_abs_r_gas_gas": 0.053454869019760466,
+        "med_abs_r_radius_temperature": 0.7765980049112757,
+        "median_r_radius_temperature": -0.7765980049112757,
+        "temperature_over_gasgas_ratio": 4.13853974561292
+      }
+    },
+    "posterior_slope": {
+      "n_planets": 663,
+      "n_gas_planet_pairs": 3315,
+      "n_pairs_dropped_frozen_sd": 0,
+      "median_T_K": 887.3413833816952,
+      "median_abs_slope_dex_per_100K": 0.35239597496539576,
+      "p90_abs_slope_dex_per_100K": 1.0000670491346033,
+      "median_signed_slope_dex_per_100K": -0.31524765921024006,
+      "per_gas_median_abs_slope": {
+        "log_H2O": 0.21456660405554795,
+        "log_CO2": 0.5679471672005728,
+        "log_CO": 0.5911227943162968,
+        "log_CH4": 0.30519323214173505,
+        "log_NH3": 0.26183546242927447
+      },
+      "cold_half_median_abs_slope": 0.4406319935408902,
+      "hot_half_median_abs_slope": 0.28241654738663524,
+      "cold_over_hot_ratio": 1.560220169881385,
+      "closed_form_N7_dex_per_100K": 0.333,
+      "measured_over_closed_form_N7": 1.0582461710672544,
+      "definition": "slope = Cov_w(T, log10 X) / Var_w(T) * 100, median over gas-planet pairs; NOT a correlation coefficient (see posterior_coupling for those)"
+    },
+    "adc": {
+      "retrievability": {
+        "planet_radius": {
+          "rmse": 0.04538720727840966,
+          "sd_target": 0.4560566425439332,
+          "r2": 0.9900955731096529
+        },
+        "planet_temp": {
+          "rmse": 57.40565452136223,
+          "sd_target": 401.38477458890355,
+          "r2": 0.9795455617591456
+        },
+        "log_H2O": {
+          "rmse": 0.5743880317282842,
+          "sd_target": 1.727785467912995,
+          "r2": 0.8894824801052097
+        },
+        "log_CO2": {
+          "rmse": 0.312767103222222,
+          "sd_target": 1.4249827253067024,
+          "r2": 0.9518248654261295
+        },
+        "log_CO": {
+          "rmse": 0.4024081461761759,
+          "sd_target": 0.8771982260100948,
+          "r2": 0.7895552779227533
+        },
+        "log_CH4": {
+          "rmse": 0.31012614998402394,
+          "sd_target": 1.7258230082378525,
+          "r2": 0.9677087939246377
+        },
+        "log_NH3": {
+          "rmse": 0.5774946475128343,
+          "sd_target": 1.4448836715007911,
+          "r2": 0.8402539382090983
+        }
+      },
+      "aux_leakage_of_temperature": {
+        "pearson_r_Teq_vs_true_T": 0.9927630174409658,
+        "rmse_Teq_K": 48.495958021216936,
+        "rmse_gbm_on_aux_only_K": 62.790690818477934,
+        "sd_true_T_K": 401.38477458890355
+      },
+      "conditioning_value": {
+        "per_gas": {
+          "log_H2O": {
+            "rmse_without": 0.5743880317282842,
+            "rmse_with_true_T_Rp": 0.5773949289449758,
+            "delta": 0.003006897216691562
+          },
+          "log_CO2": {
+            "rmse_without": 0.312767103222222,
+            "rmse_with_true_T_Rp": 0.30564090983280284,
+            "delta": -0.0071261933894191665
+          },
+          "log_CO": {
+            "rmse_without": 0.4024081461761759,
+            "rmse_with_true_T_Rp": 0.3971109752797062,
+            "delta": -0.005297170896469694
+          },
+          "log_CH4": {
+            "rmse_without": 0.31012614998402394,
+            "rmse_with_true_T_Rp": 0.3067658479295741,
+            "delta": -0.0033603020544498152
+          },
+          "log_NH3": {
+            "rmse_without": 0.5774946475128343,
+            "rmse_with_true_T_Rp": 0.5846331600923411,
+            "delta": 0.007138512579506817
+          }
+        },
+        "mrmse_without": 0.4354368157247081,
+        "mrmse_with_true_T_Rp": 0.43430916441588,
+        "relative_improvement": 0.0025897013484064363
+      }
+    },
+    "reference_retrieval_precision": {
+      "planet_radius": {
+        "n": 663,
+        "median_posterior_sigma": 0.0009671487024241249,
+        "rmse_of_posterior_median": 0.01577997846488942,
+        "sd_truth": 0.4560566425439332,
+        "overconfidence_ratio": 16.315979564815056
+      },
+      "temperature": {
+        "n": 663,
+        "median_posterior_sigma": 38.41027188688211,
+        "rmse_of_posterior_median": 201.27059093736045,
+        "sd_truth": 401.38477458890355,
+        "overconfidence_ratio": 5.240019949093317
+      }
+    },
+    "crossgen": {
+      "temperature_range_K": [
+        500.0368922092457,
+        1799.9785418177307
+      ],
+      "scale_height_dynamic_range_from_T": 3.5996914824926773,
+      "corr_temperature_with_live_aux": {
+        "star_radius_rsun": 0.00043447491744481805,
+        "planet_radius_rjup": 0.008541348558259672,
+        "log_g_cgs": -0.0033993028375861093
+      },
+      "corr_Teq_from_aux_with_true_T": 0.00030986390589420574,
+      "temperature_k_referenced_in_package": {
+        "taurex_exobiome": "not referenced",
+        "taurex_exobiome_without_quant": "not referenced",
+        "ariel_winner_on_taurex": [
+          "prepare_dataset.py"
+        ],
+        "taurex_fmpe": "not referenced"
+      },
+      "predictability_from_spectrum": {
+        "temperature_k": {
+          "rmse": 136.0130800668602,
+          "sd": 380.4403762564607,
+          "r2": 0.8721831395180959
+        },
+        "planet_radius_rjup": {
+          "rmse": 0.19108024654763128,
+          "sd": 0.2313900111173285,
+          "r2": 0.31806595614686806
+        }
+      },
+      "note": "star temperature (5500 K) and orbital distance (0.05 AU) are hard-coded constants in _build_taurex_auxiliary_frame, so the equilibrium-temperature route that leaks T on ADC carries no information here; T is an unobserved nuisance parameter spanning 3.6x in scale height, and no arm of the comparison predicts it"
+    },
+    "status_terms": {
+      "full_target_vector": false,
+      "omitted_weakly_coupled": false,
+      "omitted_input_determined": false,
+      "decisive": "coupling"
+    }
+  }
+}

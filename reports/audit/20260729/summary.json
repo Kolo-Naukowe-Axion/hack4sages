@@ -1,0 +1,317 @@
+{
+  "generated_utc": "2026-07-29T12:51:48.669695+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "invocation": {
+    "fast": false,
+    "only": null,
+    "extra": "",
+    "argv": [
+      "--out",
+      "reports/audit/20260729"
+    ]
+  },
+  "suite_size": 21,
+  "n_picked": 21,
+  "n_skipped": 0,
+  "is_partial_run": false,
+  "picked": [
+    {
+      "check": "a01_spectral_variation",
+      "fixed_args": []
+    },
+    {
+      "check": "a02_trivial_baseline",
+      "fixed_args": []
+    },
+    {
+      "check": "a03_input_convention",
+      "fixed_args": []
+    },
+    {
+      "check": "a04_quantum_scale_provenance",
+      "fixed_args": []
+    },
+    {
+      "check": "a05_training_completeness",
+      "fixed_args": []
+    },
+    {
+      "check": "a06_param_accounting",
+      "fixed_args": []
+    },
+    {
+      "check": "a07_gate_dynamics",
+      "fixed_args": []
+    },
+    {
+      "check": "a08_reference_posterior",
+      "fixed_args": []
+    },
+    {
+      "check": "a09_noise_realization",
+      "fixed_args": []
+    },
+    {
+      "check": "a10_split_integrity",
+      "fixed_args": []
+    },
+    {
+      "check": "a11_pairing_audit",
+      "fixed_args": []
+    },
+    {
+      "check": "a12_significance_power",
+      "fixed_args": []
+    },
+    {
+      "check": "a13_provenance_index",
+      "fixed_args": []
+    },
+    {
+      "check": "a14_importability",
+      "fixed_args": []
+    },
+    {
+      "check": "a15_target_completeness",
+      "fixed_args": []
+    },
+    {
+      "check": "a21_dead_features",
+      "fixed_args": []
+    },
+    {
+      "check": "a24_official_metrics",
+      "fixed_args": []
+    },
+    {
+      "check": "a26_baseline_ladder",
+      "fixed_args": []
+    },
+    {
+      "check": "a27_pipeline_fidelity",
+      "fixed_args": []
+    },
+    {
+      "check": "a29_smoke_baseline_recovery",
+      "fixed_args": []
+    },
+    {
+      "check": "d01_poseidon_diagnosis",
+      "fixed_args": [
+        "--stage",
+        "0"
+      ]
+    }
+  ],
+  "skipped": [],
+  "counts": {
+    "FAIL": 17,
+    "WARN": 1,
+    "INFO": 1,
+    "PASS": 2,
+    "ERROR": 0
+  },
+  "checks": [
+    {
+      "check": "a01_spectral_variation",
+      "status": "FAIL",
+      "finding": "K1 \u2014 all 685 POSEIDON spectra are wavelength-constant; the cross-generator axis has no signal",
+      "question": "Does each stored spectrum vary across wavelength bins, and does that variation exceed the noise?",
+      "criterion": "zero bit-constant rows AND median feature/sigma > 1 AND median std_bins/|mean_bins| > 1e-4",
+      "timestamp_utc": "2026-07-29T12:47:03.820726+00:00",
+      "json": "reports/audit/20260729/a01_spectral_variation.json"
+    },
+    {
+      "check": "a02_trivial_baseline",
+      "status": "FAIL",
+      "finding": "K2 \u2014 every cross-generator model is worse than a constant predictor; no table reports a baseline",
+      "question": "For each reported mRMSE, what is the trivial-baseline mRMSE on the same rows, and is the skill positive?",
+      "criterion": "skill = 1 - reported/(train-mean baseline) > 0 for every number presented as a model result",
+      "timestamp_utc": "2026-07-29T12:47:06.495210+00:00",
+      "json": "reports/audit/20260729/a02_trivial_baseline.json"
+    },
+    {
+      "check": "a03_input_convention",
+      "status": "FAIL",
+      "finding": "K3 \u2014 the ExoBiome-vs-SOTA comparison mixes two input conventions; the ranking reverses when they are equalised",
+      "question": "What is each model's mRMSE with and without eval-time N(0,sigma) injection, on the same split?",
+      "criterion": "sign(ExoBiome - baseline) is invariant to the input convention",
+      "timestamp_utc": "2026-07-29T12:47:49.089116+00:00",
+      "json": "reports/audit/20260729/a03_input_convention.json"
+    },
+    {
+      "check": "a04_quantum_scale_provenance",
+      "status": "FAIL",
+      "finding": "K4 \u2014 reported metrics use quantum_scale=1.0 (never validated); selection ran at 0.5",
+      "question": "Which quantum_scale reproduces holdout_metrics.json / validation_metrics.json, and what is the gate-off value?",
+      "criterion": "some swept scale reproduces a published number AND it equals the selection-time scale from history.csv",
+      "timestamp_utc": "2026-07-29T12:48:41.865552+00:00",
+      "json": "reports/audit/20260729/a04_quantum_scale_provenance.json"
+    },
+    {
+      "check": "a05_training_completeness",
+      "status": "FAIL",
+      "finding": "K5 / K3 \u2014 the flagship checkpoint comes from an 8/30-epoch aborted run; the baseline stopped at 79/300 on a different metric",
+      "question": "Did each reported run converge, on the metric it is compared on, selected on the full split?",
+      "criterion": "terminated by its own rule AND reported metric plateaued AND selection metric == reported metric AND full-split selection",
+      "timestamp_utc": "2026-07-29T12:48:42.512592+00:00",
+      "json": "reports/audit/20260729/a05_training_completeness.json"
+    },
+    {
+      "check": "a06_param_accounting",
+      "status": "FAIL",
+      "finding": "K6 \u2014 24 of 69,434 'quantum branch' parameters are quantum; the branch is a second classical head",
+      "question": "What fraction of the quantum pathway is quantum, and is the on/off ablation parameter-matched?",
+      "criterion": "quantum branch adds <1% extra classical parameters over the classical-only model",
+      "timestamp_utc": "2026-07-29T12:48:45.579596+00:00",
+      "json": "reports/audit/20260729/a06_param_accounting.json"
+    },
+    {
+      "check": "a07_gate_dynamics",
+      "status": "FAIL",
+      "finding": "K7 \u2014 'the model learned to silence the quantum branch' is unsupported: the gate is zero-initialised and was still growing",
+      "question": "Is gate~=0.046 a converged equilibrium or an artifact of zero-init plus a truncated schedule?",
+      "criterion": "gate is converged (run terminated by its own rule) AND per-gas gates agree in sign",
+      "timestamp_utc": "2026-07-29T12:48:47.624043+00:00",
+      "json": "reports/audit/20260729/a07_gate_dynamics.json"
+    },
+    {
+      "check": "a08_reference_posterior",
+      "status": "FAIL",
+      "finding": "K8 \u2014 the reported 0.30 dex beats the reference nested-sampling retrieval ~3.8x; the metric measures simulator inversion, not retrieval",
+      "question": "How does the model's RMSE compare with the reference Bayesian posterior on the same planets?",
+      "criterion": "model mRMSE >= reference-run mRMSE, both on the same 663 planets that carry a reference retrieval",
+      "timestamp_utc": "2026-07-29T12:48:48.883979+00:00",
+      "json": "reports/audit/20260729/a08_reference_posterior.json"
+    },
+    {
+      "check": "a09_noise_realization",
+      "status": "FAIL",
+      "finding": "W14 / K3 \u2014 the stored ADC spectra carry high-frequency scatter well below the quoted sigma",
+      "question": "Is the bin-to-bin scatter of instrument_spectrum consistent with a realization of N(0, instrument_noise)?",
+      "criterion": "R statistic distribution centred at >= 1 (consistent with noise present at full sigma)",
+      "timestamp_utc": "2026-07-29T12:48:50.977281+00:00",
+      "json": "reports/audit/20260729/a09_noise_realization.json"
+    },
+    {
+      "check": "a10_split_integrity",
+      "status": "FAIL",
+      "finding": "P1 / P2 / U4 \u2014 taurex_fmpe holdout == validation; noquant copies val->holdout; testdata == holdout; no in-domain TauREx test split",
+      "question": "Does any package report as 'holdout' rows that were used for early stopping or model selection?",
+      "criterion": "validation and holdout selectors differ AND row overlap is zero in every package",
+      "timestamp_utc": "2026-07-29T12:48:52.937676+00:00",
+      "json": "reports/audit/20260729/a10_split_integrity.json"
+    },
+    {
+      "check": "a11_pairing_audit",
+      "status": "FAIL",
+      "finding": "P3 \u2014 the quantum-vs-noquant comparison is unmatched on ~10 axes, including two different losses under one name",
+      "question": "Which configuration fields differ between two runs presented as an ablation pair?",
+      "criterion": "differences confined to the declared factor under study",
+      "timestamp_utc": "2026-07-29T12:48:55.732995+00:00",
+      "json": "reports/audit/20260729/a11_pairing_audit.json"
+    },
+    {
+      "check": "a12_significance_power",
+      "status": "FAIL",
+      "finding": "P7 / P4 \u2014 all 'significance' is row bootstrap on one checkpoint; no seed variance, no multiplicity control",
+      "question": "Is the resampling unit the right one for the claim, and can the set sizes resolve the claimed effects?",
+      "criterion": "effect claims backed by >=5 seeds (derived from repo files) and larger than the across-seed spread",
+      "timestamp_utc": "2026-07-29T12:48:57.458917+00:00",
+      "json": "reports/audit/20260729/a12_significance_power.json"
+    },
+    {
+      "check": "a13_provenance_index",
+      "status": "FAIL",
+      "finding": "P6 / U8 \u2014 several headline numbers have no backing artifact; the verification doc and plan-of-record are not in git",
+      "question": "Can each published number be re-derived from a committed artifact?",
+      "criterion": "every result number is recomputable from committed predictions, and its document is tracked",
+      "timestamp_utc": "2026-07-29T12:48:58.963841+00:00",
+      "json": "reports/audit/20260729/a13_provenance_index.json"
+    },
+    {
+      "check": "a14_importability",
+      "status": "FAIL",
+      "finding": "U6 \u2014 flagship CLI entrypoints and the Garnet port import a non-existent module; the evidence script loads a missing checkpoint",
+      "question": "Do all documented entrypoints, tests and analysis scripts resolve their imports and file paths?",
+      "criterion": "all referenced modules resolve and all hard-coded artifact paths exist",
+      "timestamp_utc": "2026-07-29T12:49:00.729928+00:00",
+      "json": "reports/audit/20260729/a14_importability.json"
+    },
+    {
+      "check": "a15_target_completeness",
+      "status": "FAIL",
+      "finding": "K9 \u2014 the model predicts 5 of its benchmark's 7 parameters; T is leaked by aux on ADC and wholly absent on cross-generator",
+      "question": "What does omitting temperature and planet radius from the target vector cost, per dataset?",
+      "criterion": "model predicts the full benchmark parameter vector, or omitted params are both weakly coupled and input-determined",
+      "timestamp_utc": "2026-07-29T12:49:38.120885+00:00",
+      "json": "reports/audit/20260729/a15_target_completeness.json"
+    },
+    {
+      "check": "a21_dead_features",
+      "status": "FAIL",
+      "finding": "U2 / U3 / K9(d) \u2014 5 of 8 crossgen aux features are constants; temperature_k varies 500-1800 K and is read by nobody",
+      "question": "Which model inputs carry no information, and which informative label columns are never read?",
+      "criterion": "no zero-variance input dims, no scalar-broadcast channel, no unread varying label column",
+      "timestamp_utc": "2026-07-29T12:49:41.891021+00:00",
+      "json": "reports/audit/20260729/a21_dead_features.json"
+    },
+    {
+      "check": "a24_official_metrics",
+      "status": "FAIL",
+      "finding": "K10 \u2014 scored on the metrics the challenge actually used, a point estimate is at or near the worst attainable value",
+      "question": "What do ExoBiome and the NSF baseline score on the ADC2022/ADC2023 distributional metrics?",
+      "criterion": "point model has positive KS skill against the PRIOR arm (beats a model that ignores the spectrum)",
+      "timestamp_utc": "2026-07-29T12:50:08.474847+00:00",
+      "json": "reports/audit/20260729/a24_official_metrics.json"
+    },
+    {
+      "check": "a26_baseline_ladder",
+      "status": "WARN",
+      "finding": "K2 (extension) \u2014 how much of the reported skill survives when the spectrum is removed",
+      "question": "Constant vs aux-only vs spectrum-only vs both: where does the skill come from?",
+      "criterion": "upper end of the CI on the aux-only skill share < 20 % of the aux+spectrum skill, on every dataset, and every dataset has a positive aux+spectrum skill to divide",
+      "timestamp_utc": "2026-07-29T12:51:15.749340+00:00",
+      "json": "reports/audit/20260729/a26_baseline_ladder.json"
+    },
+    {
+      "check": "d01_poseidon_diagnosis",
+      "status": "INFO",
+      "finding": "K1 \u2014 root-cause diagnosis for the wavelength-constant POSEIDON spectra",
+      "question": "Which API misuse makes POSEIDON return spectra with no wavelength dependence?",
+      "criterion": "the repo's exact call reproduces a spectrum with the same relative variation as tau (~1e-2)",
+      "timestamp_utc": "2026-07-29T12:51:47.119724+00:00",
+      "json": "reports/audit/20260729/d01_poseidon_diagnosis.json"
+    },
+    {
+      "check": "a27_pipeline_fidelity",
+      "status": "PASS",
+      "finding": "A0.2 \u2014 row-by-row fidelity of the reconstructed ExoBiome input pipeline (underpins K3, K4, K9)",
+      "question": "Do the reconstruction's predictions match the artifact's saved predictions row by row, not just on average?",
+      "criterion": "max |diff| per row per gas < 1e-4 vs mac_holdout_predictions.csv at quantum_scale=1.0",
+      "timestamp_utc": "2026-07-29T12:51:42.620898+00:00",
+      "json": "reports/audit/20260729/a27_pipeline_fidelity.json"
+    },
+    {
+      "check": "a29_smoke_baseline_recovery",
+      "status": "PASS",
+      "finding": "K1(b) \u2014 the team's own ridge smoke baseline ran, shipped in the bundle, and records no skill on POSEIDON",
+      "question": "Do the two smoke artefacts agree per gas, what skill is behind them, and how wide are the predictions?",
+      "criterion": "the finding is REFUTED (PASS) if an artefact is missing, or the CSV does not reproduce the JSON within 1e-9, or the two skills share a sign, or any file outside the bundle / audit/ / docs/ reads the artefacts by path; it STANDS (FAIL) otherwise",
+      "timestamp_utc": "2026-07-29T12:51:45.009690+00:00",
+      "json": "reports/audit/20260729/a29_smoke_baseline_recovery.json"
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "check": "a02_trivial_baseline",
+  "finding": "K2 \u2014 every cross-generator model is worse than a constant predictor; no table reports a baseline",
+  "question": "For each reported mRMSE, what is the trivial-baseline mRMSE on the same rows, and is the skill positive?",
+  "pass_criterion": "skill = 1 - reported/(train-mean baseline) > 0 for every number presented as a model result",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:47:06.495210+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "rows": [
+      {
+        "model": "exobiome hybrid (scale 1.0)",
+        "value": 0.2993761897087097,
+        "set": "adc_holdout",
+        "source": "artifacts/ariel_quantum_best_v4_epoch6/holdout_metrics.json",
+        "n_rows": 4143,
+        "baseline_train_mean_mrmse": 1.4403897168890851,
+        "baseline_oracle_constant_mrmse": 1.440134619793687,
+        "baseline_oracle_per_gas": [
+          1.727785467912995,
+          1.4249827253067024,
+          0.8771982260100948,
+          1.7258230082378525,
+          1.4448836715007911
+        ],
+        "skill_vs_train_mean": 0.7921561184459895,
+        "skill_vs_oracle_constant_informational_only": 0.7921193021860705,
+        "status": "ok"
+      },
+      {
+        "model": "exobiome hybrid (val)",
+        "value": 0.29361358284950256,
+        "set": "adc_validation",
+        "source": "artifacts/ariel_quantum_best_v4_epoch6/validation_metrics.json",
+        "n_rows": 4142,
+        "baseline_train_mean_mrmse": 1.4519749085829483,
+        "baseline_oracle_constant_mrmse": 1.451833210986224,
+        "baseline_oracle_per_gas": [
+          1.7423334354504276,
+          1.4535135653960896,
+          0.8714404992223629,
+          1.736216264675613,
+          1.4556622901866267
+        ],
+        "skill_vs_train_mean": 0.7977832942471065,
+        "skill_vs_oracle_constant_informational_only": 0.7977635580811296,
+        "status": "ok"
+      },
+      {
+        "model": "winner-style NSF (median, +noise)",
+        "value": 0.5522884130477905,
+        "set": "adc_holdout",
+        "source": "models/adc_winner_on_ariel/trained_run/holdout_metrics.json",
+        "n_rows": 4143,
+        "baseline_train_mean_mrmse": 1.4403897168890851,
+        "baseline_oracle_constant_mrmse": 1.440134619793687,
+        "baseline_oracle_per_gas": [
+          1.727785467912995,
+          1.4249827253067024,
+          0.8771982260100948,
+          1.7258230082378525,
+          1.4448836715007911
+        ],
+        "skill_vs_train_mean": 0.6165701500281409,
+        "skill_vs_oracle_constant_informational_only": 0.6165022314879764,
+        "status": "ok"
+      },
+      {
+        "model": "CNN baseline",
+        "value": 0.65003745144915,
+        "set": "adc_holdout",
+        "source": "reports/model_comparison/rmse/cnn_metrics.json (NO backing artifact)",
+        "n_rows": 4143,
+        "baseline_train_mean_mrmse": 1.4403897168890851,
+        "baseline_oracle_constant_mrmse": 1.440134619793687,
+        "baseline_oracle_per_gas": [
+          1.727785467912995,
+          1.4249827253067024,
+          0.8771982260100948,
+          1.7258230082378525,
+          1.4448836715007911
+        ],
+        "skill_vs_train_mean": 0.5487072395566088,
+        "skill_vs_oracle_constant_informational_only": 0.5486273001740114,
+        "status": "ok"
+      },
+      {
+        "model": "quantum snapshot",
+        "value": 3.215615,
+        "set": "poseidon_test",
+        "source": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_metrics.json",
+        "n_rows": 685,
+        "baseline_train_mean_mrmse": 2.8940085150877404,
+        "baseline_oracle_constant_mrmse": 2.892340030206461,
+        "baseline_oracle_per_gas": [
+          2.872145411993102,
+          2.964824304130998,
+          2.842727070398437,
+          2.940447022357035,
+          2.8415563421527312
+        ],
+        "skill_vs_train_mean": -0.11112838239265144,
+        "skill_vs_oracle_constant_informational_only": -0.11176935160367818,
+        "status": "NEGATIVE SKILL"
+      },
+      {
+        "model": "noquant snapshot",
+        "value": 3.279559,
+        "set": "poseidon_test",
+        "source": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_metrics.json",
+        "n_rows": 685,
+        "baseline_train_mean_mrmse": 2.8940085150877404,
+        "baseline_oracle_constant_mrmse": 2.892340030206461,
+        "baseline_oracle_per_gas": [
+          2.872145411993102,
+          2.964824304130998,
+          2.842727070398437,
+          2.940447022357035,
+          2.8415563421527312
+        ],
+        "skill_vs_train_mean": -0.13322368711156685,
+        "skill_vs_oracle_constant_informational_only": -0.1338774022934981,
+        "status": "NEGATIVE SKILL"
+      },
+      {
+        "model": "winner on TauREx",
+        "value": 3.453121,
+        "set": "poseidon_test",
+        "source": "reports/ariel_winner_on_taurex_20260312_112940_results_summary.md (NO backing artifact)",
+        "n_rows": 685,
+        "baseline_train_mean_mrmse": 2.8940085150877404,
+        "baseline_oracle_constant_mrmse": 2.892340030206461,
+        "baseline_oracle_per_gas": [
+          2.872145411993102,
+          2.964824304130998,
+          2.842727070398437,
+          2.940447022357035,
+          2.8415563421527312
+        ],
+        "skill_vs_train_mean": -0.19319655833677052,
+        "skill_vs_oracle_constant_informational_only": -0.19388486966849094,
+        "status": "NEGATIVE SKILL"
+      },
+      {
+        "model": "H200 noquant (excluded as 'underfit')",
+        "value": 2.894607,
+        "set": "poseidon_test",
+        "source": "reports/taurex_noquant_h200_...md (NO backing artifact)",
+        "n_rows": 685,
+        "baseline_train_mean_mrmse": 2.8940085150877404,
+        "baseline_oracle_constant_mrmse": 2.892340030206461,
+        "baseline_oracle_per_gas": [
+          2.872145411993102,
+          2.964824304130998,
+          2.842727070398437,
+          2.940447022357035,
+          2.8415563421527312
+        ],
+        "skill_vs_train_mean": -0.00020680136535178306,
+        "skill_vs_oracle_constant_informational_only": -0.0007837839845468153,
+        "status": "NEGATIVE SKILL"
+      },
+      {
+        "model": "quantum snapshot",
+        "value": 1.449002,
+        "set": "taurex_val",
+        "source": "reports/taurex_model_comparison.md",
+        "n_rows": 4142,
+        "baseline_train_mean_mrmse": 2.8852220423342816,
+        "baseline_oracle_constant_mrmse": 2.8848848765906423,
+        "baseline_oracle_per_gas": [
+          2.864456259490891,
+          2.8940291196469574,
+          2.914113842682957,
+          2.8533899547689314,
+          2.8984352063634757
+        ],
+        "skill_vs_train_mean": 0.49778492651896955,
+        "skill_vs_oracle_constant_informational_only": 0.49772623103337454,
+        "status": "ok"
+      },
+      {
+        "model": "noquant snapshot",
+        "value": 1.423032,
+        "set": "taurex_val",
+        "source": "reports/taurex_model_comparison.md",
+        "n_rows": 4142,
+        "baseline_train_mean_mrmse": 2.8852220423342816,
+        "baseline_oracle_constant_mrmse": 2.8848848765906423,
+        "baseline_oracle_per_gas": [
+          2.864456259490891,
+          2.8940291196469574,
+          2.914113842682957,
+          2.8533899547689314,
+          2.8984352063634757
+        ],
+        "skill_vs_train_mean": 0.5067859668614275,
+        "skill_vs_oracle_constant_informational_only": 0.5067283233562722,
+        "status": "ok"
+      }
+    ],
+    "negative_skill": [
+      {
+        "model": "quantum snapshot",
+        "value": 3.215615,
+        "set": "poseidon_test",
+        "source": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_metrics.json",
+        "baseline_train_mean": 2.8940085150877404,
+        "skill": -0.11112838239265144
+      },
+      {
+        "model": "noquant snapshot",
+        "value": 3.279559,
+        "set": "poseidon_test",
+        "source": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_metrics.json",
+        "baseline_train_mean": 2.8940085150877404,
+        "skill": -0.13322368711156685
+      },
+      {
+        "model": "winner on TauREx",
+        "value": 3.453121,
+        "set": "poseidon_test",
+        "source": "reports/ariel_winner_on_taurex_20260312_112940_results_summary.md (NO backing artifact)",
+        "baseline_train_mean": 2.8940085150877404,
+        "skill": -0.19319655833677052
+      },
+      {
+        "model": "H200 noquant (excluded as 'underfit')",
+        "value": 2.894607,
+        "set": "poseidon_test",
+        "source": "reports/taurex_noquant_h200_...md (NO backing artifact)",
+        "baseline_train_mean": 2.8940085150877404,
+        "skill": -0.00020680136535178306
+      }
+    ],
+    "note": "skill <= 0 means the model carries no information beyond a single constant vector. Ranking models in that regime orders their failure modes.",
+    "definition": "baseline that decides the status = mRMSE of the TRAIN-split mean vector evaluated on the reported set's rows (`skill_vs_train_mean`)",
+    "oracle_variant": "`baseline_oracle_constant_mrmse` / `skill_vs_oracle_constant_informational_only` use the per-column mean of the EVALUATION rows themselves. Reported for information only \u2014 it peeks at the evaluation targets and never enters the verdict.",
+    "max_abs_skill_difference_between_baseline_variants": 0.0006883113317204259,
+    "variant_choice_changes_no_classification": true
+  }
+}

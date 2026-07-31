@@ -1,0 +1,1360 @@
+{
+  "check": "a14_importability",
+  "finding": "U6 \u2014 flagship CLI entrypoints and the Garnet port import a non-existent module; the evidence script loads a missing checkpoint",
+  "question": "Do all documented entrypoints, tests and analysis scripts resolve their imports and file paths?",
+  "pass_criterion": "all referenced modules resolve and all hard-coded artifact paths exist",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:49:00.729928+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "files_scanned": 162,
+    "broken_imports": [
+      {
+        "file": "models/garnet_ariel_quantum_regression/checkpoint.py",
+        "line": 12,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      },
+      {
+        "file": "models/garnet_ariel_quantum_regression/checkpoint.py",
+        "line": 117,
+        "missing_module": "models.ariel_quantum_regression.model"
+      },
+      {
+        "file": "models/garnet_ariel_quantum_regression/runtime.py",
+        "line": 11,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      },
+      {
+        "file": "models/taurex_exobiome/run_ariel_quantum_cross_validation.py",
+        "line": 75,
+        "missing_module": "models.ariel_quantum_regression.cross_validation"
+      },
+      {
+        "file": "models/taurex_exobiome/run_ariel_quantum_cross_validation.py",
+        "line": 81,
+        "missing_module": "models.ariel_quantum_regression.training"
+      },
+      {
+        "file": "models/taurex_exobiome/run_ariel_quantum_regression.py",
+        "line": 63,
+        "missing_module": "models.ariel_quantum_regression.training"
+      },
+      {
+        "file": "tests/test_ariel_quantum_cross_validation.py",
+        "line": 11,
+        "missing_module": "models.ariel_quantum_regression.constants"
+      },
+      {
+        "file": "tests/test_ariel_quantum_cross_validation.py",
+        "line": 12,
+        "missing_module": "models.ariel_quantum_regression.cross_validation"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 47,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 61,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 83,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 111,
+        "missing_module": "models.ariel_quantum_regression.model"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 125,
+        "missing_module": "models.ariel_quantum_regression.model"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 143,
+        "missing_module": "models.ariel_quantum_regression.training"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 196,
+        "missing_module": "models.ariel_quantum_regression.training"
+      },
+      {
+        "file": "tests/test_ariel_quantum_regression.py",
+        "line": 251,
+        "missing_module": "models.ariel_quantum_regression.training"
+      },
+      {
+        "file": "tests/test_garnet_ariel_quantum_regression.py",
+        "line": 124,
+        "missing_module": "models.ariel_quantum_regression.dataset"
+      }
+    ],
+    "missing_paths": [
+      {
+        "path": "reports/taurex_noquant_taurex_snapshot_20260312_133054/best_model_epoch059.pt",
+        "source": "manual spot-check list",
+        "why_it_matters": "loaded by scripts/analyze_quantum_residual_evidence.py -> bootstrap evidence not reproducible"
+      },
+      {
+        "path": "reports/quantum_residual_generalization_analysis",
+        "source": "manual spot-check list",
+        "why_it_matters": "output dir of the same script: never produced"
+      },
+      {
+        "path": "models/12q_taurex_exobiome",
+        "source": "manual spot-check list",
+        "why_it_matters": "documented in docs/12q_taurex_exobiome_architecture.md and tested"
+      },
+      {
+        "path": "outputs/fair_small_experiment_cpu",
+        "source": "manual spot-check list",
+        "why_it_matters": "location claimed by README.md for the CPU sweep"
+      },
+      {
+        "path": "data/full-ariel",
+        "source": "manual spot-check list",
+        "why_it_matters": "data_root of the committed mac re-eval (mac_run_summary.json)"
+      }
+    ],
+    "n_broken_imports": 17,
+    "n_missing_paths": 5,
+    "hardcoded_artifact_constants": [
+      {
+        "value": "AuxillaryTable.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_baseline/run_baseline.py:48",
+          "models/adc_baseline/run_baseline.py:115",
+          "models/adc_winner_on_ariel/prepare_dataset.py:30",
+          "models/adc_winner_on_ariel/prepare_dataset.py:37",
+          "models/ariel_exobiome/dataset.py:175",
+          "models/ariel_exobiome/dataset.py:193",
+          "models/ariel_winner_nf/prepare_dataset.py:30",
+          "models/ariel_winner_nf/prepare_dataset.py:37",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:30",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:37",
+          "models/five_qubit_exobiome/dataset.py:175",
+          "models/five_qubit_exobiome/dataset.py:193",
+          "models/fmpe_giordano/make_dataset.py:30",
+          "models/fmpe_giordano/make_dataset.py:134",
+          "models/sbi_ariel_adc2023/prepare_dataset.py:75",
+          "models/sbi_ariel_adc2023/prepare_dataset.py:78",
+          "models/sbi_ariel_adc2023/raw_dataset.py:63",
+          "models/sbi_ariel_adc2023/raw_dataset.py:81",
+          "models/taurex_exobiome/dataset.py:232",
+          "models/taurex_exobiome/dataset.py:250",
+          "models/taurex_exobiome_without_quant/dataset.py:244",
+          "models/taurex_exobiome_without_quant/dataset.py:262",
+          "tests/test_ariel_quantum_regression.py:27",
+          "tests/test_ariel_quantum_regression.py:30"
+        ]
+      },
+      {
+        "value": "FM_Parameter_Table.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_baseline/run_baseline.py:49",
+          "models/adc_winner_on_ariel/prepare_dataset.py:31",
+          "models/ariel_exobiome/dataset.py:176",
+          "models/ariel_winner_nf/prepare_dataset.py:31",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:31",
+          "models/five_qubit_exobiome/dataset.py:176",
+          "models/fmpe_giordano/compute_reference_distribution.py:78",
+          "models/fmpe_giordano/compute_reference_distribution.py:73",
+          "models/fmpe_giordano/make_dataset.py:31",
+          "models/sbi_ariel_adc2023/prepare_dataset.py:76",
+          "models/sbi_ariel_adc2023/raw_dataset.py:64",
+          "models/taurex_exobiome/dataset.py:233",
+          "models/taurex_exobiome_without_quant/dataset.py:245",
+          "tests/test_ariel_quantum_regression.py:28"
+        ]
+      },
+      {
+        "value": "SpectralData.hdf5",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_baseline/run_baseline.py:47",
+          "models/adc_baseline/run_baseline.py:114",
+          "models/adc_winner_on_ariel/prepare_dataset.py:157",
+          "models/adc_winner_on_ariel/prepare_dataset.py:158",
+          "models/ariel_exobiome/dataset.py:177",
+          "models/ariel_exobiome/dataset.py:194",
+          "models/ariel_winner_nf/prepare_dataset.py:157",
+          "models/ariel_winner_nf/prepare_dataset.py:158",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:157",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:158",
+          "models/five_qubit_exobiome/dataset.py:177",
+          "models/five_qubit_exobiome/dataset.py:194",
+          "models/fmpe_giordano/make_dataset.py:29",
+          "models/fmpe_giordano/make_dataset.py:133",
+          "models/sbi_ariel_adc2023/prepare_dataset.py:77",
+          "models/sbi_ariel_adc2023/prepare_dataset.py:79",
+          "models/sbi_ariel_adc2023/raw_dataset.py:65",
+          "models/sbi_ariel_adc2023/raw_dataset.py:82",
+          "models/taurex_exobiome/dataset.py:234",
+          "models/taurex_exobiome/dataset.py:251",
+          "models/taurex_exobiome_without_quant/dataset.py:246",
+          "models/taurex_exobiome_without_quant/dataset.py:263",
+          "tests/test_adc_winner_on_ariel.py:46",
+          "tests/test_ariel_quantum_regression.py:29",
+          "tests/test_ariel_quantum_regression.py:31"
+        ]
+      },
+      {
+        "value": "TestData/AuxillaryTable.csv",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:65"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "TestData/SpectralData.hdf5",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:66"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "Tracedata.hdf5",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/compute_reference_distribution.py:69",
+          "models/fmpe_giordano/make_dataset.py:32"
+        ]
+      },
+      {
+        "value": "TrainingData/AuxillaryTable.csv",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:63"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "TrainingData/Ground Truth Package/FM_Parameter_Table.csv",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:62"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "TrainingData/Ground Truth Package/QuartilesTable.csv",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:61"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "TrainingData/Ground Truth Package/Tracedata.hdf5",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:60"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "TrainingData/SpectralData.hdf5",
+        "kind": "path",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/constants.py:64"
+        ],
+        "resolved_against": "data/ariel-ml-dataset",
+        "exists": true
+      },
+      {
+        "value": "_auxiliary.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "tests/test_adc_winner_on_ariel.py:36"
+        ]
+      },
+      {
+        "value": "_comparison.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/evaluate_losses.py:149"
+        ]
+      },
+      {
+        "value": "_generation.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "tests/test_crossgen_biosignatures.py:102"
+        ]
+      },
+      {
+        "value": "_planet_ids.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/prepare_dataset.py:64",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:66"
+        ]
+      },
+      {
+        "value": "_regression_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/evaluate.py:284",
+          "models/taurex_fmpe/evaluate.py:284"
+        ]
+      },
+      {
+        "value": "_regression_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/evaluate.py:285",
+          "models/taurex_fmpe/evaluate.py:285"
+        ]
+      },
+      {
+        "value": "_targets.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "tests/test_adc_winner_on_ariel.py:39"
+        ]
+      },
+      {
+        "value": "_targetwise_validation_selected_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_targetwise_residual_ensemble.py:128"
+        ]
+      },
+      {
+        "value": "aggregate_ranked.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_targetwise_residual_ensemble.py:156"
+        ]
+      },
+      {
+        "value": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:70",
+          "scripts/reeval_from_predictions.py:87",
+          "scripts/reeval_from_predictions.py:104"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "artifacts/ariel_quantum_best_v4_epoch6/holdout_predictions.csv",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:84"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/mac_holdout_predictions.csv",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:101"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "artifacts/ariel_quantum_best_v4_epoch6/split_manifest.json",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:72",
+          "scripts/reeval_from_predictions.py:89"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "artifacts/ariel_quantum_best_v4_epoch6/validation_predictions.csv",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:67"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "base_training_config.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:439",
+          "models/taurex_exobiome/cross_validation.py:563",
+          "models/taurex_exobiome_without_quant/cross_validation.py:563"
+        ]
+      },
+      {
+        "value": "best_independent_bundle.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/evaluate.py:190",
+          "models/ariel_winner_trace_nf/train.py:244"
+        ]
+      },
+      {
+        "value": "best_model.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:395",
+          "models/five_qubit_exobiome/training.py:392",
+          "models/fmpe_giordano/compute_posterior_distribution.py:151",
+          "models/fmpe_giordano/compute_posterior_distribution_single_gpu.py:93",
+          "models/fmpe_giordano/compute_posterior_distribution_single_gpu.py:131",
+          "models/fmpe_giordano/dump_best_model.py:37",
+          "models/fmpe_giordano/run_sbi_ariel.py:168",
+          "models/fmpe_giordano/run_sbi_ariel.py:66",
+          "models/garnet_ariel_quantum_regression/checkpoint.py:187",
+          "models/sbi_ariel_adc2023/evaluate.py:62",
+          "models/sbi_ariel_adc2023/training.py:409",
+          "models/taurex_exobiome/training.py:399",
+          "models/taurex_exobiome_without_quant/training.py:508",
+          "models/taurex_fmpe/evaluate.py:62",
+          "models/taurex_fmpe/training.py:409",
+          "scripts/run_controlled_quantum_residual_campaign.py:219",
+          "scripts/run_controlled_quantum_residual_campaign.py:182",
+          "tests/test_ariel_quantum_regression.py:170",
+          "tests/test_ariel_quantum_regression.py:224",
+          "tests/test_ariel_quantum_regression.py:280",
+          "tests/test_five_qubit_exobiome.py:88",
+          "tests/test_five_qubit_exobiome.py:144"
+        ]
+      },
+      {
+        "value": "best_model_by_loss.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/evaluate.py:63",
+          "models/sbi_ariel_adc2023/training.py:410",
+          "models/taurex_fmpe/evaluate.py:63",
+          "models/taurex_fmpe/training.py:410"
+        ]
+      },
+      {
+        "value": "best_model_by_mrmse.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:57",
+          "models/adc_winner_on_ariel/summarize_trained_run.py:112",
+          "models/adc_winner_on_ariel/summarize_trained_run.py:114",
+          "models/adc_winner_on_ariel/train.py:240",
+          "models/adc_winner_on_ariel/train.py:241",
+          "models/adc_winner_on_ariel/train.py:230",
+          "models/ariel_winner_nf/train.py:240",
+          "models/ariel_winner_nf/train.py:241",
+          "models/ariel_winner_nf/train.py:230",
+          "models/ariel_winner_on_taurex/train.py:240",
+          "models/ariel_winner_on_taurex/train.py:241",
+          "models/ariel_winner_on_taurex/train.py:230",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:240",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:241",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:230",
+          "models/sbi_ariel_adc2023/evaluate.py:61",
+          "models/sbi_ariel_adc2023/training.py:411",
+          "models/taurex_fmpe/evaluate.py:61",
+          "models/taurex_fmpe/training.py:411",
+          "scripts/reeval_sota.py:69",
+          "tests/test_adc_winner_on_ariel.py:125"
+        ]
+      },
+      {
+        "value": "best_model_by_nll.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:58",
+          "models/adc_winner_on_ariel/summarize_trained_run.py:117",
+          "models/adc_winner_on_ariel/summarize_trained_run.py:119",
+          "models/adc_winner_on_ariel/train.py:200",
+          "models/ariel_winner_nf/train.py:200",
+          "models/ariel_winner_on_taurex/train.py:200",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:200",
+          "models/ariel_winner_trace_nf/train.py:234",
+          "models/ariel_winner_trace_nf/train.py:218"
+        ]
+      },
+      {
+        "value": "best_model_epoch059.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_quantum_residual_evidence.py:296"
+        ]
+      },
+      {
+        "value": "best_monitor_snapshot.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/training.py:412",
+          "models/taurex_fmpe/training.py:412"
+        ]
+      },
+      {
+        "value": "campaign_config.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/run_controlled_quantum_residual_campaign.py:401",
+          "scripts/run_controlled_quantum_residual_campaign.py:447"
+        ]
+      },
+      {
+        "value": "campaign_summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/run_controlled_quantum_residual_campaign.py:439",
+          "scripts/run_controlled_quantum_residual_campaign.py:433",
+          "scripts/run_controlled_quantum_residual_campaign.py:448"
+        ]
+      },
+      {
+        "value": "cnn_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/reeval_cnn_band.py:53"
+        ]
+      },
+      {
+        "value": "comparison_metrics.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:198"
+        ]
+      },
+      {
+        "value": "comparison_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:197"
+        ]
+      },
+      {
+        "value": "config.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:742",
+          "models/five_qubit_exobiome/cross_validation.py:474",
+          "models/five_qubit_exobiome/training.py:712",
+          "models/garnet_ariel_quantum_regression/checkpoint.py:188",
+          "models/taurex_exobiome/cross_validation.py:595",
+          "models/taurex_exobiome/training.py:720",
+          "models/taurex_exobiome_without_quant/cross_validation.py:595",
+          "models/taurex_exobiome_without_quant/training.py:831",
+          "scripts/analyze_quantum_residual_evidence.py:285",
+          "scripts/analyze_quantum_residual_evidence.py:298",
+          "scripts/run_controlled_quantum_residual_campaign.py:154",
+          "tests/test_five_qubit_exobiome.py:107"
+        ]
+      },
+      {
+        "value": "controlled_aggregate_summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/aggregate_controlled_quantum_results.py:201",
+          "scripts/analyze_targetwise_residual_ensemble.py:158"
+        ]
+      },
+      {
+        "value": "coverage.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:17",
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:18"
+        ]
+      },
+      {
+        "value": "cross_validation_config.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:438",
+          "models/taurex_exobiome/cross_validation.py:562",
+          "models/taurex_exobiome_without_quant/cross_validation.py:562"
+        ]
+      },
+      {
+        "value": "cross_validation_summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:567",
+          "models/taurex_exobiome/cross_validation.py:527",
+          "models/taurex_exobiome_without_quant/cross_validation.py:527"
+        ]
+      },
+      {
+        "value": "data/val_dataset/manifest.json",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_sota.py:121"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "default: <run-dir>/best_model_by_mrmse.pt",
+        "kind": "placeholder_or_help_text",
+        "referenced_at": [
+          "scripts/reeval_sota.py:59"
+        ]
+      },
+      {
+        "value": "evaluation.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/comparison.py:22",
+          "models/fmpe_giordano/coverage_evaluation.py:92"
+        ]
+      },
+      {
+        "value": "fold_summaries.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:538",
+          "models/taurex_exobiome/cross_validation.py:494",
+          "models/taurex_exobiome_without_quant/cross_validation.py:494"
+        ]
+      },
+      {
+        "value": "history.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:364",
+          "models/five_qubit_exobiome/training.py:361",
+          "models/taurex_exobiome/training.py:368",
+          "models/taurex_exobiome_without_quant/training.py:474",
+          "scripts/run_controlled_quantum_residual_campaign.py:155",
+          "tests/test_ariel_quantum_regression.py:171",
+          "tests/test_five_qubit_exobiome.py:89",
+          "tests/test_five_qubit_exobiome.py:110"
+        ]
+      },
+      {
+        "value": "holdout.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/dataset.py:69",
+          "models/adc_winner_on_ariel/prepare_dataset.py:198",
+          "models/ariel_winner_nf/dataset.py:69",
+          "models/ariel_winner_nf/prepare_dataset.py:198",
+          "models/ariel_winner_on_taurex/dataset.py:69",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:224",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/dataset.py:69",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:198",
+          "models/ariel_winner_trace_nf/dataset.py:67",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:239",
+          "tests/test_adc_winner_on_ariel.py:102"
+        ]
+      },
+      {
+        "value": "holdout_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:52",
+          "models/adc_winner_on_ariel/train.py:272",
+          "models/ariel_exobiome/training.py:776",
+          "models/ariel_winner_nf/train.py:272",
+          "models/ariel_winner_on_taurex/train.py:272",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:272",
+          "models/ariel_winner_trace_nf/evaluate.py:248",
+          "models/ariel_winner_trace_nf/train.py:292",
+          "models/five_qubit_exobiome/cross_validation.py:511",
+          "models/five_qubit_exobiome/training.py:746",
+          "models/taurex_exobiome/cross_validation.py:632",
+          "models/taurex_exobiome/training.py:755",
+          "models/taurex_exobiome_without_quant/cross_validation.py:632",
+          "models/taurex_exobiome_without_quant/training.py:875",
+          "scripts/aggregate_controlled_quantum_results.py:120",
+          "scripts/run_controlled_quantum_residual_campaign.py:141",
+          "scripts/run_controlled_quantum_residual_campaign.py:157",
+          "tests/test_adc_winner_on_ariel.py:152",
+          "tests/test_ariel_quantum_regression.py:173",
+          "tests/test_ariel_quantum_regression.py:226",
+          "tests/test_five_qubit_exobiome.py:91"
+        ]
+      },
+      {
+        "value": "holdout_planet_ids.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/prepare_dataset.py:83",
+          "models/ariel_winner_nf/prepare_dataset.py:83",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:83",
+          "tests/test_ariel_winner_nf_split.py:42",
+          "tests/test_ariel_winner_nf_split.py:58"
+        ]
+      },
+      {
+        "value": "holdout_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:778",
+          "models/ariel_winner_trace_nf/evaluate.py:250",
+          "models/ariel_winner_trace_nf/train.py:294",
+          "models/five_qubit_exobiome/cross_validation.py:513",
+          "models/five_qubit_exobiome/training.py:748",
+          "models/taurex_exobiome/cross_validation.py:472",
+          "models/taurex_exobiome/cross_validation.py:634",
+          "models/taurex_exobiome/training.py:757",
+          "models/taurex_exobiome_without_quant/cross_validation.py:472",
+          "models/taurex_exobiome_without_quant/cross_validation.py:634",
+          "models/taurex_exobiome_without_quant/training.py:877",
+          "scripts/analyze_targetwise_residual_ensemble.py:122",
+          "scripts/analyze_targetwise_residual_ensemble.py:118",
+          "tests/test_ariel_quantum_cross_validation.py:119"
+        ]
+      },
+      {
+        "value": "ideal_spectra_comparison.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:21"
+        ]
+      },
+      {
+        "value": "labels.parquet",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_winner_on_taurex/prepare_dataset.py:68",
+          "models/taurex_exobiome/dataset.py:188",
+          "models/taurex_exobiome/dataset.py:269",
+          "models/taurex_exobiome_without_quant/dataset.py:191",
+          "models/taurex_exobiome_without_quant/dataset.py:281",
+          "models/taurex_fmpe/prepare_dataset.py:79",
+          "models/taurex_fmpe/raw_dataset.py:39",
+          "scripts/analyze_quantum_residual_evidence.py:163",
+          "tests/test_ariel_quantum_regression.py:37"
+        ]
+      },
+      {
+        "value": "last_model.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:383",
+          "models/five_qubit_exobiome/training.py:380",
+          "models/taurex_exobiome/training.py:387",
+          "models/taurex_exobiome_without_quant/training.py:495"
+        ]
+      },
+      {
+        "value": "losses.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:15"
+        ]
+      },
+      {
+        "value": "manifest.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/prepare_dataset.py:233",
+          "models/ariel_exobiome/dataset.py:348",
+          "models/ariel_exobiome/dataset.py:323",
+          "models/ariel_winner_nf/prepare_dataset.py:233",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:264",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:233",
+          "models/ariel_winner_trace_nf/dataset.py:59",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:275",
+          "models/five_qubit_exobiome/dataset.py:348",
+          "models/five_qubit_exobiome/dataset.py:323",
+          "models/sbi_ariel_adc2023/constants.py:67",
+          "models/taurex_exobiome/dataset.py:514",
+          "models/taurex_exobiome/dataset.py:489",
+          "models/taurex_exobiome_without_quant/dataset.py:614",
+          "models/taurex_exobiome_without_quant/dataset.py:589",
+          "models/taurex_fmpe/constants.py:93",
+          "scripts/reeval_lib.py:185"
+        ]
+      },
+      {
+        "value": "metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/reeval_lib.py:182",
+          "scripts/reeval_lib.py:138"
+        ]
+      },
+      {
+        "value": "metrics.pkl",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/calibration.py:537",
+          "models/fmpe_giordano/comparison.py:28"
+        ]
+      },
+      {
+        "value": "model_latest.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/compute_posterior_distribution.py:151"
+        ]
+      },
+      {
+        "value": "normalization_stats.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/constants.py:68",
+          "models/taurex_fmpe/constants.py:94"
+        ]
+      },
+      {
+        "value": "oof_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:545",
+          "models/taurex_exobiome/cross_validation.py:501",
+          "models/taurex_exobiome_without_quant/cross_validation.py:501"
+        ]
+      },
+      {
+        "value": "oof_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:541",
+          "models/taurex_exobiome/cross_validation.py:497",
+          "models/taurex_exobiome_without_quant/cross_validation.py:497",
+          "tests/test_ariel_quantum_cross_validation.py:132"
+        ]
+      },
+      {
+        "value": "per_target_metrics.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_quantum_residual_evidence.py:346",
+          "scripts/analyze_quantum_residual_evidence.py:353"
+        ]
+      },
+      {
+        "value": "poseidon_holdout_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_quantum_residual_evidence.py:239",
+          "scripts/analyze_quantum_residual_evidence.py:240"
+        ]
+      },
+      {
+        "value": "posterior_comparison.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:19"
+        ]
+      },
+      {
+        "value": "posterior_scores.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/adc_evaluation.py:270"
+        ]
+      },
+      {
+        "value": "posterior_selection.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/evaluate.py:298",
+          "models/taurex_fmpe/evaluate.py:298"
+        ]
+      },
+      {
+        "value": "predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/reeval_lib.py:142"
+        ]
+      },
+      {
+        "value": "prepared_manifest.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:53",
+          "models/ariel_exobiome/training.py:755",
+          "models/ariel_winner_trace_nf/train.py:134",
+          "models/five_qubit_exobiome/cross_validation.py:485",
+          "models/five_qubit_exobiome/training.py:725",
+          "models/sbi_ariel_adc2023/training.py:384",
+          "models/taurex_exobiome/cross_validation.py:606",
+          "models/taurex_exobiome/training.py:734",
+          "models/taurex_exobiome_without_quant/cross_validation.py:606",
+          "models/taurex_exobiome_without_quant/training.py:847",
+          "models/taurex_fmpe/training.py:384",
+          "tests/test_adc_winner_on_ariel.py:149"
+        ]
+      },
+      {
+        "value": "real_spectra_comparison.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:20"
+        ]
+      },
+      {
+        "value": "regression.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/make_ablation_study_on_aux_data.py:16"
+        ]
+      },
+      {
+        "value": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_predictions.csv",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:41"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "reports/ariel_quantum_taurex_snapshot_20260312_1003/stage2_best_model_epoch005.pt",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:44"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_predictions.csv",
+        "kind": "path",
+        "referenced_at": [
+          "scripts/reeval_from_predictions.py:52"
+        ],
+        "resolved_against": "<repo>",
+        "exists": true
+      },
+      {
+        "value": "results.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/adc_evaluation.py:291",
+          "models/fmpe_giordano/adc_evaluation.py:295",
+          "models/fmpe_giordano/comparison.py:20",
+          "models/fmpe_giordano/comparison.py:21"
+        ]
+      },
+      {
+        "value": "results.pkl",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/comparison.py:206"
+        ]
+      },
+      {
+        "value": "resume_latest.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:122",
+          "models/adc_winner_on_ariel/summarize_trained_run.py:123",
+          "models/adc_winner_on_ariel/train.py:234",
+          "models/ariel_winner_nf/train.py:234",
+          "models/ariel_winner_on_taurex/train.py:234",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:234",
+          "models/ariel_winner_trace_nf/train.py:205",
+          "models/sbi_ariel_adc2023/training.py:81",
+          "models/sbi_ariel_adc2023/training.py:386",
+          "models/sbi_ariel_adc2023/training.py:623",
+          "models/taurex_fmpe/training.py:81",
+          "models/taurex_fmpe/training.py:386",
+          "models/taurex_fmpe/training.py:623"
+        ]
+      },
+      {
+        "value": "run_summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:795",
+          "models/ariel_winner_trace_nf/train.py:305",
+          "models/five_qubit_exobiome/cross_validation.py:528",
+          "models/five_qubit_exobiome/training.py:762",
+          "models/sbi_ariel_adc2023/training.py:637",
+          "models/taurex_exobiome/cross_validation.py:471",
+          "models/taurex_exobiome/cross_validation.py:649",
+          "models/taurex_exobiome/training.py:771",
+          "models/taurex_exobiome_without_quant/cross_validation.py:471",
+          "models/taurex_exobiome_without_quant/cross_validation.py:649",
+          "models/taurex_exobiome_without_quant/training.py:892",
+          "models/taurex_fmpe/training.py:637",
+          "scripts/aggregate_controlled_quantum_results.py:119",
+          "scripts/run_controlled_quantum_residual_campaign.py:179",
+          "scripts/run_controlled_quantum_residual_campaign.py:142",
+          "scripts/run_controlled_quantum_residual_campaign.py:158",
+          "scripts/run_controlled_quantum_residual_campaign.py:348",
+          "scripts/run_controlled_quantum_residual_campaign.py:231",
+          "scripts/run_controlled_quantum_residual_campaign.py:293",
+          "tests/test_ariel_quantum_cross_validation.py:106",
+          "tests/test_ariel_quantum_regression.py:189",
+          "tests/test_ariel_quantum_regression.py:242"
+        ]
+      },
+      {
+        "value": "saved_split_manifest.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:54",
+          "tests/test_adc_winner_on_ariel.py:150"
+        ]
+      },
+      {
+        "value": "scalers.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/dataset.py:325",
+          "models/ariel_exobiome/dataset.py:356",
+          "models/ariel_exobiome/training.py:763",
+          "models/five_qubit_exobiome/cross_validation.py:487",
+          "models/five_qubit_exobiome/dataset.py:325",
+          "models/five_qubit_exobiome/dataset.py:356",
+          "models/five_qubit_exobiome/training.py:733",
+          "models/garnet_ariel_quantum_regression/checkpoint.py:189",
+          "models/taurex_exobiome/cross_validation.py:608",
+          "models/taurex_exobiome/dataset.py:491",
+          "models/taurex_exobiome/dataset.py:522",
+          "models/taurex_exobiome/training.py:742",
+          "models/taurex_exobiome_without_quant/cross_validation.py:608",
+          "models/taurex_exobiome_without_quant/dataset.py:591",
+          "models/taurex_exobiome_without_quant/dataset.py:622",
+          "models/taurex_exobiome_without_quant/training.py:855"
+        ]
+      },
+      {
+        "value": "scalers.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/dataset.py:65",
+          "models/adc_winner_on_ariel/prepare_dataset.py:179",
+          "models/ariel_winner_nf/dataset.py:65",
+          "models/ariel_winner_nf/prepare_dataset.py:179",
+          "models/ariel_winner_on_taurex/dataset.py:65",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:204",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/dataset.py:65",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:179",
+          "models/ariel_winner_trace_nf/dataset.py:69",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:212",
+          "tests/test_adc_winner_on_ariel.py:83"
+        ]
+      },
+      {
+        "value": "selection_rows.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_targetwise_residual_ensemble.py:164"
+        ]
+      },
+      {
+        "value": "spectra.h5",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_winner_on_taurex/prepare_dataset.py:76",
+          "models/taurex_exobiome/dataset.py:278",
+          "models/taurex_exobiome/dataset.py:188",
+          "models/taurex_exobiome_without_quant/dataset.py:290",
+          "models/taurex_exobiome_without_quant/dataset.py:191",
+          "models/taurex_fmpe/prepare_dataset.py:80",
+          "models/taurex_fmpe/raw_dataset.py:48",
+          "scripts/analyze_quantum_residual_evidence.py:164",
+          "tests/test_ariel_quantum_regression.py:38"
+        ]
+      },
+      {
+        "value": "spectral_scores.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/adc_evaluation.py:271"
+        ]
+      },
+      {
+        "value": "split_manifest.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/dataset.py:332",
+          "models/ariel_exobiome/dataset.py:357",
+          "models/ariel_exobiome/training.py:754",
+          "models/five_qubit_exobiome/cross_validation.py:484",
+          "models/five_qubit_exobiome/dataset.py:332",
+          "models/five_qubit_exobiome/dataset.py:357",
+          "models/five_qubit_exobiome/training.py:724",
+          "models/taurex_exobiome/cross_validation.py:605",
+          "models/taurex_exobiome/dataset.py:498",
+          "models/taurex_exobiome/dataset.py:523",
+          "models/taurex_exobiome/training.py:733",
+          "models/taurex_exobiome_without_quant/cross_validation.py:605",
+          "models/taurex_exobiome_without_quant/dataset.py:598",
+          "models/taurex_exobiome_without_quant/dataset.py:623",
+          "models/taurex_exobiome_without_quant/training.py:846"
+        ]
+      },
+      {
+        "value": "stage2_best_model_epoch005.pt",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_quantum_residual_evidence.py:283"
+        ]
+      },
+      {
+        "value": "stats.pkl",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/fmpe_giordano/calibration.py:59",
+          "models/fmpe_giordano/calibration.py:104",
+          "models/fmpe_giordano/comparison.py:24",
+          "models/fmpe_giordano/comparison.py:25"
+        ]
+      },
+      {
+        "value": "submission.hdf5",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_baseline/run_baseline.py:147",
+          "models/adc_baseline/submit_format.py:7"
+        ]
+      },
+      {
+        "value": "summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_winner_trace_nf/train.py:242",
+          "scripts/analyze_quantum_residual_evidence.py:330"
+        ]
+      },
+      {
+        "value": "targetwise_ensemble_summary.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_targetwise_residual_ensemble.py:163",
+          "scripts/analyze_targetwise_residual_ensemble.py:172",
+          "scripts/analyze_targetwise_residual_ensemble.py:178"
+        ]
+      },
+      {
+        "value": "targetwise_eval_rows.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "scripts/analyze_targetwise_residual_ensemble.py:165"
+        ]
+      },
+      {
+        "value": "tau_041424_041433.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "tests/test_crossgen_biosignatures.py:136"
+        ]
+      },
+      {
+        "value": "tau_generation.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "tests/test_crossgen_biosignatures.py:146"
+        ]
+      },
+      {
+        "value": "testdata.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/dataset.py:70",
+          "models/adc_winner_on_ariel/prepare_dataset.py:206",
+          "models/ariel_winner_nf/dataset.py:70",
+          "models/ariel_winner_nf/prepare_dataset.py:206",
+          "models/ariel_winner_on_taurex/dataset.py:70",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:232",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/dataset.py:70",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:206",
+          "models/ariel_winner_trace_nf/dataset.py:68",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:240",
+          "tests/test_adc_winner_on_ariel.py:110"
+        ]
+      },
+      {
+        "value": "testdata_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:779",
+          "models/ariel_winner_trace_nf/evaluate.py:251",
+          "models/ariel_winner_trace_nf/train.py:295",
+          "models/five_qubit_exobiome/cross_validation.py:514",
+          "models/five_qubit_exobiome/training.py:749",
+          "models/sbi_ariel_adc2023/evaluate.py:302",
+          "models/taurex_exobiome/cross_validation.py:473",
+          "models/taurex_exobiome/cross_validation.py:635",
+          "models/taurex_exobiome/training.py:758",
+          "models/taurex_exobiome_without_quant/cross_validation.py:473",
+          "models/taurex_exobiome_without_quant/cross_validation.py:635",
+          "models/taurex_exobiome_without_quant/training.py:878",
+          "models/taurex_fmpe/evaluate.py:302",
+          "tests/test_ariel_quantum_cross_validation.py:120",
+          "tests/test_ariel_quantum_regression.py:177",
+          "tests/test_ariel_quantum_regression.py:230",
+          "tests/test_ariel_quantum_regression.py:174",
+          "tests/test_ariel_quantum_regression.py:227",
+          "tests/test_five_qubit_exobiome.py:95",
+          "tests/test_five_qubit_exobiome.py:92"
+        ]
+      },
+      {
+        "value": "testdata_predictions_ensemble.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/five_qubit_exobiome/cross_validation.py:548",
+          "models/taurex_exobiome/cross_validation.py:504",
+          "models/taurex_exobiome_without_quant/cross_validation.py:504",
+          "tests/test_ariel_quantum_cross_validation.py:135"
+        ]
+      },
+      {
+        "value": "train.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/dataset.py:67",
+          "models/adc_winner_on_ariel/prepare_dataset.py:182",
+          "models/ariel_winner_nf/dataset.py:67",
+          "models/ariel_winner_nf/prepare_dataset.py:182",
+          "models/ariel_winner_on_taurex/dataset.py:67",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:208",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/dataset.py:67",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:182",
+          "models/ariel_winner_trace_nf/dataset.py:65",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:237",
+          "tests/test_adc_winner_on_ariel.py:86"
+        ]
+      },
+      {
+        "value": "train_planet_ids.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/prepare_dataset.py:81",
+          "models/ariel_winner_nf/prepare_dataset.py:81",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:81",
+          "tests/test_ariel_winner_nf_split.py:40",
+          "tests/test_ariel_winner_nf_split.py:56"
+        ]
+      },
+      {
+        "value": "training_state.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:366",
+          "models/five_qubit_exobiome/training.py:363",
+          "models/taurex_exobiome/training.py:370",
+          "models/taurex_exobiome_without_quant/training.py:476",
+          "scripts/analyze_quantum_residual_evidence.py:253",
+          "scripts/analyze_quantum_residual_evidence.py:254",
+          "scripts/analyze_quantum_residual_evidence.py:286",
+          "scripts/analyze_quantum_residual_evidence.py:299"
+        ]
+      },
+      {
+        "value": "validation.npz",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/dataset.py:68",
+          "models/adc_winner_on_ariel/prepare_dataset.py:190",
+          "models/ariel_winner_nf/dataset.py:68",
+          "models/ariel_winner_nf/prepare_dataset.py:190",
+          "models/ariel_winner_on_taurex/dataset.py:68",
+          "models/ariel_winner_on_taurex/prepare_dataset.py:216",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/dataset.py:68",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:190",
+          "models/ariel_winner_trace_nf/dataset.py:66",
+          "models/ariel_winner_trace_nf/prepare_dataset.py:238",
+          "tests/test_adc_winner_on_ariel.py:94"
+        ]
+      },
+      {
+        "value": "validation_metrics.json",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/summarize_trained_run.py:51",
+          "models/adc_winner_on_ariel/train.py:271",
+          "models/ariel_exobiome/training.py:775",
+          "models/ariel_winner_nf/train.py:271",
+          "models/ariel_winner_on_taurex/train.py:271",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/train.py:271",
+          "models/ariel_winner_trace_nf/evaluate.py:247",
+          "models/ariel_winner_trace_nf/train.py:291",
+          "models/five_qubit_exobiome/cross_validation.py:510",
+          "models/five_qubit_exobiome/training.py:745",
+          "models/taurex_exobiome/cross_validation.py:631",
+          "models/taurex_exobiome/training.py:754",
+          "models/taurex_exobiome_without_quant/cross_validation.py:631",
+          "models/taurex_exobiome_without_quant/training.py:874",
+          "scripts/analyze_targetwise_residual_ensemble.py:97",
+          "scripts/run_controlled_quantum_residual_campaign.py:140",
+          "scripts/run_controlled_quantum_residual_campaign.py:156",
+          "tests/test_adc_winner_on_ariel.py:151",
+          "tests/test_ariel_quantum_regression.py:172",
+          "tests/test_ariel_quantum_regression.py:225",
+          "tests/test_ariel_quantum_regression.py:281",
+          "tests/test_five_qubit_exobiome.py:90",
+          "tests/test_five_qubit_exobiome.py:145"
+        ]
+      },
+      {
+        "value": "validation_planet_ids.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/adc_winner_on_ariel/prepare_dataset.py:82",
+          "models/ariel_winner_nf/prepare_dataset.py:82",
+          "models/ariel_winner_trace_nf/ariel_winner_nf/prepare_dataset.py:82",
+          "tests/test_ariel_winner_nf_split.py:41",
+          "tests/test_ariel_winner_nf_split.py:57"
+        ]
+      },
+      {
+        "value": "validation_predictions.csv",
+        "kind": "bare_filename_resolved_at_runtime",
+        "referenced_at": [
+          "models/ariel_exobiome/training.py:777",
+          "models/ariel_winner_trace_nf/evaluate.py:249",
+          "models/ariel_winner_trace_nf/train.py:293",
+          "models/five_qubit_exobiome/cross_validation.py:512",
+          "models/five_qubit_exobiome/training.py:747",
+          "models/taurex_exobiome/cross_validation.py:633",
+          "models/taurex_exobiome/training.py:756",
+          "models/taurex_exobiome_without_quant/cross_validation.py:633",
+          "models/taurex_exobiome_without_quant/training.py:876"
+        ]
+      },
+      {
+        "value": "{split_name}_metadata.csv",
+        "kind": "placeholder_or_help_text",
+        "referenced_at": [
+          "models/sbi_ariel_adc2023/constants.py:65",
+          "models/taurex_fmpe/constants.py:91"
+        ]
+      }
+    ],
+    "n_hardcoded_artifact_constants": 105,
+    "hardcoded_constant_kinds": {
+      "bare_filename_resolved_at_runtime": 87,
+      "path": 16,
+      "placeholder_or_help_text": 2
+    },
+    "artifact_path_roots_tried": [
+      "",
+      "data/ariel-ml-dataset",
+      "data/full-ariel",
+      "data/TauREx set"
+    ]
+  }
+}

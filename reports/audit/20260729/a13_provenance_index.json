@@ -1,0 +1,364 @@
+{
+  "check": "a13_provenance_index",
+  "finding": "P6 / U8 \u2014 several headline numbers have no backing artifact; the verification doc and plan-of-record are not in git",
+  "question": "Can each published number be re-derived from a committed artifact?",
+  "pass_criterion": "every result number is recomputable from committed predictions, and its document is tracked",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:58.963841+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "claims": [
+      {
+        "id": "exobiome_holdout",
+        "value": 0.2993761897087097,
+        "metrics": "artifacts/ariel_quantum_best_v4_epoch6/holdout_metrics.json",
+        "predictions": "artifacts/ariel_quantum_best_v4_epoch6/holdout_predictions.csv",
+        "weights": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+        "cited_in": "README.md",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": true,
+          "weights": true
+        },
+        "recomputed": 0.29937625996093453,
+        "status": "backed_full",
+        "delta": 7.025222481527038e-08
+      },
+      {
+        "id": "exobiome_val",
+        "value": 0.29361358284950256,
+        "metrics": "artifacts/ariel_quantum_best_v4_epoch6/validation_metrics.json",
+        "predictions": "artifacts/ariel_quantum_best_v4_epoch6/validation_predictions.csv",
+        "weights": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+        "cited_in": "README.md",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": true,
+          "weights": true
+        },
+        "recomputed": 0.29361368736850973,
+        "status": "backed_full",
+        "delta": 1.0451900717134421e-07
+      },
+      {
+        "id": "exobiome_mac_holdout",
+        "value": 0.29869264364242554,
+        "metrics": "artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/mac_holdout_metrics.json",
+        "predictions": "artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/mac_holdout_predictions.csv",
+        "weights": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+        "cited_in": "reports/model_comparison/rmse/exobiome_metrics.json + figure 1",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": true,
+          "weights": true
+        },
+        "recomputed": 0.298692656545864,
+        "status": "backed_full",
+        "delta": 1.2903438484368479e-08
+      },
+      {
+        "id": "sota_holdout_median",
+        "value": 0.5522884130477905,
+        "metrics": "models/adc_winner_on_ariel/trained_run/holdout_metrics.json",
+        "predictions": null,
+        "weights": "models/adc_winner_on_ariel/trained_run/best_model_by_mrmse.pt",
+        "cited_in": "reports/model_comparison/rmse/sota_metrics.json + figure 1",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": false,
+          "weights": true
+        },
+        "recomputed": null,
+        "status": "backed_summary",
+        "delta": null
+      },
+      {
+        "id": "cnn_holdout",
+        "value": 0.65003745144915,
+        "metrics": "models/adc_baseline/cnn_metrics.json",
+        "predictions": null,
+        "weights": "models/adc_baseline/cnn_whole_ariel_new.weights.h5",
+        "cited_in": "figure 1; identical JSON also at reports/model_comparison/rmse/cnn_metrics.json. This is the OFFICIAL ADC2023 baseline (ucl-exoplanets/ADC2023-baseline), vendored with code + weights + notebook -> re-derivable, needs the TF env",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": false,
+          "weights": true
+        },
+        "recomputed": null,
+        "status": "backed_summary",
+        "delta": null
+      },
+      {
+        "id": "random_forest_holdout",
+        "value": 0.75724,
+        "metrics": "reports/model_comparison/rmse/random_forest_metrics.json",
+        "predictions": null,
+        "weights": null,
+        "cited_in": "figure 1 (removed 2026-07-23)",
+        "artifacts_present": {
+          "metrics": false,
+          "predictions": false,
+          "weights": false
+        },
+        "recomputed": null,
+        "status": "UNBACKED",
+        "delta": null
+      },
+      {
+        "id": "quantum_poseidon",
+        "value": 3.215615,
+        "metrics": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_metrics.json",
+        "predictions": "reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_predictions.csv",
+        "weights": "reports/ariel_quantum_taurex_snapshot_20260312_1003/stage2_best_model_epoch005.pt",
+        "cited_in": "reports/taurex_model_comparison.md",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": true,
+          "weights": true
+        },
+        "recomputed": 3.2156152428152134,
+        "status": "backed_full",
+        "delta": 2.4281521326940947e-07
+      },
+      {
+        "id": "noquant_poseidon",
+        "value": 3.279559,
+        "metrics": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_metrics.json",
+        "predictions": "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_predictions.csv",
+        "weights": "reports/taurex_noquant_taurex_snapshot_20260312_133054/best_model_epoch059.pt",
+        "cited_in": "reports/taurex_model_comparison.md",
+        "artifacts_present": {
+          "metrics": true,
+          "predictions": true,
+          "weights": false
+        },
+        "recomputed": 3.2795595859735265,
+        "status": "backed_full",
+        "delta": 5.859735265900667e-07
+      },
+      {
+        "id": "winner_on_taurex_poseidon",
+        "value": 3.453121,
+        "metrics": null,
+        "predictions": null,
+        "weights": null,
+        "cited_in": "reports/taurex_model_comparison.md (1 of 3 rows)",
+        "artifacts_present": {
+          "metrics": false,
+          "predictions": false,
+          "weights": false
+        },
+        "recomputed": null,
+        "status": "UNBACKED",
+        "delta": null
+      },
+      {
+        "id": "h200_poseidon",
+        "value": 2.894607,
+        "metrics": null,
+        "predictions": null,
+        "weights": null,
+        "cited_in": "reports/taurex_noquant_h200_...md (excluded from ranking)",
+        "artifacts_present": {
+          "metrics": false,
+          "predictions": false,
+          "weights": false
+        },
+        "recomputed": null,
+        "status": "UNBACKED",
+        "delta": null
+      },
+      {
+        "id": "garnet_hardware",
+        "value": 0.278756,
+        "metrics": null,
+        "predictions": null,
+        "weights": null,
+        "cited_in": "scripts/presentation/render_scientific_figures.py figure 4",
+        "artifacts_present": {
+          "metrics": false,
+          "predictions": false,
+          "weights": false
+        },
+        "recomputed": null,
+        "status": "UNBACKED",
+        "delta": null
+      }
+    ],
+    "unbacked_or_mismatched": [
+      "random_forest_holdout",
+      "winner_on_taurex_poseidon",
+      "h200_poseidon",
+      "garnet_hardware"
+    ],
+    "backed_summary_not_recomputable": [
+      "sota_holdout_median",
+      "cnn_holdout"
+    ],
+    "declared_weights_absent": [
+      {
+        "id": "noquant_poseidon",
+        "weights": "reports/taurex_noquant_taurex_snapshot_20260312_133054/best_model_epoch059.pt",
+        "also_reported_by": "a14_importability.missing_paths"
+      }
+    ],
+    "documents": [
+      {
+        "doc": "docs/12q_taurex_exobiome_architecture.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "docs/LITERATURA.md",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "docs/METHODOLOGICAL_AUDIT.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "docs/VERIFICATION.md",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "docs/ariel_quantum_architecture.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "docs/RAPORT_KONCOWY.tex",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/ariel_quantum_taurex_snapshot_20260312_1003/README.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/ariel_winner_on_taurex_20260312_112940_results_summary.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/reeval/README.md",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/reeval/superseded/20260722/sota_holdout/SUPERSEDED.md",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/reeval/superseded/20260722/sota_validation/SUPERSEDED.md",
+        "exists": true,
+        "tracked_in_git": false,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/taurex_model_comparison.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/taurex_noquant_mac_20260312_133054_audit.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "reports/taurex_noquant_taurex_snapshot_20260312_133054/README.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "enumerated"
+      },
+      {
+        "doc": "README.md",
+        "exists": true,
+        "tracked_in_git": true,
+        "resolved_root": "/Users/mariaplatek/projects/AXION/hack4sages",
+        "is_main_checkout": true,
+        "source": "DOCS (reczna lista)"
+      }
+    ],
+    "n_documents": 19,
+    "document_scan_globs": [
+      "docs/**/*.md",
+      "docs/**/*.tex",
+      "reports/**/*.md",
+      "reports/**/*.tex"
+    ],
+    "document_scan_excluded_prefixes": [
+      "reports/audit/"
+    ],
+    "worktree_roots": [],
+    "untracked_documents": [
+      "docs/LITERATURA.md @ /Users/mariaplatek/projects/AXION/hack4sages",
+      "docs/RAPORT_KONCOWY.tex @ /Users/mariaplatek/projects/AXION/hack4sages",
+      "docs/VERIFICATION.md @ /Users/mariaplatek/projects/AXION/hack4sages",
+      "reports/reeval/README.md @ /Users/mariaplatek/projects/AXION/hack4sages",
+      "reports/reeval/superseded/20260722/sota_holdout/SUPERSEDED.md @ /Users/mariaplatek/projects/AXION/hack4sages",
+      "reports/reeval/superseded/20260722/sota_validation/SUPERSEDED.md @ /Users/mariaplatek/projects/AXION/hack4sages"
+    ],
+    "missing_documents": [],
+    "documents_absent_in_main_checkout_present_in_other_worktree": [],
+    "legend": "artifacts column: M=metrics json, P=predictions csv, W=weights",
+    "note": "backed_summary means the number was transcribed from a summary JSON and cannot be re-derived without a fresh forward pass. For a publication every result must be backed_full \u2014 and since 2026-07-28 backed_summary is a FAIL reason, not a pass."
+  }
+}

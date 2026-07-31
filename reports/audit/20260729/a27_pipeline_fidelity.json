@@ -1,0 +1,280 @@
+{
+  "check": "a27_pipeline_fidelity",
+  "finding": "A0.2 \u2014 row-by-row fidelity of the reconstructed ExoBiome input pipeline (underpins K3, K4, K9)",
+  "question": "Do the reconstruction's predictions match the artifact's saved predictions row by row, not just on average?",
+  "pass_criterion": "max |diff| per row per gas < 1e-4 vs mac_holdout_predictions.csv at quantum_scale=1.0",
+  "status": "PASS",
+  "timestamp_utc": "2026-07-29T12:51:42.620898+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+      "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6"
+    },
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/scalers.json",
+      "sha256": "d441508f6447fe36cc5d1b6ade9152a397b2e36a960c7ae434db9857890cff12"
+    }
+  ],
+  "payload": {
+    "split": "holdout",
+    "n_rows": 4143,
+    "tolerance": 0.0001,
+    "scales_tested": [
+      1.0,
+      0.5
+    ],
+    "references": {
+      "mac_cpu": {
+        "meta": {
+          "path": "artifacts/ariel_quantum_best_v4_epoch6/mac_eval_20260312/mac_holdout_predictions.csv",
+          "same_code_path": true,
+          "note": "CPU / lightning.qubit / fp32 \u2014 strict target. data_root recorded as data/full-ariel (absent)."
+        },
+        "by_scale": {
+          "1.0000": {
+            "reference": "mac_cpu",
+            "n_rows": 4143,
+            "max_abs_diff": 8.88922119113289e-06,
+            "mean_abs_diff": 2.701847364616787e-07,
+            "p99_abs_diff": 1.4690522460725222e-06,
+            "rows_over_tolerance": 0,
+            "fraction_rows_over_tolerance": 0.0,
+            "per_gas": {
+              "log_H2O": {
+                "max": 3.982360839316357e-06,
+                "p99": 1.890794677734675e-06,
+                "median": 1.8365478471338292e-07
+              },
+              "log_CO2": {
+                "max": 8.88922119113289e-06,
+                "p99": 1.6051507564007745e-06,
+                "median": 1.503295896654322e-07
+              },
+              "log_CO": {
+                "max": 3.960144042913782e-06,
+                "p99": 1.4238997805549047e-06,
+                "median": 9.112548848833057e-08
+              },
+              "log_CH4": {
+                "max": 2.8478393554465242e-06,
+                "p99": 1.378738403658985e-06,
+                "median": 1.6156005777645532e-07
+              },
+              "log_NH3": {
+                "max": 2.8958129885126027e-06,
+                "p99": 1.4454869382518608e-06,
+                "median": 1.4767456057995787e-07
+              }
+            },
+            "worst_row": {
+              "planet_ID": "train41403",
+              "diffs": {
+                "log_H2O": 2.11e-06,
+                "log_CO2": 8.89e-06,
+                "log_CO": 1.39e-06,
+                "log_CH4": 1.2e-07,
+                "log_NH3": 2.38e-06
+              }
+            },
+            "within_tolerance": true,
+            "aggregate_would_have_hidden_it": false,
+            "mrmse_reconstruction": 0.29869264364242554,
+            "mrmse_reference": 0.29869265603888373
+          },
+          "0.5000": {
+            "reference": "mac_cpu",
+            "n_rows": 4143,
+            "max_abs_diff": 0.4102979673767093,
+            "mean_abs_diff": 0.036568681759304424,
+            "p99_abs_diff": 0.2460548026370853,
+            "rows_over_tolerance": 4143,
+            "fraction_rows_over_tolerance": 1.0,
+            "per_gas": {
+              "log_H2O": {
+                "max": 0.4102979673767093,
+                "p99": 0.32417231825561543,
+                "median": 0.033124594604492685
+              },
+              "log_CO2": {
+                "max": 0.24803920048217787,
+                "p99": 0.15875622370520043,
+                "median": 0.018585717224121723
+              },
+              "log_CO": {
+                "max": 0.11678318790283182,
+                "p99": 0.07991073006408668,
+                "median": 0.018012677185058834
+              },
+              "log_CH4": {
+                "max": 0.12011617343139669,
+                "p99": 0.08358440800537116,
+                "median": 0.015265242138672086
+              },
+              "log_NH3": {
+                "max": 0.2439074560791017,
+                "p99": 0.18490221609301774,
+                "median": 0.033464141845703566
+              }
+            },
+            "worst_row": {
+              "planet_ID": "train910",
+              "diffs": {
+                "log_H2O": 0.41029797,
+                "log_CO2": 0.18763308,
+                "log_CO": 0.01805303,
+                "log_CH4": 0.12011617,
+                "log_NH3": 0.0190239
+              }
+            },
+            "within_tolerance": false,
+            "aggregate_would_have_hidden_it": false,
+            "mrmse_reconstruction": 0.29555177688598633,
+            "mrmse_reference": 0.29869265603888373
+          }
+        },
+        "best_matching_scale": "1.0000"
+      },
+      "gpu_amp": {
+        "meta": {
+          "path": "artifacts/ariel_quantum_best_v4_epoch6/holdout_predictions.csv",
+          "same_code_path": false,
+          "note": "CUDA + bfloat16 autocast \u2014 residual ~1e-3 expected, this is the P8 noise floor."
+        },
+        "by_scale": {
+          "1.0000": {
+            "reference": "gpu_amp",
+            "n_rows": 4143,
+            "max_abs_diff": 0.9609341004638674,
+            "mean_abs_diff": 0.019366229520323335,
+            "p99_abs_diff": 0.20617349406250038,
+            "rows_over_tolerance": 4143,
+            "fraction_rows_over_tolerance": 1.0,
+            "per_gas": {
+              "log_H2O": {
+                "max": 0.5492458612854003,
+                "p99": 0.21255474789770476,
+                "median": 0.009036870773315275
+              },
+              "log_CO2": {
+                "max": 0.9609341004638674,
+                "p99": 0.37383080998620516,
+                "median": 0.010246168457030969
+              },
+              "log_CO": {
+                "max": 0.5231711165771484,
+                "p99": 0.21601090426495326,
+                "median": 0.009910068707275066
+              },
+              "log_CH4": {
+                "max": 0.1998872967651364,
+                "p99": 0.06317811217163101,
+                "median": 0.005572284301758046
+              },
+              "log_NH3": {
+                "max": 0.28462903695678676,
+                "p99": 0.11034214760644524,
+                "median": 0.007624114245605718
+              }
+            },
+            "worst_row": {
+              "planet_ID": "train22718",
+              "diffs": {
+                "log_H2O": 0.5025577,
+                "log_CO2": 0.9609341,
+                "log_CO": 0.39734653,
+                "log_CH4": 0.05339444,
+                "log_NH3": 0.09476228
+              }
+            },
+            "within_tolerance": false,
+            "aggregate_would_have_hidden_it": false,
+            "mrmse_reconstruction": 0.29869264364242554,
+            "mrmse_reference": 0.2993762593441225
+          },
+          "0.5000": {
+            "reference": "gpu_amp",
+            "n_rows": 4143,
+            "max_abs_diff": 1.1147145608215334,
+            "mean_abs_diff": 0.041153138602747934,
+            "p99_abs_diff": 0.2856587389509286,
+            "rows_over_tolerance": 4143,
+            "fraction_rows_over_tolerance": 1.0,
+            "per_gas": {
+              "log_H2O": {
+                "max": 0.41668363505859407,
+                "p99": 0.31133823723449705,
+                "median": 0.029939166723632837
+              },
+              "log_CO2": {
+                "max": 1.1147145608215334,
+                "p99": 0.4894395068017573,
+                "median": 0.025052828521728188
+              },
+              "log_CO": {
+                "max": 0.5647775428161621,
+                "p99": 0.23754010123571764,
+                "median": 0.019839438079833904
+              },
+              "log_CH4": {
+                "max": 0.27492499237060564,
+                "p99": 0.11416225736999538,
+                "median": 0.015102112203979612
+              },
+              "log_NH3": {
+                "max": 0.25185629768676776,
+                "p99": 0.17357225747729463,
+                "median": 0.029394653961182016
+              }
+            },
+            "worst_row": {
+              "planet_ID": "train22718",
+              "diffs": {
+                "log_H2O": 0.23876375,
+                "log_CO2": 1.11471456,
+                "log_CO": 0.43356327,
+                "log_CH4": 0.03431809,
+                "log_NH3": 0.02865977
+              }
+            },
+            "within_tolerance": false,
+            "aggregate_would_have_hidden_it": false,
+            "mrmse_reconstruction": 0.29555177688598633,
+            "mrmse_reference": 0.2993762593441225
+          }
+        },
+        "best_matching_scale": "1.0000"
+      }
+    },
+    "id_alignment": {
+      "mac_cpu": {
+        "same_order": true,
+        "n_ref": 4143,
+        "truth_matches_independent_load": true
+      },
+      "gpu_amp": {
+        "same_order": true,
+        "n_ref": 4143,
+        "truth_matches_independent_load": true
+      }
+    },
+    "verdict": "reconstruction faithful row by row \u2014 K3, K4 and K9 rest on solid ground",
+    "diagnostic_if_failed": [
+      "compare mrmse_reconstruction vs mrmse_reference: if they agree but rows differ, the errors cancel and the aggregate check was indeed insufficient",
+      "check id_alignment.truth_matches_independent_load: if False, the reference was computed on a different data root (mac_run_summary.json records data/full-ariel, which is absent)",
+      "check whether the worst rows share a property (extreme sigma, extreme transit depth) \u2014 that points at the per-sample normalisation in _normalize_sample_spectra"
+    ]
+  }
+}

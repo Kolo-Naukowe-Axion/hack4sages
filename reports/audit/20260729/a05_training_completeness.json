@@ -1,0 +1,165 @@
+{
+  "check": "a05_training_completeness",
+  "finding": "K5 / K3 \u2014 the flagship checkpoint comes from an 8/30-epoch aborted run; the baseline stopped at 79/300 on a different metric",
+  "question": "Did each reported run converge, on the metric it is compared on, selected on the full split?",
+  "pass_criterion": "terminated by its own rule AND reported metric plateaued AND selection metric == reported metric AND full-split selection",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:42.512592+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "runs": [
+      {
+        "run": "exobiome_stage2_v4",
+        "epochs_run": 8,
+        "max_epochs": 30,
+        "best_epoch": 6,
+        "best_val_rmse_mean": 0.2908111214637756,
+        "epoch_column_contiguous": true,
+        "epoch_range": [
+          1,
+          8
+        ],
+        "post_best_val_trajectory": [
+          0.3286555111408233,
+          0.3218213617801666
+        ],
+        "val_trajectory": [
+          0.2933245897293091,
+          0.2923854887485504,
+          0.291854053735733,
+          0.2915705442428589,
+          0.2912792563438415,
+          0.2908111214637756,
+          0.3286555111408233,
+          0.3218213617801666
+        ],
+        "quantum_scale_trajectory": [
+          0.0833333333333333,
+          0.1666666666666666,
+          0.25,
+          0.3333333333333333,
+          0.4166666666666667,
+          0.5,
+          0.5833333333333334,
+          0.6666666666666666
+        ],
+        "backbone_frozen_trajectory": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0
+        ],
+        "selection_metric": "val mRMSE (full split, every epoch)",
+        "reported_metric": "val/holdout mRMSE at quantum_scale=1.0",
+        "issues": [
+          "run ended at epoch 8 of max_epochs=30 without exhausting early_stop_patience=8 -> manual stop",
+          "best epoch (6) is exactly the last frozen-backbone epoch; the reported model never trained with an unfrozen backbone",
+          "validation diverged after the selected epoch: 0.29081 -> 0.32866 (+13.0%)",
+          "quantum_scale never reached 1.0 (max 0.667, ramp=12 epochs) yet metrics are reported at scale 1.0 \u2014 see a04",
+          "stage-1 init checkpoint absent from the repo (/home/iwo/hack4sages-crossgen/outputs/ariel_quantum_two_stage_v2_20260311_175726/stage1_classical/best_model.pt) -> total training compute undocumented; no compute-matched claim is possible"
+        ]
+      },
+      {
+        "run": "adc_winner_nsf",
+        "epochs_run": 79,
+        "max_epochs": 300,
+        "mrmse_measurements": [
+          [
+            10,
+            0.629857
+          ],
+          [
+            20,
+            0.612171
+          ],
+          [
+            30,
+            0.573626
+          ],
+          [
+            40,
+            0.579947
+          ],
+          [
+            50,
+            0.562935
+          ],
+          [
+            60,
+            0.544989
+          ],
+          [
+            70,
+            0.565738
+          ]
+        ],
+        "lr_first_last": [
+          0.001,
+          3.90625e-06
+        ],
+        "lr_collapse_factor_threshold": 100.0,
+        "lr_anneal_factor": 256.0,
+        "lr_collapsed": true,
+        "comparison_metric_still_improving": true,
+        "best_mrmse_measurement_index": 5,
+        "n_mrmse_measurements": 7,
+        "improving_tail_measurements": 2,
+        "selection_metric": "mRMSE on 256 rows x 16 samples every 10 epochs",
+        "stopping_metric": "val NLL",
+        "reported_metric": "full-split mRMSE, 128 samples, median",
+        "issues": [
+          "stopped at epoch 79 of epochs=300",
+          "early stopping was driven by val NLL, NOT by the reported comparison metric (mRMSE)",
+          "the reported metric was still at/near its minimum at the last measurement ((60, 0.544989)) -> not converged on that metric",
+          "mRMSE measured only 7 times (every 10 epochs)",
+          "checkpoint selected on 256 rows x 16 posterior samples, then reported on the full split with 128 samples -> selection estimator != reported estimator",
+          "point estimate is the posterior MEDIAN while the metric is RMSE; the MSE-optimal summary is the MEAN (evaluate.py supports it) -> baseline penalised by convention",
+          "LR annealed 1e-03 -> 3.9e-06 (factor 256 > 100, 9 distinct values) WHILE the comparison metric was still improving: minimum of 7 mRMSE measurements at (60, 0.544989), i.e. measurement 6/7"
+        ]
+      },
+      {
+        "run": "quantum_taurex_snapshot",
+        "best_epoch": 5,
+        "max_epochs": 20,
+        "batch_size": 128,
+        "classical_lr": 5e-05,
+        "init_checkpoint_path": "/workspace/hack4sages/outputs/ariel_quantum_taurex_20260312_0957/stage1_classical/best_model.pt",
+        "early_stop_patience": 5,
+        "issues": [
+          "best_epoch=5 of max_epochs=20 -> compared as a finished model",
+          "README states the run continued after this snapshot: it is a mid-flight artifact"
+        ]
+      },
+      {
+        "run": "noquant_taurex_snapshot",
+        "best_epoch": 59,
+        "max_epochs": 60,
+        "batch_size": 256,
+        "classical_lr": 0.001,
+        "init_checkpoint_path": null,
+        "early_stop_patience": 12,
+        "issues": [
+          "taurex_ignore_poseidon=true -> this run's own holdout_metrics.json is validation data"
+        ]
+      }
+    ],
+    "n_runs_with_issues": 4
+  }
+}

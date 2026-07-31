@@ -1,0 +1,72 @@
+{
+  "check": "a07_gate_dynamics",
+  "finding": "K7 \u2014 'the model learned to silence the quantum branch' is unsupported: the gate is zero-initialised and was still growing",
+  "question": "Is gate~=0.046 a converged equilibrium or an artifact of zero-init plus a truncated schedule?",
+  "pass_criterion": "gate is converged (run terminated by its own rule) AND per-gas gates agree in sign",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:47.624043+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+      "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6"
+    }
+  ],
+  "payload": {
+    "gate_raw": [
+      -0.05853388085961342,
+      0.037773970514535904,
+      -0.05329551175236702,
+      -0.03554580733180046,
+      -0.046499721705913544
+    ],
+    "gate_tanh": [
+      -0.05846712365746498,
+      0.03775601461529732,
+      -0.05324510857462883,
+      -0.03553084656596184,
+      -0.04646623507142067
+    ],
+    "gate_tanh_per_gas": {
+      "log_H2O": -0.05846712365746498,
+      "log_CO2": 0.03775601461529732,
+      "log_CO": -0.05324510857462883,
+      "log_CH4": -0.03553084656596184,
+      "log_NH3": -0.04646623507142067
+    },
+    "mean_abs_tanh_gate": 0.04629306495189667,
+    "zero_initialised": true,
+    "sign_agreement_across_gases": false,
+    "epochs_run": 8,
+    "best_epoch": 6,
+    "max_epochs": 30,
+    "converged_by_own_rule": false,
+    "quantum_lr": 0.0002,
+    "approx_optimizer_steps_before_selection": 12426,
+    "circuit_weight_abs_mean": 0.09172246605157852,
+    "circuit_init_scale": 0.1,
+    "issues": [
+      "quantum_gate is initialised to EXACTLY zeros -> |gate|=0.046 is a distance travelled from zero, not a learned suppression",
+      "run ended at epoch 8/30 without exhausting patience 8 -> the gate was not at equilibrium",
+      "per-gas gates disagree in sign (neg: ['log_H2O', 'log_CO', 'log_CH4', 'log_NH3']; pos: ['log_CO2']) -> mean|tanh(gate)| is not an adequate summary of the branch",
+      "the gate trained for 6 epochs x ~2071 steps at quantum_lr=0.0002 with weight_decay=0.0001 while quantum_scale was simultaneously ramping 0->0.667; the gate gradient is proportional to that scale, so the two effects are confounded"
+    ],
+    "missing_evidence_to_settle_it": [
+      "per-epoch gate values (log tanh(quantum_gate) every epoch, or save per-epoch checkpoints)",
+      "a run to convergence at fixed quantum_scale=1.0 (no ramp), so gate growth is not confounded",
+      ">=5 seeds, to see whether the gate lands in the same place"
+    ]
+  }
+}

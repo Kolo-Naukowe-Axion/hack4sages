@@ -1,0 +1,61 @@
+{
+  "check": "a09_noise_realization",
+  "finding": "W14 / K3 \u2014 the stored ADC spectra carry high-frequency scatter well below the quoted sigma",
+  "question": "Is the bin-to-bin scatter of instrument_spectrum consistent with a realization of N(0, instrument_noise)?",
+  "pass_criterion": "R statistic distribution centred at >= 1 (consistent with noise present at full sigma)",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:50.977281+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "statistic": "sqrt( sum d2^2 / sum(sig_{i-1}^2+4sig_i^2+sig_{i+1}^2) ); E[R]=1 for iid noise at sigma",
+    "calibration_tau_noiseless": {
+      "n": 2000,
+      "p1": 0.027146906207945777,
+      "p5": 0.04838280596439595,
+      "median": 0.36954116129703873,
+      "p95": 4.240156160420867,
+      "frac_below_0.9": 0.7315,
+      "frac_below_0.5": 0.5875
+    },
+    "calibration_tau_noisy": {
+      "n": 2000,
+      "p1": 0.877593238371071,
+      "p5": 0.9290027519521383,
+      "median": 1.0930173003067385,
+      "p95": 4.314910093344172,
+      "frac_below_0.9": 0.023,
+      "frac_below_0.5": 0.0
+    },
+    "calibration_note": "Same code, same spectra, noise known to be exactly 1.0 sigma in the 'noisy' arm. The gap between the two rows is the statistic's response to noise; the 'noiseless' row is the structure-only offset for that dataset's smoothness.",
+    "adc_instrument_spectrum": {
+      "n": 2000,
+      "p1": 0.23005257142557714,
+      "p5": 0.31851250412759835,
+      "median": 0.7568636838563152,
+      "p95": 2.1081420765016876,
+      "frac_below_0.9": 0.6275,
+      "frac_below_0.5": 0.2225
+    },
+    "adc_sigma_is_per_bin": true,
+    "threshold": {
+      "value": 0.8744138402453908,
+      "basis": "0.80 x kalibracja tau_noisy (1.0930), czyli szum znany jako dokladnie 1.0 sigma",
+      "calibration_fraction": 0.8,
+      "assumed_not_calibrated": false
+    },
+    "conclusion": "median R = 0.757, p5 = 0.319, 62.7% of planets below 0.9. A realization of N(0,sigma) cannot produce R far below 1, so the stored ADC spectra carry materially less than the full quoted sigma. Definitive test still outstanding: reconstruct the noiseless binned spectrum from FM_Parameter_Table through the forward model and subtract."
+  }
+}

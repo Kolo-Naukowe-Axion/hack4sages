@@ -1,0 +1,214 @@
+{
+  "check": "a04_quantum_scale_provenance",
+  "finding": "K4 \u2014 reported metrics use quantum_scale=1.0 (never validated); selection ran at 0.5",
+  "question": "Which quantum_scale reproduces holdout_metrics.json / validation_metrics.json, and what is the gate-off value?",
+  "pass_criterion": "some swept scale reproduces a published number AND it equals the selection-time scale from history.csv",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:41.865552+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+      "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6"
+    },
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/history.csv",
+      "sha256": "ed143357c4a9222e3a6c21c61f74963f82d9d942ea3e61063c2ae465256155c3"
+    }
+  ],
+  "payload": {
+    "best_epoch": 6,
+    "selection_time_quantum_scale": 0.5,
+    "selection_time_val_mrmse": 0.2908111214637756,
+    "splits": {
+      "holdout": {
+        "n_rows": 4143,
+        "reported": 0.2993761897087097,
+        "mac_reported": 0.29869264364242554,
+        "sweep": {
+          "0.000000": {
+            "mrmse": 0.30240896344184875,
+            "per_gas": {
+              "log_H2O": 0.40298062562942505,
+              "log_CO2": 0.2433129847049713,
+              "log_CO": 0.23241561651229858,
+              "log_CH4": 0.23500894010066986,
+              "log_NH3": 0.39832666516304016
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.250000": {
+            "mrmse": 0.29774925112724304,
+            "per_gas": {
+              "log_H2O": 0.3936498761177063,
+              "log_CO2": 0.23735468089580536,
+              "log_CO": 0.23062844574451447,
+              "log_CH4": 0.23422709107398987,
+              "log_NH3": 0.3928861916065216
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.500000": {
+            "mrmse": 0.29555177688598633,
+            "per_gas": {
+              "log_H2O": 0.3908696472644806,
+              "log_CO2": 0.23292692005634308,
+              "log_CO": 0.22967955470085144,
+              "log_CH4": 0.234160915017128,
+              "log_NH3": 0.3901217579841614
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.666667": {
+            "mrmse": 0.2954871654510498,
+            "per_gas": {
+              "log_H2O": 0.39273741841316223,
+              "log_CO2": 0.23086941242218018,
+              "log_CO": 0.22951805591583252,
+              "log_CH4": 0.23451495170593262,
+              "log_NH3": 0.38979601860046387
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "1.000000": {
+            "mrmse": 0.29869264364242554,
+            "per_gas": {
+              "log_H2O": 0.405182808637619,
+              "log_CO2": 0.22898583114147186,
+              "log_CO": 0.23032815754413605,
+              "log_CH4": 0.2361721247434616,
+              "log_NH3": 0.3927944004535675
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": true
+          }
+        },
+        "scales_reproducing_the_published_number": [],
+        "published_number_reproduced_by_any_swept_scale": false,
+        "scales_reproducing_only_the_mac_reevaluation_not_published": [
+          "1.000000"
+        ],
+        "gate_off_mrmse": 0.30240896344184875,
+        "quantum_pathway_contribution_at_scale_1": 0.0037163197994232178,
+        "quantum_pathway_contribution_at_selection_scale": 0.006857186555862427,
+        "best_scale_on_this_split": "0.666667",
+        "reported_is_best": false
+      },
+      "validation": {
+        "n_rows": 4142,
+        "reported": 0.29361358284950256,
+        "mac_reported": 0.29482102394104004,
+        "sweep": {
+          "0.000000": {
+            "mrmse": 0.2992710769176483,
+            "per_gas": {
+              "log_H2O": 0.4000283181667328,
+              "log_CO2": 0.2451169639825821,
+              "log_CO": 0.22351740300655365,
+              "log_CH4": 0.23444120585918427,
+              "log_NH3": 0.39325153827667236
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.250000": {
+            "mrmse": 0.2945694923400879,
+            "per_gas": {
+              "log_H2O": 0.3916351795196533,
+              "log_CO2": 0.23816020786762238,
+              "log_CO": 0.22158406674861908,
+              "log_CH4": 0.23314078152179718,
+              "log_NH3": 0.3883271813392639
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.500000": {
+            "mrmse": 0.2922368049621582,
+            "per_gas": {
+              "log_H2O": 0.38926786184310913,
+              "log_CO2": 0.23260681331157684,
+              "log_CO": 0.2205047607421875,
+              "log_CH4": 0.23252925276756287,
+              "log_NH3": 0.38627535104751587
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "0.666667": {
+            "mrmse": 0.2920279800891876,
+            "per_gas": {
+              "log_H2O": 0.39110252261161804,
+              "log_CO2": 0.22973567247390747,
+              "log_CO": 0.2202656865119934,
+              "log_CH4": 0.2325073778629303,
+              "log_NH3": 0.3865286111831665
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": false
+          },
+          "1.000000": {
+            "mrmse": 0.2948210537433624,
+            "per_gas": {
+              "log_H2O": 0.402763694524765,
+              "log_CO2": 0.2260986864566803,
+              "log_CO": 0.2209463119506836,
+              "log_CH4": 0.23338885605335236,
+              "log_NH3": 0.3909076154232025
+            },
+            "matches_reported": false,
+            "matches_mac_reeval": true
+          }
+        },
+        "scales_reproducing_the_published_number": [],
+        "published_number_reproduced_by_any_swept_scale": false,
+        "scales_reproducing_only_the_mac_reevaluation_not_published": [
+          "1.000000"
+        ],
+        "gate_off_mrmse": 0.2992710769176483,
+        "quantum_pathway_contribution_at_scale_1": 0.004450023174285889,
+        "quantum_pathway_contribution_at_selection_scale": 0.007034271955490112,
+        "best_scale_on_this_split": "0.666667",
+        "reported_is_best": false
+      }
+    },
+    "verification_md_claim": "docs/VERIFICATION.md: 'artifact / table numbers -> native ramp scale ~= 0.5'. This check tests that claim directly.",
+    "code_site": "models/ariel_exobiome/training.py final eval omits quantum_scale -> default 1.0",
+    "mismatches": [
+      {
+        "split": "holdout",
+        "selection_scale": 0.5,
+        "reproducing_scales": [
+          "1.000000"
+        ],
+        "reproduces_published_number": false
+      },
+      {
+        "split": "validation",
+        "selection_scale": 0.5,
+        "reproducing_scales": [
+          "1.000000"
+        ],
+        "reproduces_published_number": false
+      }
+    ],
+    "splits_where_no_scale_reproduces_a_published_number": [],
+    "published_numbers_reproduced_on_all_splits": false
+  }
+}

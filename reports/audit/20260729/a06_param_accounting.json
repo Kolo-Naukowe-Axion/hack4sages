@@ -1,0 +1,63 @@
+{
+  "check": "a06_param_accounting",
+  "finding": "K6 \u2014 24 of 69,434 'quantum branch' parameters are quantum; the branch is a second classical head",
+  "question": "What fraction of the quantum pathway is quantum, and is the on/off ablation parameter-matched?",
+  "pass_criterion": "quantum branch adds <1% extra classical parameters over the classical-only model",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:45.579596+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+      "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6"
+    }
+  ],
+  "payload": {
+    "modules": {
+      "quantum_gate": 5,
+      "spectral_encoder": 104321,
+      "aux_encoder": 1344,
+      "fusion_encoder": 33280,
+      "classical_head": 50309,
+      "projector": 17560,
+      "quantum_block": 24,
+      "quantum_head": 51845
+    },
+    "total_params": 258688,
+    "quantum_pathway_params": 69434,
+    "circuit_params": 24,
+    "extra_classical_params_added_by_the_branch": 69410,
+    "classical_only_params": 189254,
+    "circuit_share_of_model": 9.277585353785254e-05,
+    "extra_classical_over_classical_only": 0.36675578851701945,
+    "quantum_head_input_dim": 264,
+    "quantum_features_share_of_head_input": 0.030303030303030304,
+    "gate_tanh": [
+      -0.05846712365746498,
+      0.03775601461529732,
+      -0.05324510857462883,
+      -0.03553084284067154,
+      -0.04646623507142067
+    ],
+    "gate_mean_abs": 0.04629306122660637,
+    "effective_multiplier_at_scale_0.5": [
+      0.01776542142033577,
+      0.02923356182873249
+    ],
+    "circuit_formula": "3 * n_qubits * (depth // 2)",
+    "variational_layers": 1,
+    "interpretation": "The branch adds ~37% extra classical capacity over the classical-only model, so an on/off ablation is not parameter-matched. The circuit contributes 8 of 264 input dims to a 51845-parameter classical head, and the whole correction is multiplied by |tanh(gate)|*scale. The architecture cannot isolate a quantum effect by construction \u2014 a null result is uninformative and a positive result is unattributable."
+  }
+}

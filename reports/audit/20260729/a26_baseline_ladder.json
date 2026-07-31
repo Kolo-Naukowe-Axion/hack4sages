@@ -1,0 +1,729 @@
+{
+  "check": "a26_baseline_ladder",
+  "finding": "K2 (extension) \u2014 how much of the reported skill survives when the spectrum is removed",
+  "question": "Constant vs aux-only vs spectrum-only vs both: where does the skill come from?",
+  "pass_criterion": "upper end of the CI on the aux-only skill share < 20 % of the aux+spectrum skill, on every dataset, and every dataset has a positive aux+spectrum skill to divide",
+  "status": "WARN",
+  "timestamp_utc": "2026-07-29T12:51:15.749340+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "rung_definitions": {
+      "0_constant": "training-set mean vector, identical for every planet",
+      "1_aux_only": "learned on the auxiliary columns, spectrum withheld",
+      "2_spectrum_only": "learned on the spectrum and its noise; the auxiliary TABLE is withheld but auxiliary INFORMATION is not \u2014 see aux_recoverable_from_spectrum_block, where log_g_cgs reaches R^2 0.67 from the spectral shape alone on tau_val and star_temperature R^2 0.75 from the noise vector on ADC",
+      "2b_spectrum_without_scale_column": "as rung 2 with the log10(mean transit depth) column removed; isolates how much of rung 2 rides on the one column that most directly encodes stellar radius (R^2 0.80 for star_radius_rsun on tau_val)",
+      "3_aux_plus_spectrum": "both"
+    },
+    "learners": [
+      "ridge (same recipe as data/crossgen_biosignatures/baseline_smoke.py)",
+      "HistGradientBoostingRegressor"
+    ],
+    "threshold": {
+      "limit": 0.2,
+      "derived_from": "a15 ADC2023: aux pins Teq to 48.50 K, and conditioning on the TRUE T and Rp improves the scored gas mRMSE by 0.259 % (conditioning_value.relative_improvement = 0.0025897)",
+      "documented_aux_to_gas_route_share": 0.0025897,
+      "margin_over_documented_route": 77.22902266671817,
+      "reading": "a share above the limit cannot be explained by the aux -> Teq -> abundance coupling and would mean an undocumented shortcut",
+      "compared_against": "upper end of the 95 % bootstrap CI over evaluation rows, not the point estimate \u2014 a point estimate cannot be below a limit 'significantly'",
+      "binding_today": false
+    },
+    "bootstrap": {
+      "n_resamples": 1000,
+      "seed": 26,
+      "resamples": "evaluation rows, with replacement; predictions are reused, the learners are not refitted",
+      "max_nonpositive_denominator_fraction": 0.05
+    },
+    "datasets": {
+      "adc": {
+        "dataset": "ADC2023 holdout",
+        "n_train": 12000,
+        "n_eval": 4143,
+        "rungs": {
+          "0_constant": {
+            "mrmse": 1.44045486644806,
+            "skill": 0.0,
+            "per_gas": {
+              "log_H2O": 1.7284246415293671,
+              "log_CO2": 1.4250501787326848,
+              "log_CO": 0.8772925749303163,
+              "log_CH4": 1.7264726101459549,
+              "log_NH3": 1.445034326901977
+            }
+          },
+          "1_aux_only": {
+            "ridge": {
+              "mrmse": 1.4407439304414633,
+              "skill": -0.00020067549503721693,
+              "per_gas": {
+                "log_H2O": 1.7275533509117444,
+                "log_CO2": 1.4261455647874741,
+                "log_CO": 0.8772602769521487,
+                "log_CH4": 1.727308817138714,
+                "log_NH3": 1.4454516424172352
+              }
+            },
+            "gbm": {
+              "mrmse": 1.4423835539756202,
+              "skill": -0.0013389433938433282,
+              "per_gas": {
+                "log_H2O": 1.730027343697925,
+                "log_CO2": 1.4259257572407698,
+                "log_CO": 0.8775522938577845,
+                "log_CH4": 1.7301936769782456,
+                "log_NH3": 1.4482186981033758
+              }
+            },
+            "n_columns": 8,
+            "best_learner": "ridge",
+            "mrmse": 1.4407439304414633,
+            "skill": -0.00020067549503721693
+          },
+          "2_spectrum_only": {
+            "ridge": {
+              "mrmse": 1.0174285650954018,
+              "skill": 0.2936754987650366,
+              "per_gas": {
+                "log_H2O": 1.141707874376961,
+                "log_CO2": 1.070735420530382,
+                "log_CO": 0.8093090974358197,
+                "log_CH4": 1.0654970322841215,
+                "log_NH3": 0.9998934008497244
+              }
+            },
+            "gbm": {
+              "mrmse": 0.44091272230249656,
+              "skill": 0.6939072979150541,
+              "per_gas": {
+                "log_H2O": 0.5788223491068026,
+                "log_CO2": 0.32599595169910567,
+                "log_CO": 0.4092883710119599,
+                "log_CH4": 0.31517150986083786,
+                "log_NH3": 0.5752854298337764
+              }
+            },
+            "n_columns": 105,
+            "best_learner": "gbm",
+            "mrmse": 0.44091272230249656,
+            "skill": 0.6939072979150541
+          },
+          "2b_spectrum_without_scale_column": {
+            "ridge": {
+              "mrmse": 1.016948968162707,
+              "skill": 0.29400844701899853,
+              "per_gas": {
+                "log_H2O": 1.1422159151247584,
+                "log_CO2": 1.0717028002379334,
+                "log_CO": 0.8078142073773403,
+                "log_CH4": 1.0648394105464476,
+                "log_NH3": 0.9981725075270562
+              }
+            },
+            "gbm": {
+              "mrmse": 0.4397962004206442,
+              "skill": 0.6946824154892726,
+              "per_gas": {
+                "log_H2O": 0.578170484804449,
+                "log_CO2": 0.3251085791397438,
+                "log_CO": 0.40645570723299823,
+                "log_CH4": 0.3154102655330256,
+                "log_NH3": 0.5738359653930044
+              }
+            },
+            "n_columns": 104,
+            "best_learner": "gbm",
+            "mrmse": 0.4397962004206442,
+            "skill": 0.6946824154892726
+          },
+          "3_aux_plus_spectrum": {
+            "ridge": {
+              "mrmse": 1.1065017941714195,
+              "skill": 0.2318386226845951,
+              "per_gas": {
+                "log_H2O": 1.2157270391102277,
+                "log_CO2": 1.0712450196550618,
+                "log_CO": 0.8246190726457207,
+                "log_CH4": 1.422578371756872,
+                "log_NH3": 0.998339467689215
+              }
+            },
+            "gbm": {
+              "mrmse": 0.44229388537599545,
+              "skill": 0.6929484597690838,
+              "per_gas": {
+                "log_H2O": 0.5843619010437908,
+                "log_CO2": 0.3200035286763722,
+                "log_CO": 0.4107325230775293,
+                "log_CH4": 0.3136586831613379,
+                "log_NH3": 0.5827127909209469
+              }
+            },
+            "n_columns": 113,
+            "best_learner": "gbm",
+            "mrmse": 0.44229388537599545,
+            "skill": 0.6929484597690838
+          }
+        },
+        "headline_learner": "gbm",
+        "headline_learner_rule": "the learner with the lowest rung-3 mRMSE; rung 3 defines the achievable skill, hence the denominator",
+        "skill_share_of_aux_by_learner": {
+          "ridge": {
+            "value": -0.0008655826743338876,
+            "denominator_nonpositive": false,
+            "numerator_skill": -0.00020067549503721693,
+            "denominator_skill": 0.2318386226845951
+          },
+          "gbm": {
+            "value": -0.0019322409552501407,
+            "denominator_nonpositive": false,
+            "numerator_skill": -0.0013389433938433282,
+            "denominator_skill": 0.6929484597690838
+          }
+        },
+        "skill_share_of_spectrum_only_by_learner": {
+          "ridge": {
+            "value": 1.266723789868988,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.2936754987650366,
+            "denominator_skill": 0.2318386226845951
+          },
+          "gbm": {
+            "value": 1.0013837077382204,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.6939072979150541,
+            "denominator_skill": 0.6929484597690838
+          }
+        },
+        "skill_share_of_spectrum_without_scale_by_learner": {
+          "ridge": {
+            "value": 1.268159910607226,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.29400844701899853,
+            "denominator_skill": 0.2318386226845951
+          },
+          "gbm": {
+            "value": 1.0025022867079705,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.6946824154892726,
+            "denominator_skill": 0.6929484597690838
+          }
+        },
+        "denominator_nonpositive": false,
+        "skill_share_of_aux": -0.0019322409552501407,
+        "skill_share_of_spectrum_only": 1.0013837077382204,
+        "skill_share_of_spectrum_only_caveat": "rung 2 withholds the auxiliary TABLE, not auxiliary INFORMATION; see aux_recoverable_from_spectrum_block. A value at or above 1.0 means rung 2 matched or beat rung 3, which is itself evidence that the aux table adds nothing the spectrum lacks.",
+        "skill_share_of_aux_bootstrap": {
+          "n_resamples": 1000,
+          "n_resamples_with_nonpositive_denominator": 0,
+          "fraction_with_nonpositive_denominator": 0.0,
+          "denominator_unusable": false,
+          "ci95": [
+            -0.003326058756364061,
+            -0.00044958181070216697
+          ],
+          "median": -0.0019337771480401617
+        },
+        "verdict_contribution": "spectroscopy_confirmed",
+        "aux_recoverable_from_spectrum_block": {
+          "note": "ridge R^2 on the evaluation split; > 0 means the auxiliary column is partly reconstructible from spectral columns alone, so no rung here is aux-free",
+          "by_source": {
+            "shape_normalised_spectrum": {
+              "star_distance": -0.0015594211245375522,
+              "star_mass_kg": 0.1627076358027415,
+              "star_radius_m": 0.1799124486880852,
+              "star_temperature": 0.10565597088160217,
+              "planet_mass_kg": 0.7479854273971833,
+              "planet_orbital_period": 0.4133547098587351,
+              "planet_distance": 0.34803063553586167,
+              "planet_surface_gravity": 0.07820898938470189
+            },
+            "noise_vector": {
+              "star_distance": 0.6928451346849731,
+              "star_mass_kg": 0.538535684365953,
+              "star_radius_m": 0.2664101563150474,
+              "star_temperature": 0.7490559828785824,
+              "planet_mass_kg": 0.7285577155976702,
+              "planet_orbital_period": -0.03716190430359223,
+              "planet_distance": -0.04458304055843554,
+              "planet_surface_gravity": 0.007261539972530873
+            },
+            "log10_mean_transit_depth": {
+              "star_distance": 0.007821932941439291,
+              "star_mass_kg": 0.08146138078088982,
+              "star_radius_m": 0.11605170132185683,
+              "star_temperature": 0.05714348449889106,
+              "planet_mass_kg": 0.6687968354886971,
+              "planet_orbital_period": 0.012656699154456663,
+              "planet_distance": 0.020429276111382566,
+              "planet_surface_gravity": 0.019279978919185314
+            }
+          },
+          "max_r2_over_sources": {
+            "star_distance": 0.6928451346849731,
+            "star_mass_kg": 0.538535684365953,
+            "star_radius_m": 0.2664101563150474,
+            "star_temperature": 0.7490559828785824,
+            "planet_mass_kg": 0.7479854273971833,
+            "planet_orbital_period": 0.4133547098587351,
+            "planet_distance": 0.34803063553586167,
+            "planet_surface_gravity": 0.07820898938470189
+          },
+          "worst_leak": "star_temperature",
+          "worst_leak_r2": 0.7490559828785824
+        }
+      },
+      "tau_val": {
+        "dataset": "crossgen tau_val",
+        "n_train": 12000,
+        "n_eval": 4142,
+        "rungs": {
+          "0_constant": {
+            "mrmse": 2.8853370051466647,
+            "skill": 0.0,
+            "per_gas": {
+              "log10_vmr_h2o": 2.8644913286724125,
+              "log10_vmr_co2": 2.894490795101497,
+              "log10_vmr_co": 2.914984899292926,
+              "log10_vmr_ch4": 2.854276260352501,
+              "log10_vmr_nh3": 2.898441742313987
+            }
+          },
+          "1_aux_only": {
+            "ridge": {
+              "mrmse": 2.8860461130348734,
+              "skill": -0.0002457625875049718,
+              "per_gas": {
+                "log10_vmr_h2o": 2.864330271445812,
+                "log10_vmr_co2": 2.8963112255276835,
+                "log10_vmr_co": 2.9157997775554114,
+                "log10_vmr_ch4": 2.8547104678362434,
+                "log10_vmr_nh3": 2.8990788228092166
+              }
+            },
+            "gbm": {
+              "mrmse": 2.890630231199954,
+              "skill": -0.00183452610348378,
+              "per_gas": {
+                "log10_vmr_h2o": 2.8665636816538225,
+                "log10_vmr_co2": 2.90249662243163,
+                "log10_vmr_co": 2.919245694650916,
+                "log10_vmr_ch4": 2.8606996792686226,
+                "log10_vmr_nh3": 2.9041454779947817
+              }
+            },
+            "n_columns": 3,
+            "best_learner": "ridge",
+            "mrmse": 2.8860461130348734,
+            "skill": -0.0002457625875049718
+          },
+          "2_spectrum_only": {
+            "ridge": {
+              "mrmse": 2.1925383078079763,
+              "skill": 0.24011014869421565,
+              "per_gas": {
+                "log10_vmr_h2o": 2.2100860376394085,
+                "log10_vmr_co2": 2.046322834908724,
+                "log10_vmr_co": 2.6518168031726783,
+                "log10_vmr_ch4": 1.970359635702918,
+                "log10_vmr_nh3": 2.0841062276161524
+              }
+            },
+            "gbm": {
+              "mrmse": 1.6054550787406625,
+              "skill": 0.4435814340311157,
+              "per_gas": {
+                "log10_vmr_h2o": 1.7409170629811992,
+                "log10_vmr_co2": 1.1481465336393968,
+                "log10_vmr_co": 2.317048706646359,
+                "log10_vmr_ch4": 1.293242705557295,
+                "log10_vmr_nh3": 1.5279203848790628
+              }
+            },
+            "n_columns": 220,
+            "best_learner": "gbm",
+            "mrmse": 1.6054550787406625,
+            "skill": 0.4435814340311157
+          },
+          "2b_spectrum_without_scale_column": {
+            "ridge": {
+              "mrmse": 2.1925595071277932,
+              "skill": 0.24010280143468266,
+              "per_gas": {
+                "log10_vmr_h2o": 2.2103415794064634,
+                "log10_vmr_co2": 2.046334904130317,
+                "log10_vmr_co": 2.651867225777566,
+                "log10_vmr_ch4": 1.9702789254016633,
+                "log10_vmr_nh3": 2.083974900922955
+              }
+            },
+            "gbm": {
+              "mrmse": 1.6040245572803744,
+              "skill": 0.44407722410961825,
+              "per_gas": {
+                "log10_vmr_h2o": 1.7335591116184197,
+                "log10_vmr_co2": 1.1552678987911924,
+                "log10_vmr_co": 2.3231846876218527,
+                "log10_vmr_ch4": 1.3057431401380866,
+                "log10_vmr_nh3": 1.502367948232321
+              }
+            },
+            "n_columns": 219,
+            "best_learner": "gbm",
+            "mrmse": 1.6040245572803744,
+            "skill": 0.44407722410961825
+          },
+          "3_aux_plus_spectrum": {
+            "ridge": {
+              "mrmse": 2.190507187417174,
+              "skill": 0.2408140943293977,
+              "per_gas": {
+                "log10_vmr_h2o": 2.209534526843032,
+                "log10_vmr_co2": 2.0459871221827512,
+                "log10_vmr_co": 2.6529913394812104,
+                "log10_vmr_ch4": 1.9618617849736106,
+                "log10_vmr_nh3": 2.0821611636052655
+              }
+            },
+            "gbm": {
+              "mrmse": 1.5964071742723074,
+              "skill": 0.4467172564505475,
+              "per_gas": {
+                "log10_vmr_h2o": 1.734042186504187,
+                "log10_vmr_co2": 1.1481201959100156,
+                "log10_vmr_co": 2.308731613181467,
+                "log10_vmr_ch4": 1.2880579446048477,
+                "log10_vmr_nh3": 1.5030839311610198
+              }
+            },
+            "n_columns": 223,
+            "best_learner": "gbm",
+            "mrmse": 1.5964071742723074,
+            "skill": 0.4467172564505475
+          }
+        },
+        "headline_learner": "gbm",
+        "headline_learner_rule": "the learner with the lowest rung-3 mRMSE; rung 3 defines the achievable skill, hence the denominator",
+        "skill_share_of_aux_by_learner": {
+          "ridge": {
+            "value": -0.001020549018068707,
+            "denominator_nonpositive": false,
+            "numerator_skill": -0.0002457625875049718,
+            "denominator_skill": 0.2408140943293977
+          },
+          "gbm": {
+            "value": -0.0041066828670561235,
+            "denominator_nonpositive": false,
+            "numerator_skill": -0.00183452610348378,
+            "denominator_skill": 0.4467172564505475
+          }
+        },
+        "skill_share_of_spectrum_only_by_learner": {
+          "ridge": {
+            "value": 0.997076808825736,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.24011014869421565,
+            "denominator_skill": 0.2408140943293977
+          },
+          "gbm": {
+            "value": 0.9929802971025837,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.4435814340311157,
+            "denominator_skill": 0.4467172564505475
+          }
+        },
+        "skill_share_of_spectrum_without_scale_by_learner": {
+          "ridge": {
+            "value": 0.9970462987363933,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.24010280143468266,
+            "denominator_skill": 0.2408140943293977
+          },
+          "gbm": {
+            "value": 0.9940901491876406,
+            "denominator_nonpositive": false,
+            "numerator_skill": 0.44407722410961825,
+            "denominator_skill": 0.4467172564505475
+          }
+        },
+        "denominator_nonpositive": false,
+        "skill_share_of_aux": -0.0041066828670561235,
+        "skill_share_of_spectrum_only": 0.9929802971025837,
+        "skill_share_of_spectrum_only_caveat": "rung 2 withholds the auxiliary TABLE, not auxiliary INFORMATION; see aux_recoverable_from_spectrum_block. A value at or above 1.0 means rung 2 matched or beat rung 3, which is itself evidence that the aux table adds nothing the spectrum lacks.",
+        "skill_share_of_aux_bootstrap": {
+          "n_resamples": 1000,
+          "n_resamples_with_nonpositive_denominator": 0,
+          "fraction_with_nonpositive_denominator": 0.0,
+          "denominator_unusable": false,
+          "ci95": [
+            -0.005976787717272582,
+            -0.0022785680897163484
+          ],
+          "median": -0.004121326190791924
+        },
+        "verdict_contribution": "spectroscopy_confirmed",
+        "aux_recoverable_from_spectrum_block": {
+          "note": "ridge R^2 on the evaluation split; > 0 means the auxiliary column is partly reconstructible from spectral columns alone, so no rung here is aux-free",
+          "by_source": {
+            "shape_normalised_spectrum": {
+              "planet_radius_rjup": 0.08081508218437217,
+              "log_g_cgs": 0.6662405327804892,
+              "star_radius_rsun": -0.026110220166982723
+            },
+            "log10_mean_transit_depth": {
+              "planet_radius_rjup": 0.15457202503064404,
+              "log_g_cgs": 0.00030526284187737396,
+              "star_radius_rsun": 0.7983754644452219
+            },
+            "log10_sigma_ppm": {
+              "planet_radius_rjup": -0.00046889649414505463,
+              "log_g_cgs": -0.0004364482695566885,
+              "star_radius_rsun": 0.00017376010673941789
+            }
+          },
+          "max_r2_over_sources": {
+            "planet_radius_rjup": 0.15457202503064404,
+            "log_g_cgs": 0.6662405327804892,
+            "star_radius_rsun": 0.7983754644452219
+          },
+          "worst_leak": "star_radius_rsun",
+          "worst_leak_r2": 0.7983754644452219
+        }
+      },
+      "poseidon_test": {
+        "dataset": "crossgen poseidon_test",
+        "n_train": 12000,
+        "n_eval": 685,
+        "rungs": {
+          "0_constant": {
+            "mrmse": 2.8937948121303347,
+            "skill": 0.0,
+            "per_gas": {
+              "log10_vmr_h2o": 2.8728038768077604,
+              "log10_vmr_co2": 2.9668729850169555,
+              "log10_vmr_co": 2.8452402427466943,
+              "log10_vmr_ch4": 2.9420209285304626,
+              "log10_vmr_nh3": 2.8420360275498013
+            }
+          },
+          "1_aux_only": {
+            "ridge": {
+              "mrmse": 2.8948099295693748,
+              "skill": -0.0003507910909179568,
+              "per_gas": {
+                "log10_vmr_h2o": 2.8726216292888878,
+                "log10_vmr_co2": 2.9682061808726927,
+                "log10_vmr_co": 2.846262374178411,
+                "log10_vmr_ch4": 2.944366193691988,
+                "log10_vmr_nh3": 2.8425932698148944
+              }
+            },
+            "gbm": {
+              "mrmse": 2.893859748087066,
+              "skill": -2.243972394277982e-05,
+              "per_gas": {
+                "log10_vmr_h2o": 2.8754809087824627,
+                "log10_vmr_co2": 2.9644416401500844,
+                "log10_vmr_co": 2.839796091346814,
+                "log10_vmr_ch4": 2.947666210705319,
+                "log10_vmr_nh3": 2.8419138894506513
+              }
+            },
+            "n_columns": 3,
+            "best_learner": "gbm",
+            "mrmse": 2.893859748087066,
+            "skill": -2.243972394277982e-05
+          },
+          "2_spectrum_only": {
+            "ridge": {
+              "mrmse": 2.949846960979885,
+              "skill": -0.019369773079483066,
+              "per_gas": {
+                "log10_vmr_h2o": 2.913180317323596,
+                "log10_vmr_co2": 2.989945667969964,
+                "log10_vmr_co": 2.9071250633718693,
+                "log10_vmr_ch4": 3.0409468368558903,
+                "log10_vmr_nh3": 2.898036919378106
+              }
+            },
+            "gbm": {
+              "mrmse": 3.2623473199410697,
+              "skill": -0.1273595855054479,
+              "per_gas": {
+                "log10_vmr_h2o": 3.05545168362557,
+                "log10_vmr_co2": 3.776228636120622,
+                "log10_vmr_co": 3.104559568476298,
+                "log10_vmr_ch4": 3.338966532464471,
+                "log10_vmr_nh3": 3.036530179018383
+              }
+            },
+            "n_columns": 220,
+            "best_learner": "ridge",
+            "mrmse": 2.949846960979885,
+            "skill": -0.019369773079483066
+          },
+          "2b_spectrum_without_scale_column": {
+            "ridge": {
+              "mrmse": 2.949798269330322,
+              "skill": -0.019352946852081443,
+              "per_gas": {
+                "log10_vmr_h2o": 2.913492354526703,
+                "log10_vmr_co2": 2.990002801964568,
+                "log10_vmr_co": 2.907068877599995,
+                "log10_vmr_ch4": 3.0405692623818577,
+                "log10_vmr_nh3": 2.8978580501784865
+              }
+            },
+            "gbm": {
+              "mrmse": 3.2855487881518437,
+              "skill": -0.13537724733603707,
+              "per_gas": {
+                "log10_vmr_h2o": 3.1188788582542872,
+                "log10_vmr_co2": 3.7766170958845415,
+                "log10_vmr_co": 3.1167897601823826,
+                "log10_vmr_ch4": 3.347368766196876,
+                "log10_vmr_nh3": 3.0680894602411306
+              }
+            },
+            "n_columns": 219,
+            "best_learner": "ridge",
+            "mrmse": 2.949798269330322,
+            "skill": -0.019352946852081443
+          },
+          "3_aux_plus_spectrum": {
+            "ridge": {
+              "mrmse": 2.9694957663041883,
+              "skill": -0.026159751844369472,
+              "per_gas": {
+                "log10_vmr_h2o": 2.9258276140378006,
+                "log10_vmr_co2": 2.9898344875842677,
+                "log10_vmr_co": 2.9140966823354737,
+                "log10_vmr_ch4": 3.0933630028280166,
+                "log10_vmr_nh3": 2.9243570447353813
+              }
+            },
+            "gbm": {
+              "mrmse": 3.2155141530481033,
+              "skill": -0.11117558838974051,
+              "per_gas": {
+                "log10_vmr_h2o": 3.0414434355326105,
+                "log10_vmr_co2": 3.7140252713007147,
+                "log10_vmr_co": 3.0388781168992343,
+                "log10_vmr_ch4": 3.2785444386468954,
+                "log10_vmr_nh3": 3.004679502861064
+              }
+            },
+            "n_columns": 223,
+            "best_learner": "ridge",
+            "mrmse": 2.9694957663041883,
+            "skill": -0.026159751844369472
+          }
+        },
+        "headline_learner": "ridge",
+        "headline_learner_rule": "the learner with the lowest rung-3 mRMSE; rung 3 defines the achievable skill, hence the denominator",
+        "skill_share_of_aux_by_learner": {
+          "ridge": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -0.0003507910909179568,
+            "denominator_skill": -0.026159751844369472,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          },
+          "gbm": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -2.243972394277982e-05,
+            "denominator_skill": -0.11117558838974051,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          }
+        },
+        "skill_share_of_spectrum_only_by_learner": {
+          "ridge": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -0.019369773079483066,
+            "denominator_skill": -0.026159751844369472,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          },
+          "gbm": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -0.1273595855054479,
+            "denominator_skill": -0.11117558838974051,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          }
+        },
+        "skill_share_of_spectrum_without_scale_by_learner": {
+          "ridge": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -0.019352946852081443,
+            "denominator_skill": -0.026159751844369472,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          },
+          "gbm": {
+            "value": null,
+            "denominator_nonpositive": true,
+            "numerator_skill": -0.13537724733603707,
+            "denominator_skill": -0.11117558838974051,
+            "why": "the aux+spectrum rung has no positive skill over the constant predictor, so there is no achievable skill to take a share of"
+          }
+        },
+        "denominator_nonpositive": true,
+        "skill_share_of_aux": null,
+        "skill_share_of_spectrum_only": null,
+        "skill_share_of_spectrum_only_caveat": "rung 2 withholds the auxiliary TABLE, not auxiliary INFORMATION; see aux_recoverable_from_spectrum_block. A value at or above 1.0 means rung 2 matched or beat rung 3, which is itself evidence that the aux table adds nothing the spectrum lacks.",
+        "verdict_contribution": "no_achievable_skill_to_divide",
+        "skill_share_of_aux_bootstrap": null,
+        "aux_recoverable_from_spectrum_block": {
+          "note": "ridge R^2 on the evaluation split; > 0 means the auxiliary column is partly reconstructible from spectral columns alone, so no rung here is aux-free",
+          "by_source": {
+            "shape_normalised_spectrum": {
+              "planet_radius_rjup": -0.2905237163449892,
+              "log_g_cgs": -1.2914920422150806,
+              "star_radius_rsun": -0.04112694994661381
+            },
+            "log10_mean_transit_depth": {
+              "planet_radius_rjup": 0.13058919259781432,
+              "log_g_cgs": -0.004677744192439048,
+              "star_radius_rsun": 0.8128451050786611
+            },
+            "log10_sigma_ppm": {
+              "planet_radius_rjup": -0.0005838493777139409,
+              "log_g_cgs": -0.0030540437866841685,
+              "star_radius_rsun": -0.001960680675104909
+            }
+          },
+          "max_r2_over_sources": {
+            "planet_radius_rjup": 0.13058919259781432,
+            "log_g_cgs": -0.0030540437866841685,
+            "star_radius_rsun": 0.8128451050786611
+          },
+          "worst_leak": "star_radius_rsun",
+          "worst_leak_r2": 0.8128451050786611
+        }
+      }
+    },
+    "datasets_where_aux_dominates": [],
+    "datasets_with_no_achievable_skill_to_divide": [
+      "poseidon_test"
+    ],
+    "verdict_contributions": {
+      "adc": "spectroscopy_confirmed",
+      "tau_val": "spectroscopy_confirmed",
+      "poseidon_test": "no_achievable_skill_to_divide"
+    },
+    "interpretation": "A high aux share means the reported accuracy is not spectroscopy. The targets scored here are the five gas abundances only (a24: temperature and radius are not scored), so the threshold is anchored on the gases: on ADC2023 the aux table pins the equilibrium temperature to 48.5 K (a15), yet conditioning on the TRUE temperature and radius improves the scored gas mRMSE by just 0.259 % (a15 conditioning_value). The documented aux -> gas route is therefore worth ~0.3 % of the achievable skill, and the 20 % limit sits ~77x above it: a share above the limit would mean the benchmark rewards reading the star catalogue through some path nobody has described. Measured today the share is ~-0.2 % (ADC) and ~-0.4 % (tau_val) \u2014 the aux-only rung is WORSE than the constant predictor, so the limit is far from binding and its resolving power near the boundary is untested on these data. poseidon_test has no positive aux+spectrum skill at all, so it cannot support the claim."
+  }
+}

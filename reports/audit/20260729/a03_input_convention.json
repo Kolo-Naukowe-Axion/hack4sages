@@ -1,0 +1,195 @@
+{
+  "check": "a03_input_convention",
+  "finding": "K3 \u2014 the ExoBiome-vs-SOTA comparison mixes two input conventions; the ranking reverses when they are equalised",
+  "question": "What is each model's mRMSE with and without eval-time N(0,sigma) injection, on the same split?",
+  "pass_criterion": "sign(ExoBiome - baseline) is invariant to the input convention",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:47:49.089116+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "artifacts/ariel_quantum_best_v4_epoch6/best_model.pt",
+      "sha256": "92bce97c61cb41ce9393020264231f5c403bbd8fdd3880704e4d38c7b68781b6"
+    }
+  ],
+  "payload": {
+    "split": "holdout",
+    "exobiome": {
+      "n_rows": 4143,
+      "clean": {
+        "0.0000": {
+          "mrmse": 0.30240896344184875,
+          "per_gas": {
+            "log_H2O": 0.40298062562942505,
+            "log_CO2": 0.2433129847049713,
+            "log_CO": 0.23241561651229858,
+            "log_CH4": 0.23500894010066986,
+            "log_NH3": 0.39832666516304016
+          }
+        },
+        "0.5000": {
+          "mrmse": 0.29555177688598633,
+          "per_gas": {
+            "log_H2O": 0.3908696472644806,
+            "log_CO2": 0.23292692005634308,
+            "log_CO": 0.22967955470085144,
+            "log_CH4": 0.234160915017128,
+            "log_NH3": 0.3901217579841614
+          }
+        },
+        "1.0000": {
+          "mrmse": 0.29869264364242554,
+          "per_gas": {
+            "log_H2O": 0.405182808637619,
+            "log_CO2": 0.22898583114147186,
+            "log_CO": 0.23032815754413605,
+            "log_CH4": 0.2361721247434616,
+            "log_NH3": 0.3927944004535675
+          }
+        }
+      },
+      "noised": {
+        "scale": 1.0,
+        "seeds": [
+          42,
+          1,
+          2
+        ],
+        "mrmse_per_seed": [
+          0.9694358110427856,
+          0.9574098587036133,
+          0.9726904630661011
+        ],
+        "mrmse_mean": 0.9665120442708334,
+        "mrmse_std": 0.00657193662595228
+      },
+      "degradation_factor": 3.235807994748862
+    },
+    "baseline_nsf": {
+      "n_params": 10771200,
+      "trained_with_noise_augmentation": true,
+      "posterior_sample_seed": 42,
+      "posterior_sample_seed_note": "global torch RNG seeded before each evaluate_point_metric call; the flow's sample() takes no generator (model.py:54), so row_seed/noise_seed do NOT cover the posterior draw. Makes the number reproducible, not more accurate: it is still one Monte Carlo draw of final_num_samples samples.",
+      "clean": {
+        "mean": {
+          "mrmse": 0.4036025106906891,
+          "per_gas": {
+            "log_H2O": 0.5044530034065247,
+            "log_CO2": 0.26568207144737244,
+            "log_CO": 0.3930797874927521,
+            "log_CH4": 0.33008378744125366,
+            "log_NH3": 0.524713933467865
+          },
+          "n_rows": 4143
+        },
+        "median": {
+          "mrmse": 0.38462120294570923,
+          "per_gas": {
+            "log_H2O": 0.4790753126144409,
+            "log_CO2": 0.2511897683143616,
+            "log_CO": 0.37226006388664246,
+            "log_CH4": 0.3157489597797394,
+            "log_NH3": 0.5048319697380066
+          },
+          "n_rows": 4143
+        }
+      },
+      "noised": {
+        "mean": {
+          "seeds": [
+            42,
+            1,
+            2
+          ],
+          "mrmse_per_seed": [
+            0.5498321056365967,
+            0.549182653427124,
+            0.5477655529975891
+          ],
+          "mrmse_mean": 0.5489267706871033,
+          "mrmse_std": 0.0008628506765088547
+        },
+        "median": {
+          "seeds": [
+            42,
+            1,
+            2
+          ],
+          "mrmse_per_seed": [
+            0.5576013326644897,
+            0.5566796660423279,
+            0.5561186075210571
+          ],
+          "mrmse_mean": 0.5567998687426249,
+          "mrmse_std": 0.0006112582539924476
+        }
+      },
+      "degradation_factor": {
+        "mean": 1.3600677799246572,
+        "median": 1.4476577590581228
+      }
+    },
+    "published_estimator": {
+      "source": "models/adc_winner_on_ariel/trained_run/holdout_metrics.json",
+      "source_exists": true,
+      "field": "point_estimate",
+      "why_this_field": "the sibling key is named `rmse_mean`, but that is the mean over gases (evaluate_point_metric's naming), NOT the `mean` point-estimate arm; `point_estimate` is the only field that names the arm",
+      "estimator": "median",
+      "read_from_artefact": true,
+      "published_mrmse": 0.5522884130477905,
+      "published_rows": 4143
+    },
+    "published_comparison": {
+      "exobiome": 0.2993761897087097,
+      "baseline": 0.5522884130477905,
+      "claimed_ratio": 1.844797388814261
+    },
+    "comparison_by_estimator": {
+      "mean": {
+        "estimator": "mean",
+        "is_published_arm": false,
+        "delta_clean_input(exo-base)": -0.10490986704826355,
+        "delta_noised_input(exo-base)": 0.4175852735837301,
+        "ratio_clean(base/exo)": 1.3512301667993354,
+        "ratio_noised(base/exo)": 0.5679461253907401,
+        "sign_flips": true,
+        "degradation_factor_baseline": 1.3600677799246572
+      },
+      "median": {
+        "estimator": "median",
+        "is_published_arm": true,
+        "delta_clean_input(exo-base)": -0.08592855930328369,
+        "delta_noised_input(exo-base)": 0.4097121755282085,
+        "ratio_clean(base/exo)": 1.2876822082238875,
+        "ratio_noised(base/exo)": 0.576092012554993,
+        "sign_flips": true,
+        "degradation_factor_baseline": 1.4476577590581228
+      }
+    },
+    "comparison": {
+      "estimator": "median",
+      "is_published_arm": true,
+      "delta_clean_input(exo-base)": -0.08592855930328369,
+      "delta_noised_input(exo-base)": 0.4097121755282085,
+      "ratio_clean(base/exo)": 1.2876822082238875,
+      "ratio_noised(base/exo)": 0.576092012554993,
+      "sign_flips": true,
+      "degradation_factor_baseline": 1.4476577590581228,
+      "published_arm_evaluated": true,
+      "published_arm_source": "models/adc_winner_on_ariel/trained_run/holdout_metrics.json"
+    },
+    "interpretation": "The published 1.845x advantage compares ExoBiome on the stored spectra against the NSF's median arm on spectra with N(0,sigma) added, i.e. two different inference problems. Equalised on the CLEAN convention the ratio is 1.2877x (delta = -0.0859); equalised on the NOISED convention it is 0.5761x (delta = +0.4097). The sign of (ExoBiome - baseline) FLIPS between the two conventions, so the published ranking is an artefact of the input convention. Degradation under +N(0,sigma): ExoBiome 3.236x vs NSF(median) 1.448x \u2014 the point model degrades more steeply, so the 'noise robustness' hypothesis is not supported. Other point-estimate arms evaluated (reported, not used for the verdict): mean ratio_clean=1.3512, flips=True."
+  }
+}

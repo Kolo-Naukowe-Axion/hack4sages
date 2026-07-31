@@ -1,0 +1,132 @@
+{
+  "check": "a08_reference_posterior",
+  "finding": "K8 \u2014 the reported 0.30 dex beats the reference nested-sampling retrieval ~3.8x; the metric measures simulator inversion, not retrieval",
+  "question": "How does the model's RMSE compare with the reference Bayesian posterior on the same planets?",
+  "pass_criterion": "model mRMSE >= reference-run mRMSE, both on the same 663 planets that carry a reference retrieval",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:48.883979+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "data/ariel-ml-dataset/TrainingData/Ground Truth Package/QuartilesTable.csv",
+      "sha256": "adeb3873c4ff3b9553efe0bb0b3105db55e20fbd0f6f4f16fee8b85f0e671886"
+    }
+  ],
+  "payload": {
+    "split": "holdout",
+    "per_gas": {
+      "log_H2O": {
+        "n_with_reference_retrieval": 663,
+        "n_scored_on_common_mask": 663,
+        "reference_rmse_median_vs_truth": 1.3574718144503835,
+        "reference_bias": -0.806174401049127,
+        "reference_sigma_median": 1.901753317670616,
+        "reference_sigma_mean": 1.6170545275536998,
+        "iqr_coverage_of_truth": 0.77526395173454,
+        "prior_support_in_fm_table": [
+          -8.999855646693188,
+          -3.000497152860257
+        ]
+      },
+      "log_CO2": {
+        "n_with_reference_retrieval": 663,
+        "n_scored_on_common_mask": 663,
+        "reference_rmse_median_vs_truth": 1.228092061113234,
+        "reference_bias": -0.2747395370296152,
+        "reference_sigma_median": 0.6021186625632958,
+        "reference_sigma_mean": 1.1560580679594854,
+        "iqr_coverage_of_truth": 0.8582202111613876,
+        "prior_support_in_fm_table": [
+          -8.999931614830441,
+          -4.000008793697162
+        ]
+      },
+      "log_CO": {
+        "n_with_reference_retrieval": 663,
+        "n_scored_on_common_mask": 663,
+        "reference_rmse_median_vs_truth": 2.017437435777554,
+        "reference_bias": -1.3103188890500599,
+        "reference_sigma_median": 3.098175443986198,
+        "reference_sigma_mean": 2.603077847165948,
+        "iqr_coverage_of_truth": 0.7963800904977375,
+        "prior_support_in_fm_table": [
+          -5.999983547102525,
+          -3.00001049207684
+        ]
+      },
+      "log_CH4": {
+        "n_with_reference_retrieval": 663,
+        "n_scored_on_common_mask": 663,
+        "reference_rmse_median_vs_truth": 1.0930933597948584,
+        "reference_bias": -0.6440573200427283,
+        "reference_sigma_median": 0.3014569795121706,
+        "reference_sigma_mean": 1.1723131258385908,
+        "iqr_coverage_of_truth": 0.799396681749623,
+        "prior_support_in_fm_table": [
+          -8.999856457775103,
+          -3.0003326873234064
+        ]
+      },
+      "log_NH3": {
+        "n_with_reference_retrieval": 663,
+        "n_scored_on_common_mask": 663,
+        "reference_rmse_median_vs_truth": 1.4728633793522516,
+        "reference_bias": -0.9327365626752978,
+        "reference_sigma_median": 2.1890182971889622,
+        "reference_sigma_mean": 1.6255824822455716,
+        "iqr_coverage_of_truth": 0.7194570135746606,
+        "prior_support_in_fm_table": [
+          -8.999985426635691,
+          -3.004636140277848
+        ]
+      }
+    },
+    "n_planets_compared": 663,
+    "n_planets_in_split": 4143,
+    "n_rows_in_predictions_csv": 4143,
+    "comparison_set": "the 663 planets with a non-NaN reference quartile on all 5 gases; reference AND model are both scored on exactly these rows",
+    "reference_posterior_mrmse": 1.4337916100976564,
+    "reference_posterior_sigma_mean_over_gases": 1.6185045401842486,
+    "model_mrmse": 0.3769797785864117,
+    "constant_predictor_mrmse": 1.4612083460779286,
+    "reference_over_model_ratio": 3.803364773235446,
+    "model_mrmse_all_rows_not_in_verdict": 0.29937625996093453,
+    "ratio_on_mismatched_sets_not_in_verdict": 4.789262883719474,
+    "ratio_key_note": "`reference_over_model_ratio` = reference / model, >1 means the model reports a SMALLER error than the reference run. The previous key was named `model_over_reference_ratio` while holding exactly this quantity \u2014 inverted relative to its contents, and the report quoted the key name",
+    "reference_calibration_not_in_criterion": {
+      "mean_bias_dex": -0.7936053419693656,
+      "mean_iqr_coverage_of_truth": 0.7897435897435898,
+      "nominal_iqr_coverage": 0.5,
+      "over_coverage_factor": 1.5794871794871796,
+      "why_not_in_criterion": "A run this biased and this over-wide is not 'the exact posterior', so 'no estimator can beat the posterior' cannot carry the argument. The criterion is therefore a comparison against a NAMED artefact (the published MultiNest run), which is what K8 actually needs. Folding calibration into the same status would make a FAIL unattributable between 'model too good' and 'reference miscalibrated'"
+    },
+    "multimodality_probe": {
+      "planets_probed": 200,
+      "n_available": 663,
+      "n_requested": 200,
+      "sampling": "uniform without replacement from all 663 holdout planets that carry a >=7-column trace, numpy default_rng(seed=42); NOT the first 200 split positions, which are the lowest-numbered planets and 52% trace-bearing vs 16.0% globally",
+      "seed": 42,
+      "fraction_with_>=2_modes": {
+        "log_H2O": 0.51,
+        "log_CO2": 0.31,
+        "log_CO": 0.62,
+        "log_CH4": 0.415,
+        "log_NH3": 0.545
+      },
+      "note": "crude weighted-histogram peak count; enough to show the labels are obtainable from assets already in the repo (contradicts plan_problems_log P8)"
+    },
+    "interpretation": "The regressor reports an accuracy several times finer than the reference MultiNest retrieval on the same spectra and the same planets. That is only possible if the input is (near-)noiseless, i.e. the task is simulator inversion. Under the observational noise these spectra were generated for, the achievable accuracy is the reference sigma (0.3-3 dex), not 0.3 dex."
+  }
+}

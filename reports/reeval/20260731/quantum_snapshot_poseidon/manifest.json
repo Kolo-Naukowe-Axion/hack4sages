@@ -1,0 +1,64 @@
+{
+  "model": "quantum_snapshot_poseidon",
+  "method": "recompute-from-predictions",
+  "timestamp_utc": "2026-07-31T05:50:40.251893+00:00",
+  "git_commit": "77013c937af33a98780982d05864eebbc82d2fb0-dirty",
+  "python": "3.12.13",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "packages": {
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "pennylane-lightning": "0.44.0",
+    "zuko": "1.6.0",
+    "tensorflow": "not-installed",
+    "scikit-learn": "1.9.0",
+    "h5py": "3.16.0"
+  },
+  "checkpoint": {
+    "path": "/Users/mariaplatek/projects/AXION/hack4sages/reports/ariel_quantum_taurex_snapshot_20260312_1003/stage2_best_model_epoch005.pt",
+    "sha256": "0d1729ba7ede79efc21940e2b8284183c6eba04196ecbb73910a790710b02aeb",
+    "declared": true,
+    "present": true
+  },
+  "inputs": {
+    "source_predictions": {
+      "path": "/Users/mariaplatek/projects/AXION/hack4sages/reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_predictions.csv",
+      "sha256": "99bf9fcc60202d849ca87de2c5ab13eebebd06559648c39c98fc6938daf61687"
+    }
+  },
+  "truth_check": {
+    "label_source": "data/TauREx set/labels.parquet",
+    "label_source_sha256": "3cdd24c367f8fae4a51f3f7e08dcb8abcf6a8f1cd346b41055b79de9fe8992a3",
+    "n_rows_compared": 685,
+    "n_ids_unmatched": 0,
+    "max_abs_diff_per_gas": {
+      "log_H2O": 8.918052287754108e-07,
+      "log_CO2": 8.708347092323265e-07,
+      "log_CO": 8.812646647982092e-07,
+      "log_CH4": 8.899963503949948e-07,
+      "log_NH3": 9.172239288091077e-07
+    },
+    "max_abs_diff": 9.172239288091077e-07,
+    "tolerance": 1e-05,
+    "verified": true,
+    "what_this_establishes": "the CSV's true_* column equals an independent load of the labels; without it, recomputation only proves internal consistency of the CSV"
+  },
+  "data_root": "data/TauREx set",
+  "split_manifest": null,
+  "seed": 42,
+  "quantum_scale": 0.625,
+  "rmse_mean": 3.2156152428152134,
+  "rows": 685,
+  "reported": 3.2156150341033936,
+  "delta_vs_reported": 2.1e-07,
+  "status": "verified",
+  "tolerance": 5e-05,
+  "tolerance_kind": "fixed",
+  "outputs": {
+    "metrics": "metrics.json",
+    "predictions": null
+  },
+  "notes": "#8 cross-gen Poseidon side. TauREx-val side (1.449002) confirmed against training log."
+}

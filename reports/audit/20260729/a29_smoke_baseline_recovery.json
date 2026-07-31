@@ -1,0 +1,349 @@
+{
+  "check": "a29_smoke_baseline_recovery",
+  "finding": "K1(b) \u2014 the team's own ridge smoke baseline ran, shipped in the bundle, and records no skill on POSEIDON",
+  "question": "Do the two smoke artefacts agree per gas, what skill is behind them, and how wide are the predictions?",
+  "pass_criterion": "the finding is REFUTED (PASS) if an artefact is missing, or the CSV does not reproduce the JSON within 1e-9, or the two skills share a sign, or any file outside the bundle / audit/ / docs/ reads the artefacts by path; it STANDS (FAIL) otherwise",
+  "status": "PASS",
+  "timestamp_utc": "2026-07-29T13:17:27.405217+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "data/TauREx set/baseline_smoke.json",
+      "sha256": "7ccf0529568f435deed9d1dfa8806a1c767fa9483688ef606f49caaf46b4d579"
+    },
+    {
+      "path": "data/TauREx set/baseline_poseidon_predictions.csv",
+      "sha256": "7cb74b5d9e7b2b440d83f40d9265c0b9a38087d1da33605dbe3a6c0a3a45c463"
+    },
+    {
+      "path": "data/TauREx set/labels.parquet",
+      "sha256": "3cdd24c367f8fae4a51f3f7e08dcb8abcf6a8f1cd346b41055b79de9fe8992a3"
+    }
+  ],
+  "payload": {
+    "t1_artefact_consistency": {
+      "per_gas": {
+        "log10_vmr_h2o": {
+          "recomputed_from_csv": 2.8738372456788213,
+          "recorded_in_json": 2.8738372456788213,
+          "abs_diff": 0.0
+        },
+        "log10_vmr_co2": {
+          "recomputed_from_csv": 2.966078673011262,
+          "recorded_in_json": 2.96607867301126,
+          "abs_diff": 1.7763568394002505e-15
+        },
+        "log10_vmr_co": {
+          "recomputed_from_csv": 2.8482125676924612,
+          "recorded_in_json": 2.848212567692463,
+          "abs_diff": 1.7763568394002505e-15
+        },
+        "log10_vmr_ch4": {
+          "recomputed_from_csv": 2.9477281326593117,
+          "recorded_in_json": 2.947728132659312,
+          "abs_diff": 4.440892098500626e-16
+        },
+        "log10_vmr_nh3": {
+          "recomputed_from_csv": 2.8410349275133093,
+          "recorded_in_json": 2.8410349275133107,
+          "abs_diff": 1.3322676295501878e-15
+        }
+      },
+      "max_abs_diff": 1.7763568394002505e-15,
+      "tolerance": 1e-09,
+      "consistent": true,
+      "n_rows_csv": 685,
+      "n_rows_csv_matched_to_labels": 685,
+      "n_rows_labels": 685,
+      "sample_ids_in_csv_absent_from_labels": [],
+      "n_sample_ids_absent": 0,
+      "rmse_computed_on": "only the rows matched to labels; any unmatched id is a FAIL reason"
+    },
+    "t2_mrmse": {
+      "taurex_val": {
+        "per_gas": {
+          "log10_vmr_h2o": 2.6040562018598266,
+          "log10_vmr_co2": 2.559763462079074,
+          "log10_vmr_co": 2.7875355545891307,
+          "log10_vmr_ch4": 2.529390359697249,
+          "log10_vmr_nh3": 2.592587034955373
+        },
+        "mrmse": 2.6146665226361305,
+        "independently_recomputable": false,
+        "note": "the bundle ships no prediction file for the TauREx split, so this aggregate rests on the recorded per-gas values alone"
+      },
+      "poseidon_test": {
+        "per_gas": {
+          "log10_vmr_h2o": 2.8738372456788213,
+          "log10_vmr_co2": 2.96607867301126,
+          "log10_vmr_co": 2.848212567692463,
+          "log10_vmr_ch4": 2.947728132659312,
+          "log10_vmr_nh3": 2.8410349275133107
+        },
+        "mrmse": 2.8953783093110337,
+        "mrmse_recomputed_from_csv": 2.8953783093110332,
+        "independently_recomputable": true
+      }
+    },
+    "t3_skill": {
+      "taurex_val": {
+        "n_rows": 4142,
+        "smoke_mrmse": 2.6146665226361305,
+        "baseline_train_mean_mrmse": 2.8852220423342816,
+        "baseline_train_mean_per_gas": [
+          2.8646118196211194,
+          2.8941612424696794,
+          2.9146493459068123,
+          2.854251818602987,
+          2.8984359850708095
+        ],
+        "baseline_oracle_constant_mrmse": 2.8848848765906423,
+        "baseline_oracle_per_gas": [
+          2.864456259490891,
+          2.8940291196469574,
+          2.914113842682957,
+          2.8533899547689314,
+          2.8984352063634757
+        ],
+        "skill_vs_train_mean": 0.09377285897873522,
+        "skill_vs_oracle_constant": 0.09366694530766018
+      },
+      "poseidon_test": {
+        "n_rows": 685,
+        "smoke_mrmse": 2.8953783093110337,
+        "baseline_train_mean_mrmse": 2.8940085150877404,
+        "baseline_train_mean_per_gas": [
+          2.874083565125271,
+          2.9660770091472672,
+          2.84592837860613,
+          2.941988790259407,
+          2.8419648323006275
+        ],
+        "baseline_oracle_constant_mrmse": 2.892340030206461,
+        "baseline_oracle_per_gas": [
+          2.872145411993102,
+          2.964824304130998,
+          2.842727070398437,
+          2.940447022357035,
+          2.8415563421527312
+        ],
+        "skill_vs_train_mean": -0.00047332073010575293,
+        "skill_vs_oracle_constant": -0.001050457094547097
+      }
+    },
+    "t4_prediction_spread": {
+      "per_gas": {
+        "log10_vmr_h2o": {
+          "sd_pred": 0.06836500071108464,
+          "sd_label": 2.874244166684558,
+          "ratio": 0.023785383824904374,
+          "label_sd_vs_uniform_prior_sd": 0.9956673860112246
+        },
+        "log10_vmr_co2": {
+          "sd_pred": 0.07359608312688179,
+          "sd_label": 2.9669907818071124,
+          "ratio": 0.024804958471106687,
+          "label_sd_vs_uniform_prior_sd": 1.0277957559356847
+        },
+        "log10_vmr_co": {
+          "sd_pred": 0.04608802997032704,
+          "sd_label": 2.8448043283083653,
+          "ratio": 0.016200773287536732,
+          "label_sd_vs_uniform_prior_sd": 0.9854691268443883
+        },
+        "log10_vmr_ch4": {
+          "sd_pred": 0.07510784624247376,
+          "sd_label": 2.9425956868910035,
+          "ratio": 0.025524351366744805,
+          "label_sd_vs_uniform_prior_sd": 1.0193450471656516
+        },
+        "log10_vmr_nh3": {
+          "sd_pred": 0.057792719620384535,
+          "sd_label": 2.8436327445797205,
+          "ratio": 0.020323552586227554,
+          "label_sd_vs_uniform_prior_sd": 0.9850632783357215
+        }
+      },
+      "mean_ratio": 0.02212780390730403,
+      "mean_prediction_all_gases": -7.01411131748504,
+      "prior_mean": -7.0,
+      "prior_sd": 2.886751345948129,
+      "sd_convention": "ddof=1"
+    },
+    "t5_collapse_to_prior_mean": {
+      "constant_at_prior_mean_mrmse": 2.893799353246111,
+      "smoke_mrmse": 2.8953783093110337,
+      "abs_diff": 0.001578956064922643
+    },
+    "t6_consumption": {
+      "consumers": [
+        {
+          "path": "archive/early_prototype_snapshot/cross/README.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json",
+            "baseline_poseidon_predictions.csv"
+          ],
+          "git_tracked": true,
+          "added_in": "7afae8c 2026-03-13"
+        },
+        {
+          "path": "archive/early_prototype_snapshot/cross/data_explanation.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json",
+            "baseline_poseidon_predictions.csv"
+          ],
+          "git_tracked": true,
+          "added_in": "7afae8c 2026-03-13"
+        },
+        {
+          "path": "archive/hack4sages_2_snapshot/exobiome_model/audit_reports/00_EXECUTIVE_SUMMARY.md",
+          "artefacts_referenced": [
+            "baseline_poseidon_predictions.csv"
+          ],
+          "git_tracked": true,
+          "added_in": "c84824f 2026-03-13"
+        },
+        {
+          "path": "archive/hack4sages_2_snapshot/exobiome_model/audit_reports/02_target_leakage.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json"
+          ],
+          "git_tracked": true,
+          "added_in": "c84824f 2026-03-13"
+        },
+        {
+          "path": "archive/hack4sages_2_snapshot/exobiome_model/audit_reports/11_baseline_comparison.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json",
+            "baseline_poseidon_predictions.csv"
+          ],
+          "git_tracked": true,
+          "added_in": "c84824f 2026-03-13"
+        },
+        {
+          "path": "archive/hack4sages_2_snapshot/exobiome_model/audit_reports/14_scientific_claims.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json"
+          ],
+          "git_tracked": true,
+          "added_in": "c84824f 2026-03-13"
+        },
+        {
+          "path": "archive/hack4sages_2_snapshot/exobiome_model/audit_reports/15_experimental_design_leakage.md",
+          "artefacts_referenced": [
+            "baseline_smoke.json"
+          ],
+          "git_tracked": true,
+          "added_in": "c84824f 2026-03-13"
+        },
+        {
+          "path": "data/crossgen_biosignatures/constants.py",
+          "artefacts_referenced": [
+            "baseline_smoke.json",
+            "baseline_poseidon_predictions.csv"
+          ],
+          "git_tracked": true,
+          "added_in": "0ce244b 2026-03-11"
+        }
+      ],
+      "n_consumers": 8,
+      "consumed": true,
+      "artefact_names_searched": [
+        "baseline_smoke.json",
+        "baseline_poseidon_predictions.csv"
+      ],
+      "excluded_path_prefixes": [
+        "data/TauREx set",
+        "audit",
+        "docs",
+        "reports/audit",
+        ".git"
+      ],
+      "excluded_dir_globs": [
+        ".venv*",
+        "__pycache__",
+        "*.egg-info",
+        "node_modules"
+      ],
+      "excluded_files": [
+        ".gitignore"
+      ],
+      "n_files_scanned": 1480,
+      "n_files_skipped_over_size_cap": 100,
+      "size_cap_bytes": 8000000,
+      "match_semantics": "bare filename appearing in the file's bytes; a reference, not a proven read"
+    },
+    "provenance": {
+      "smoke": {
+        "path": "data/TauREx set/baseline_smoke.json",
+        "exists": true,
+        "size_bytes": 1111,
+        "mtime_utc": "2026-07-17T09:21:15.405829+00:00",
+        "git_tracked": true,
+        "added_in": "4c431db 2026-07-27"
+      },
+      "predictions": {
+        "path": "data/TauREx set/baseline_poseidon_predictions.csv",
+        "exists": true,
+        "size_bytes": 76170,
+        "mtime_utc": "2026-07-17T09:21:15.405325+00:00",
+        "git_tracked": true,
+        "added_in": "4c431db 2026-07-27"
+      },
+      "labels": {
+        "path": "data/TauREx set/labels.parquet",
+        "exists": true,
+        "size_bytes": 5350808,
+        "mtime_utc": "2026-07-17T10:28:12.700377+00:00",
+        "git_tracked": true,
+        "added_in": "57405ae 2026-07-16"
+      }
+    },
+    "definitions": {
+      "mrmse": "unweighted mean over gases of per-gas RMSE over the sample axis (audit_lib.mrmse)",
+      "smoke_rmse": "baseline_smoke.py:_rmse_by_column = sqrt(mean((pred-true)**2, axis=0)), bit-for-bit the same functional as audit_lib.per_gas_rmse",
+      "baseline_train_mean": "constant vector = mean of the tau/train labels, evaluated on the rows in question \u2014 the honest trivial baseline, and the variant a02 reports",
+      "baseline_oracle_constant": "constant vector = mean of the evaluation rows themselves \u2014 the most favourable constant, hence an upper bound on model credit",
+      "prior": "crossgen prior is U(-12, -2) for all five gases"
+    },
+    "verdict": {
+      "status": "PASS",
+      "refuting_conditions_met": [
+        "d_result_was_consumed"
+      ],
+      "refuting_conditions": {
+        "a_artefact_missing": false,
+        "b_csv_disagrees_with_json": false,
+        "c_no_skill_sign_contrast": false,
+        "d_result_was_consumed": true
+      },
+      "finding_stands_conjunction": {
+        "both_artefacts_present": true,
+        "artefacts_agree_within_tol": true,
+        "positive_skill_on_taurex_val": true,
+        "no_skill_on_poseidon_test": true,
+        "no_consumer_outside_audit": false,
+        "all_sample_ids_matched": true
+      },
+      "decisive_skill_variant": "skill_vs_train_mean",
+      "skill_taurex_val": 0.09377285897873522,
+      "skill_poseidon_test": -0.00047332073010575293,
+      "magnitudes_are_reported_not_scored": "neither |skill| enters the PASS/FAIL algebra; baseline quality is K1 (a01) and the ladders (a02, a26), not K1(b)"
+    },
+    "verdict_reasons": [
+      "(d) the result WAS consumed: 8 file(s) outside the bundle / audit/ / docs/ reference the artefacts by name, e.g. archive/early_prototype_snapshot/cross/README.md, archive/early_prototype_snapshot/cross/data_explanation.md, archive/hack4sages_2_snapshot/exobiome_model/audit_reports/00_EXECUTIVE_SUMMARY.md"
+    ]
+  }
+}

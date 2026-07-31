@@ -1,0 +1,257 @@
+{
+  "check": "a10_split_integrity",
+  "finding": "P1 / P2 / U4 \u2014 taurex_fmpe holdout == validation; noquant copies val->holdout; testdata == holdout; no in-domain TauREx test split",
+  "question": "Does any package report as 'holdout' rows that were used for early stopping or model selection?",
+  "pass_criterion": "validation and holdout selectors differ AND row overlap is zero in every package",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:48:52.937676+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [],
+  "payload": {
+    "packages": {
+      "taurex_exobiome": {
+        "selectors": {
+          "TAUREX_TRAIN_GENERATOR": "tau",
+          "TAUREX_TRAIN_SPLIT": "train",
+          "TAUREX_VAL_GENERATOR": "tau",
+          "TAUREX_VAL_SPLIT": "val",
+          "TAUREX_HOLDOUT_GENERATOR": "poseidon",
+          "TAUREX_HOLDOUT_SPLIT": "test"
+        },
+        "validation_selector": [
+          "tau",
+          "val"
+        ],
+        "holdout_selector": [
+          "poseidon",
+          "test"
+        ],
+        "selector_keys_used": {
+          "validation_generator": "TAUREX_VAL_GENERATOR",
+          "validation_split": "TAUREX_VAL_SPLIT",
+          "holdout_generator": "TAUREX_HOLDOUT_GENERATOR",
+          "holdout_split": "TAUREX_HOLDOUT_SPLIT"
+        },
+        "issues": []
+      },
+      "taurex_exobiome_without_quant": {
+        "selectors": {
+          "TAUREX_TRAIN_GENERATOR": "tau",
+          "TAUREX_TRAIN_SPLIT": "train",
+          "TAUREX_VAL_GENERATOR": "tau",
+          "TAUREX_VAL_SPLIT": "val",
+          "TAUREX_HOLDOUT_GENERATOR": "poseidon",
+          "TAUREX_HOLDOUT_SPLIT": "test"
+        },
+        "validation_selector": [
+          "tau",
+          "val"
+        ],
+        "holdout_selector": [
+          "poseidon",
+          "test"
+        ],
+        "selector_keys_used": {
+          "validation_generator": "TAUREX_VAL_GENERATOR",
+          "validation_split": "TAUREX_VAL_SPLIT",
+          "holdout_generator": "TAUREX_HOLDOUT_GENERATOR",
+          "holdout_split": "TAUREX_HOLDOUT_SPLIT"
+        },
+        "issues": []
+      },
+      "taurex_fmpe": {
+        "selectors": {
+          "SOURCE_TRAIN_GENERATOR": "tau",
+          "SOURCE_TRAIN_SPLIT": "train",
+          "SOURCE_VALIDATION_GENERATOR": "tau",
+          "SOURCE_VALIDATION_SPLIT": "val",
+          "SOURCE_HOLDOUT_GENERATOR": "tau",
+          "SOURCE_HOLDOUT_SPLIT": "val",
+          "EXCLUDED_GENERATORS": [
+            "poseidon"
+          ]
+        },
+        "validation_selector": [
+          "tau",
+          "val"
+        ],
+        "holdout_selector": [
+          "tau",
+          "val"
+        ],
+        "selector_keys_used": {
+          "validation_generator": "SOURCE_VALIDATION_GENERATOR",
+          "validation_split": "SOURCE_VALIDATION_SPLIT",
+          "holdout_generator": "SOURCE_HOLDOUT_GENERATOR",
+          "holdout_split": "SOURCE_HOLDOUT_SPLIT"
+        },
+        "issues": [
+          "validation and holdout use the SAME selector ('tau', 'val') -> the reported holdout metric is a validation metric (selection-contaminated)"
+        ]
+      }
+    },
+    "n_packages_examined": 3,
+    "packages_skipped_no_selectors": [
+      {
+        "package": "adc_baseline",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": []
+      },
+      {
+        "package": "adc_winner_on_ariel",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "ariel_exobiome",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "ariel_winner_nf",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "ariel_winner_on_taurex",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "ariel_winner_trace_nf",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "five_qubit_exobiome",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "fmpe_giordano",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "dataset.py"
+        ]
+      },
+      {
+        "package": "garnet_ariel_quantum_regression",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py"
+        ]
+      },
+      {
+        "package": "sbi_ariel_adc2023",
+        "reason": "brak stalych selektorow w constants.py / dataset.py",
+        "files_present": [
+          "constants.py",
+          "dataset.py"
+        ]
+      }
+    ],
+    "n_packages_skipped": 10,
+    "n_package_dirs_in_models": 13,
+    "code_patterns": [
+      {
+        "file": "models/taurex_exobiome_without_quant/dataset.py",
+        "pattern": "holdout_source_indices = val_source_indices.copy()",
+        "present": true,
+        "meaning": "taurex_ignore_poseidon=true copies validation into holdout"
+      },
+      {
+        "file": "models/taurex_exobiome/dataset.py",
+        "pattern": "test_indices = holdout_indices.copy()",
+        "present": true,
+        "meaning": "testdata is a copy of holdout"
+      },
+      {
+        "file": "models/taurex_fmpe/prepare_dataset.py",
+        "pattern": "holdout_mirrors_validation",
+        "present": true,
+        "meaning": "package self-documents that holdout mirrors validation"
+      }
+    ],
+    "configs_with_ignore_poseidon": [
+      "reports/taurex_noquant_taurex_snapshot_20260312_133054/config.json"
+    ],
+    "crossgen_overlap": {
+      "split_sizes": {
+        "('poseidon', 'test')": 685,
+        "('tau', 'train')": 37281,
+        "('tau', 'val')": 4142
+      },
+      "pairwise_overlap": {
+        "('poseidon', 'test')|('tau', 'train')": 0,
+        "('poseidon', 'test')|('tau', 'val')": 0,
+        "('tau', 'train')|('tau', 'val')": 0
+      },
+      "duplicate_sample_ids": 0,
+      "in_distribution_test_split_exists": false,
+      "pairwise_overlap_all_zero": true,
+      "nonzero_pairs": {}
+    },
+    "problems": [
+      {
+        "package": "taurex_fmpe",
+        "issues": [
+          "validation and holdout use the SAME selector ('tau', 'val') -> the reported holdout metric is a validation metric (selection-contaminated)"
+        ]
+      },
+      {
+        "package": "models/taurex_exobiome_without_quant/dataset.py",
+        "issues": [
+          "taurex_ignore_poseidon=true copies validation into holdout"
+        ]
+      },
+      {
+        "package": "models/taurex_exobiome/dataset.py",
+        "issues": [
+          "testdata is a copy of holdout"
+        ]
+      },
+      {
+        "package": "models/taurex_fmpe/prepare_dataset.py",
+        "issues": [
+          "package self-documents that holdout mirrors validation"
+        ]
+      },
+      {
+        "package": "data/TauREx set",
+        "issues": [
+          "no tau/test split exists: tau/val is both the early-stopping set and the reported in-distribution score"
+        ]
+      }
+    ]
+  }
+}

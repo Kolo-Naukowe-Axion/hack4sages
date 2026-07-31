@@ -1,0 +1,153 @@
+{
+  "check": "a01_spectral_variation",
+  "finding": "K1 \u2014 all 685 POSEIDON spectra are wavelength-constant; the cross-generator axis has no signal",
+  "question": "Does each stored spectrum vary across wavelength bins, and does that variation exceed the noise?",
+  "pass_criterion": "zero bit-constant rows AND median feature/sigma > 1 AND median std_bins/|mean_bins| > 1e-4",
+  "status": "FAIL",
+  "timestamp_utc": "2026-07-29T12:47:03.820726+00:00",
+  "git_revision": "e8a426173b850db945ad2c6dfb05627caef8c074-dirty",
+  "repo": "/Users/mariaplatek/projects/AXION/hack4sages",
+  "env": {
+    "python": "3.12.13",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.5.1",
+    "pandas": "2.3.3",
+    "torch": "2.13.0",
+    "pennylane": "0.44.1",
+    "zuko": "1.6.0",
+    "h5py": "3.16.0",
+    "scipy": "1.18.0"
+  },
+  "inputs": [
+    {
+      "path": "data/TauREx set/spectra.h5",
+      "sha256": "ba8937f9f05bab7d89bf895103f8a8471bc0a1e085ecb81ff3bb26ba92236433-first67108864B"
+    }
+  ],
+  "payload": {
+    "file": "/Users/mariaplatek/projects/AXION/hack4sages/data/TauREx set/spectra.h5",
+    "criteria": {
+      "structural": "no bit-constant row (threshold-free)",
+      "physical": "median feature amplitude / sigma > 1.0",
+      "scale_free": "median std_bins/|mean_bins| > 0.0001"
+    },
+    "cannot_catch": "structure of the wrong amplitude \u2014 e.g. a generator missing an opacity term (finding K11) passes this check; see a25",
+    "generators": {
+      "poseidon": {
+        "sampling": "all 685 rows",
+        "n_total_rows": 685,
+        "fields": {
+          "transit_depth_noiseless": {
+            "n_rows_checked": 685,
+            "field_is_noiseless": true,
+            "rel_variation_median": 0.0,
+            "rel_variation_p01": 0.0,
+            "rel_variation_max": 0.0,
+            "frac_rows_below_rel_threshold": 1.0,
+            "bit_constant_rows": 685,
+            "bit_constant_fraction": 1.0,
+            "n_unique_values_median": 1,
+            "feature_amplitude_over_sigma_median": 0.0,
+            "frac_rows_snr_gt_1": 0.0,
+            "frac_rows_snr_gt_3": 0.0,
+            "first_row_n_unique": 1,
+            "first_row_head": [
+              0.016985462978482246,
+              0.016985462978482246,
+              0.016985462978482246,
+              0.016985462978482246,
+              0.016985462978482246,
+              0.016985462978482246
+            ]
+          },
+          "transit_depth_noisy": {
+            "n_rows_checked": 685,
+            "field_is_noiseless": false,
+            "rel_variation_median": 0.002144067673440211,
+            "rel_variation_p01": 0.00013265546254917165,
+            "rel_variation_max": 0.020297773596559137,
+            "frac_rows_below_rel_threshold": 0.008759124087591242,
+            "bit_constant_rows": 0,
+            "bit_constant_fraction": 0.0,
+            "n_unique_values_median": 218,
+            "apparent_amplitude_over_sigma_median": 0.9977099124748924,
+            "frac_rows_snr_gt_1": 0.48759124087591244,
+            "frac_rows_snr_gt_3": 0.0,
+            "first_row_n_unique": 217,
+            "first_row_head": [
+              0.016942236572504044,
+              0.01699187606573105,
+              0.01699291728436947,
+              0.016846276819705963,
+              0.01699882000684738,
+              0.016917629167437553
+            ]
+          }
+        }
+      },
+      "tau": {
+        "sampling": "all 41423 rows",
+        "n_total_rows": 41423,
+        "fields": {
+          "transit_depth_noiseless": {
+            "n_rows_checked": 41423,
+            "field_is_noiseless": true,
+            "rel_variation_median": 0.012891929306123559,
+            "rel_variation_p01": 0.001992436902951902,
+            "rel_variation_max": 0.18041746920552962,
+            "frac_rows_below_rel_threshold": 0.0,
+            "bit_constant_rows": 0,
+            "bit_constant_fraction": 0.0,
+            "n_unique_values_median": 218,
+            "feature_amplitude_over_sigma_median": 6.416618145423763,
+            "frac_rows_snr_gt_1": 0.9218791492649011,
+            "frac_rows_snr_gt_3": 0.7066364097240664,
+            "first_row_n_unique": 218,
+            "first_row_head": [
+              0.007666823919862509,
+              0.007664584554731846,
+              0.007661707699298859,
+              0.007659566588699818,
+              0.007657850161194801,
+              0.00765670370310545
+            ]
+          },
+          "transit_depth_noisy": {
+            "n_rows_checked": 41423,
+            "field_is_noiseless": false,
+            "rel_variation_median": 0.013937868443822252,
+            "rel_variation_p01": 0.002510822654412035,
+            "rel_variation_max": 0.1803803360102733,
+            "frac_rows_below_rel_threshold": 0.0,
+            "bit_constant_rows": 0,
+            "bit_constant_fraction": 0.0,
+            "n_unique_values_median": 218,
+            "apparent_amplitude_over_sigma_median": 6.487823591192305,
+            "frac_rows_snr_gt_1": 0.9973444704632692,
+            "frac_rows_snr_gt_3": 0.7214108104193323,
+            "first_row_n_unique": 218,
+            "first_row_head": [
+              0.0076431818306446075,
+              0.007686109747737646,
+              0.007656590547412634,
+              0.007673203945159912,
+              0.007637724280357361,
+              0.007684171665459871
+            ]
+          }
+        }
+      }
+    },
+    "failing_generators": [
+      {
+        "generator": "poseidon",
+        "reasons": [
+          "685/685 rows are bit-constant",
+          "median feature/sigma = 0.000 <= 1.0",
+          "median rel. variation = 0.000e+00 <= 0.0001"
+        ]
+      }
+    ],
+    "consequence": "Any metric computed on a failing generator measures the model's response to a featureless input. Every mRMSE / gap / ranking derived from it must be withdrawn."
+  }
+}
