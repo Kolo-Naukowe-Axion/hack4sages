@@ -43,7 +43,8 @@ git worktree add ../hack4sages-data origin/iwosmu/data-artifacts
 Dane publikowane na tej gałęzi: `data/ariel-ml-dataset/`,
 `data/petitradtrans-adc2023-validation/`, `data/reference_data/adc2023_reference_bundle.npz`,
 `data/eda/`, `data/published/crossgen_biosignatures/20260311/`. Wyjścia generowane lokalnie mają
-zostawać pod `data/generated-data/`, które jest ignorowane na `main`.
+zostawać pod `data/generated-data/`. Na `main` ignorowane są zarówno one, jak i podłączane zbiory:
+`.gitignore:23,25,40` (`data/generated-data/`, `data/val_dataset/`, `data/ariel-ml-dataset/`).
 
 ---
 
