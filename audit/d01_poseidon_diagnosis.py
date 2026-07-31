@@ -54,17 +54,16 @@ MIN_REL_VARIATION = 1e-4  # same criterion as a01
 
 
 def rel_variation(x: np.ndarray) -> float:
-    """Zmiennosc wzgledna widma. mean == 0 to BRAK zmiennosci (0.0), nie inf.
+    """Relative variation of a spectrum. mean == 0 means NO variation (0.0), not inf.
 
-    Wczesniej zwracalo float("inf"), a inf <= MIN_REL_VARIATION daje False — czyli widmo z samych
-    zer (albo dokladnie antysymetryczne wokol zera) przechodzilo `flat_by_a01_criterion` jako "ma
-    zmiennosc", i to w checku, ktorego jedynym zadaniem jest wykrycie plaskich widm. Konwencja
-    ujednolicona z a01:61, gdzie ten sam blad byl juz naprawiony (`np.where(|mean| > 0, std/|mean|,
-    0.0)`), bo dwie rozne konwencje na te sama wielkosc same sa wada.
+    Was: returned float("inf"), and inf <= MIN_REL_VARIATION is False, so an all-zero (or exactly
+    antisymmetric) spectrum passed `flat_by_a01_criterion` as "has variation" — in a check whose
+    only job is detecting flat spectra. Unified with a01:56, which already fixed the same bug
+    (`np.where(|mean| > 0, std/|mean|, 0.0)`).
 
-    Dzis nieosiagalne: stage2 nie uruchamia sie bez 72 GB opacities, a a01 mierzy 0/42108 wierszy
-    z mean_bins == 0 (min |mean| = 3.26e-03). To zabezpieczenie kryterium, wiec nie moze zalezec od
-    tego, ze dane akurat sa dobre.
+    Unreachable today: Stage 2 does not run without the 72 GB opacities, and a01 measures 0/42108
+    rows with mean_bins == 0 (min |mean| = 3.26e-03). This is a guard on the criterion, so it must
+    not depend on today's data happening to be well-behaved.
     """
     x = np.asarray(x, dtype=np.float64)
     m = float(x.mean())
@@ -72,18 +71,16 @@ def rel_variation(x: np.ndarray) -> float:
 
 
 def nearest_log_pressure_index(P: np.ndarray, P_ref: float) -> int:
-    """Indeks warstwy najblizszej P_ref, mierzony w log10.
+    """Index of the layer nearest P_ref, measured in log10.
 
-    Siatka cisnien jest LOGARYTMICZNA (np.geomspace / np.logspace, 1e-6..100 bar w 100 warstwach),
-    a poprzednio blizszosc byla liczona jako argmin |P - P_ref| w skali LINIOWEJ. W skali liniowej
-    odleglosci sa zdominowane przez warstwy wysokocisnieniowe: krok nad P_ref jest wielokrotnie
-    wiekszy niz pod nim, wiec "najblizsza" warstwa systematycznie wypada ponizej P_ref.
+    The pressure grid is LOGARITHMIC (np.geomspace / np.logspace, 1e-6..100 bar over 100 layers).
+    Was: nearness computed as argmin |P - P_ref| on a LINEAR scale, which is dominated by the
+    high-pressure layers, so the "nearest" layer systematically fell below P_ref.
 
-    Dla dzisiejszej siatki i P_ref = 10 bar oba kryteria wskazuja TEN SAM indeks (87 dla siatki
-    repo, 12 dla tutorialowej), wiec zadna raportowana liczba sie nie zmienia. Poprawka jest
-    strukturalna: przy innym P_ref (albo innej liczbie warstw) kryteria by sie rozjechaly, a
-    wielkosci nazwane "r at P_ref" i "H at P_ref" musza dotyczyc warstwy najblizszej w tej metryce,
-    w ktorej siatka jest rownomierna.
+    For today's grid and P_ref = 10 bar both criteria pick the SAME index (87 for the repo grid,
+    12 for the tutorial one), so no reported number changes. The fix is structural: a different
+    P_ref (or layer count) would make the two criteria diverge, and "r at P_ref" / "H at P_ref"
+    must name the layer nearest in the metric in which the grid is uniform.
     """
     P = np.asarray(P, dtype=np.float64)
     with np.errstate(divide="ignore", invalid="ignore"):
@@ -94,9 +91,9 @@ def nearest_log_pressure_index(P: np.ndarray, P_ref: float) -> int:
 # STAGE 0
 
 def expected_opacity_filename(database: str, version: str) -> str | None:
-    """Plik, ktory POSEIDON FAKTYCZNIE otwiera dla danej pary (opacity_database, database_version).
+    """The file POSEIDON ACTUALLY opens for a given (opacity_database, database_version) pair.
 
-    Odwzorowanie przepisane z zainstalowanego POSEIDON 1.4.0, absorption.py:781-802:
+    Mapping copied from the installed POSEIDON 1.4.0, absorption.py:781-802:
         High-T    + '1.3' -> opacity/Opacity_database_v1.3.hdf5
         High-T    + '1.2' -> opacity/Opacity_database_v1.2.hdf5
         High-T    + '1.0' -> opacity/Opacity_database_v1.0.hdf5
@@ -110,7 +107,7 @@ def expected_opacity_filename(database: str, version: str) -> str | None:
 
 
 def repo_opacity_request() -> tuple[str, str]:
-    """Ktora baze i wersje zamawia backend repo. Fallback = wartosci z constants.py na 2026-07."""
+    """Which database and version the repo's backend requests. Fallback = constants.py values as of 2026-07."""
     try:
         sys.path.insert(0, str(A.REPO))
         from data.crossgen_biosignatures.constants import (
@@ -151,13 +148,11 @@ def stage0() -> dict:
         if opac.exists():
             files = sorted(p.name for p in opac.glob("*.hdf5"))
             out["opacity_files"] = files
-            # Wczesniej: any("high" in f.lower() for f in files). To byl FALSZYWY BLOKER, i to
-            # odwrocony: POSEIDON dla opacity_database="High-T" otwiera plik
-            # Opacity_database_v1.3.hdf5 (absorption.py:784,788), w ktorego nazwie slowa "high"
-            # NIE MA w ogole. Na POPRAWNIE zainstalowanych danych check zglaszal wiec brak bazy
-            # High-T, czyli podtrzymywal hipoteze H2 dokladnie w sytuacji, ktora ja obala — i
-            # odwrotnie, dowolny plik z "high" w nazwie (np. Opacity_high_res_test.hdf5) zdejmowal
-            # blokera bez zadnego zwiazku z tym, co backend laduje.
+            # Previously: any("high" in f.lower() for f in files) — a FALSE blocker, and an inverted
+            # one: opacity_database="High-T" opens Opacity_database_v1.3.hdf5 (absorption.py:784,788),
+            # whose name contains no "high" at all. So on a correctly installed dataset the check
+            # reported a missing High-T database exactly where the data refute it — and conversely,
+            # any file with "high" in its name cleared the blocker regardless of what the backend loads.
             out["high_T_database_present"] = bool(want and want in files)
             if want and not out["high_T_database_present"]:
                 out["blockers"].append(
@@ -202,11 +197,11 @@ def build_repo_objects(sample: dict):
                        T_eff=FIXED_STAR_TEMPERATURE_K, log_g=FIXED_STAR_LOG_G_CGS,
                        Met=FIXED_STAR_METALLICITY, stellar_grid="blackbody", wl=wl)
     r_p_m = float(sample["planet_radius_rjup"]) * JUPITER_RADIUS_M
-    # NIE "naprawiaj" d na parseki. Recenzja zarzucila blad jednostki; zarzut jest FALSZYWY.
-    # W zainstalowanym POSEIDON 1.4.0, core.py:337 docstring create_planet mowi wprost
-    # "d (float): Distance to system (m)", a a_p analogicznie "(m) -- NOT in AU". Kod podaje
-    # metry (PC * PARSEC_M, AU * 1.495978707e11) i jest poprawny; zamiana na parseki wprowadzilaby
-    # blad rzedu 3e16.
+    # Do NOT "fix" d to parsecs. A review alleged a unit error; the allegation is FALSE. In the
+    # installed POSEIDON 1.4.0, the create_planet docstring at core.py:337 states plainly
+    # "d (float): Distance to system (m)", and a_p likewise "(m) -- NOT in AU". The code passes
+    # metres (PC * PARSEC_M, AU * 1.495978707e11) and is correct; switching to parsecs would
+    # introduce an error of order 3e16.
     planet = create_planet(planet_name=str(sample["sample_id"]), R_p=r_p_m,
                            log_g=float(sample["log_g_cgs"]), T_eq=float(sample["temperature_k"]),
                            d=FIXED_SYSTEM_DISTANCE_PC * PARSEC_M,
@@ -282,7 +277,7 @@ def stage1(cfg: dict, sample: dict) -> dict:
                     entry["scale_height_is_constant"] = bool(np.allclose(H, H[0], rtol=1e-9))
                     entry["extent_over_H"] = float((np.nanmax(r) - np.nanmin(r)) / np.median(H))
                     if len(H_full) == len(r) and j is not None:
-                        # ten sam indeks warstwy co wyzej, nie druga niezalezna kopia argmina
+                        # same layer index as above, not a second independent argmin
                         entry["scale_height_at_P_ref_km"] = float(H_full[j] / 1e3)
 
             if "X" in atm:

@@ -100,9 +100,9 @@ def main() -> None:
           f"sign agreement: {sign_agreement}   converged: {converged}")
     for i in issues:
         print(f"   - {i}")
-    # Galaz PASS MUSI istniec, inaczej check jest niefalsyfikowalny w strone spelnienia kryterium:
-    # `criterion=` definiuje warunek PASS (bramka zbiezna AND znaki zgodne), a poprzednia wersja
-    # w najlepszym razie zwracala WARN, wiec kryterium nie moglo zostac spelnione zadnymi danymi.
+    # A PASS branch MUST exist, otherwise the check is unfalsifiable in the direction of meeting the
+    # criterion: `criterion=` defines the PASS condition (gate converged AND signs agree), yet the
+    # previous version returned WARN at best, so no data could ever satisfy it.
     if converged and sign_agreement:
         _status = "PASS"
     elif (zero_init and not converged) or not sign_agreement:

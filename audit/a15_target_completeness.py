@@ -43,20 +43,20 @@ R_SUN_M = 6.957e8
 
 
 def posterior_slope(max_planets: int) -> dict:
-    """Kurs wymiany T -> abundancja, w dex na 100 K, z posteriorow referencyjnych.
+    """Exchange rate T -> abundance, in dex per 100 K, from the reference posteriors.
 
-    To NIE to samo co `posterior_coupling`: tam liczymy wspolczynniki KORELACJI (kowariancja
-    znormalizowana przez sd), tu NACHYLENIE regresji wazonej:
+    NOT the same as `posterior_coupling`: that computes CORRELATION coefficients (covariance
+    normalised by sd); this computes the weighted regression SLOPE:
 
-        nachylenie = Cov_w(T, log10 X) / Var_w(T),   potem x100  ->  dex / 100 K
+        slope = Cov_w(T, log10 X) / Var_w(T), then x100 -> dex / 100 K
 
-    Blok dodany 2026-07-28, bo liczby cytowane w §K9(b) i §K9(g) raportu (0,359 / 0,360;
-    p90 1,002; 2955 par; mediana T 913 K; podzial zimna/goraca 0,451 / 0,282) NIE ISTNIALY
-    w zadnym payloadzie — byly obliczeniami ad hoc, i to DWOMA ROZNYMI: 0,359 odtwarza sie
-    na 600 planetach (cap), 0,360 na 591. Na wszystkich 663 dostepnych kurs wynosi 0,352.
+    Added 2026-07-28: the numbers cited in report SS K9(b)/K9(g) (0.359 / 0.360; p90 1.002;
+    2955 pairs; median T 913 K; cold/hot split 0.451 / 0.282) existed in NO payload — they were
+    ad hoc calculations, from TWO different runs: 0.359 reproduces at 600 planets (capped), 0.360
+    at 591. Over all 663 available planets the rate is 0.352.
 
-    Wielkosc sluzy do porownania z forma zamknieta `Dlog X = -(N/ln10) * eps/(1+eps)`
-    (§K9(g)) — dla N=7 daje 0,333, czyli iloraz zmierzone/teoria = 1,06.
+    Compared against the closed form `Dlog X = -(N/ln10) * eps/(1+eps)` (K9(g)): for N=7 this
+    gives 0.333, i.e. measured/theory ratio = 1.06.
     """
     import h5py
     gt = A.adc_root() / "TrainingData/Ground Truth Package"
@@ -88,16 +88,16 @@ def posterior_slope(max_planets: int) -> dict:
                         continue
                     s = cov[1, j] / var_T * 100.0
                     slopes.append(s)
-                    slope_T.append(float((w @ tr)[1]))   # temperatura TEJ pary, nie z pozycji
+                    slope_T.append(float((w @ tr)[1]))   # temperature of THIS pair, not positional
                     per_gas[g].append(s)
             if max_planets and n_planets >= max_planets:
                 break
 
     sl = np.abs(np.array(slopes))
     med_T = float(np.median(temps))
-    # podzial po temperaturze przypisanej DO PARY. Wczesniejsza wersja uzywala
-    # np.repeat(temps, 5)[:len(slopes)], co rozjezdza sie, gdy ktorakolwiek para wypadnie
-    # przez zamrozone sd — ta sama kruchosc indeksowania pozycyjnego, ktora zarzucamy a05.
+    # Split on the temperature attached TO THE PAIR. An earlier version used
+    # np.repeat(temps, 5)[:len(slopes)], which drifts out of alignment as soon as any pair is
+    # dropped for frozen sd — the same positional-indexing fragility we charge a05 with.
     cold = [s for s, tt in zip(slopes, slope_T) if tt < med_T]
     hot = [s for s, tt in zip(slopes, slope_T) if tt >= med_T]
     mc = float(np.median(np.abs(cold))) if cold else float("nan")
@@ -151,8 +151,8 @@ def posterior_coupling(max_planets: int) -> dict:
     def med_abs(i, j):
         v = Cs[:, i, j]
         v = v[np.isfinite(v)]
-        if len(v) == 0:                       # wszystkie planety mialy zamrozone sd na tej parze
-            return (float("nan"),) * 4        # np.percentile([]) rzuca IndexError, nie zwraca nan
+        if len(v) == 0:                       # every planet had a frozen sd on this pair
+            return (float("nan"),) * 4        # np.percentile([]) raises IndexError, returns no nan
         return float(np.median(np.abs(v))), float(np.median(v)), float(np.percentile(v, 10)), float(np.percentile(v, 90))
 
     out = {"n_planets": len(Cs), "per_gas": {}}
@@ -186,15 +186,18 @@ def adc_experiments(n_train: int) -> dict:
 
     def build(split, n=None):
         ids = A.adc_split_ids(split)
-        if n:
+        # `is not None`, not `if n:` — a truthiness test on an int would make `--n-train 0` SILENTLY
+        # mean "all rows" instead of zero. The same bug existed in `a26` and was fixed there;
+        # `main()` now rejects 0 outright, so this branch has no special case.
+        if n is not None:
             ids = ids[:n]
         with h5py.File(A.adc_root() / "TrainingData/SpectralData.hdf5", "r") as h:
             S = np.stack([h[f"Planet_{p}"]["instrument_spectrum"][:] for p in ids]).astype(np.float64)
             N = np.stack([h[f"Planet_{p}"]["instrument_noise"][:] for p in ids]).astype(np.float64)
         ref = S.mean(axis=1, keepdims=True)
         a = aux.loc[ids]
-        # clip jak w a26:117 i audit_lib:289 — dzis bit-identyczne (0 zer, 0 ujemnych, 0 NaN
-        # we wszystkich 7 kolumnach AuxillaryTable), ale bez tego -inf/NaN wysadza HistGBR
+        # clip as in a26_baseline_ladder.py:321 and audit_lib.py:338 — today bit-identical (0 zeros,
+        # 0 negatives, 0 NaN across all 7 AuxillaryTable columns), but without it -inf/NaN blows up HistGBR
         def lg(col):
             return np.log10(np.clip(a[col].to_numpy(dtype=np.float64), 1e-12, None))
         af = np.column_stack([lg("star_distance"), lg("star_mass_kg"),
@@ -316,19 +319,33 @@ def crossgen() -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    # 0 = wszystkie planety przechodzace walidacje ksztaltu. W holdoucie ADC jest 4143 planet,
-    # wszystkie z blokiem tracedata, ale tylko 663 ma macierz 7-kolumnowa. Poprzedni domyslny
-    # cap 600 wyrzucal 63 z nich (9,5%) bez uzasadnienia i zmienial kurs z 0,352 na 0,359.
+    # 0 = every planet that passes shape validation. The ADC holdout has 4143 planets, all with a
+    # tracedata block, but only 663 carry a 7-column matrix. The previous default cap of 600 threw
+    # away 63 of them (9.5%) for no stated reason and moved the rate from 0.352 to 0.359.
     ap.add_argument("--max-planets", type=int, default=0,
                     help="0 = wszystkie dostepne (663); wartosc >0 ogranicza probke")
     ap.add_argument("--n-train", type=int, default=12000)
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
+    # `--n-train 0` has no valid meaning: zero rows will not train a HistGBM, and previously (with
+    # `if n:` in `build`) it SILENTLY meant "all rows". Rejected outright, as in `a26`.
+    if args.n_train <= 0:
+        ap.error("--n-train musi byc > 0 (zero wierszy nie wytrenuje modelu)")
 
     payload = {
         "model_targets": A.TARGETS,
         "benchmark_targets": TRACE_COLS,
         "n_predicted": len(A.TARGETS), "n_required": len(TRACE_COLS),
+        # The headline experiment's sample size MUST be in the record: the figure 12 000 is cited in
+        # K9(c) as the budget of both conditioning arms, and without this field it had to be taken
+        # from the flag's default in the code — i.e. ASSUMING the run did not override it.
+        "sampling": {
+            "adc_n_train": int(args.n_train),
+            "adc_n_train_selection": "prefix of the split id list (ids[:n]), NOT a random subsample",
+            "adc_learner": "HistGradientBoostingRegressor(max_iter=250, random_state=0), both arms",
+            "max_planets": int(args.max_planets),
+            "max_planets_meaning": "0 = every holdout planet carrying a 7-column trace (663)",
+        },
         "posterior_coupling": posterior_coupling(args.max_planets),
         "posterior_slope": posterior_slope(args.max_planets),
         "adc": adc_experiments(args.n_train),
@@ -361,18 +378,16 @@ def main() -> None:
           f"corr(T_eq_from_aux, T)={cg['corr_Teq_from_aux_with_true_T']:+.4f} -> no aux route; "
           f"spectrum R2={cg['predictability_from_spectrum']['temperature_k']['r2']:.3f}, predicted by NOBODY")
 
-    # Status realizuje OBIE galezie kryterium. Poprzednia wersja porownywala dwie STALE
-    # (n_predicted=5, n_required=7), wiec byla tautologia: check nie mogl zwrocic PASS przy
-    # zadnych danych, a cala analiza sprzezen i retrievability nie wplywala na werdykt.
+    # The status implements BOTH branches of the criterion. The previous version compared two
+    # CONSTANTS (n_predicted=5, n_required=7) and was therefore a tautology: the check could not
+    # return PASS on any data, and the coupling / retrievability analysis did not affect the verdict.
     #
-    # Galaz 1: model przewiduje pelny wektor benchmarku.
-    # Galaz 2: pominiete parametry sa JEDNOCZESNIE slabo sprzezone i wyznaczone przez wejscie.
-    #          Progi zadeklarowane tu, nie dobrane po wyniku:
-    #            - sprzezenie T-gaz nie moze przewyzszac sprzezenia gaz-gaz bardziej niz 1,5x
-    #              (gdyby przewyzszalo, T nosi informacje, ktorej gazy same nie niosa),
-    #            - |r| w parze pominietych (R_p, T) <= 0,30,
-    #            - R^2 odtworzenia kazdego pominietego parametru z wejscia >= 0,95 na OBU zbiorach
-    #              (bo model przenoszony miedzy nimi musi miec te informacje w obu).
+    # Branch 1: the model predicts the full benchmark vector.
+    # Branch 2: the omitted parameters are BOTH weakly coupled (thresholds declared here, not picked
+    #           after seeing the result: T-gas coupling <= 1.5x the gas-gas coupling, |r| for the
+    #           (R_p, T) pair <= 0.30) AND input-determined: R^2 from the spectrum >= 0.95 on `cg`
+    #           (the cross-generator set) — NOT on both sets: ADC retrievability (adc_experiments) is
+    #           computed and reported, but does not enter this threshold.
     pc, cg = payload["posterior_coupling"]["summary"], payload["crossgen"]["predictability_from_spectrum"]
     full_vector = payload["n_predicted"] >= payload["n_required"]
     weakly_coupled = (pc["temperature_over_gasgas_ratio"] <= 1.5

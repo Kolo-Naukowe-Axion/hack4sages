@@ -34,13 +34,11 @@ CHECK = A.Check(
     criterion="validation and holdout selectors differ AND row overlap is zero in every package",
 )
 
-# Bylo: lista zawierala TAUREX_VALIDATION_GENERATOR / TAUREX_VALIDATION_SPLIT, ktore w repo NIE
-# ISTNIEJA — kod uzywa TAUREX_VAL_GENERATOR / TAUREX_VAL_SPLIT
-# (models/taurex_exobiome/dataset.py:55-56, models/taurex_exobiome_without_quant/dataset.py:58-59).
-# Skutek: dla OBU flagowych pakietow validation_selector wychodzil [None, None], warunek na :82
-# nie byl nawet oceniany, a payload pokazywal "issues: []" — test wygladal na wykonany i zdany,
-# a byl PUSTY. Dlatego nizej dochodzi jawny warunek "selektor nierozstrzygalny -> problem":
-# milczace zero problemow nie moze byc odpowiedzia, gdy nie odczytano selektora.
+# Previously: the list held only TAUREX_VALIDATION_GENERATOR/SPLIT, which do not exist in the repo —
+# the code uses TAUREX_VAL_GENERATOR/SPLIT (taurex_exobiome/dataset.py:55-56,
+# _without_quant/dataset.py:58-59). Effect: validation_selector came out [None, None] for both flagship
+# packages, the condition at :123 was never evaluated, and the payload showed "issues: []" — the test
+# looked passed but was empty. Hence the explicit "undecidable selector -> problem" branch below.
 SELECTOR_KEYS = ["SOURCE_TRAIN_GENERATOR", "SOURCE_TRAIN_SPLIT", "SOURCE_VALIDATION_GENERATOR",
                  "SOURCE_VALIDATION_SPLIT", "SOURCE_HOLDOUT_GENERATOR", "SOURCE_HOLDOUT_SPLIT",
                  "TAUREX_TRAIN_GENERATOR", "TAUREX_TRAIN_SPLIT",
@@ -49,8 +47,8 @@ SELECTOR_KEYS = ["SOURCE_TRAIN_GENERATOR", "SOURCE_TRAIN_SPLIT", "SOURCE_VALIDAT
                  "TAUREX_HOLDOUT_GENERATOR", "TAUREX_HOLDOUT_SPLIT",
                  "EXCLUDED_GENERATORS"]
 
-# Pakiety, dla ktorych brak selektorow to fakt do zaraportowania, a nie powod do pominiecia.
-# Bylo: `if not found: continue` wypadalo 10 z 13 katalogow w models/ bez sladu w payloadzie.
+# Missing selectors are a fact to report, not a reason to skip.
+# Previously: `if not found: continue` dropped 10 of 13 directories with no trace in the payload.
 SELECTOR_ALIASES = {
     "validation_generator": ["SOURCE_VALIDATION_GENERATOR", "TAUREX_VAL_GENERATOR",
                              "TAUREX_VALIDATION_GENERATOR"],
@@ -98,7 +96,7 @@ def main() -> None:
             if p.exists():
                 found.update(literals(p))
         if not found:
-            # raportujemy, czego NIE zbadano — pominiecie bez sladu jest nieodroznialne od zdania testu
+            # report what was NOT examined — a traceless skip is indistinguishable from a passed test
             skipped_packages.append({"package": pkg.name,
                                      "reason": "brak stalych selektorow w constants.py / dataset.py",
                                      "files_present": [f for f in ("constants.py", "dataset.py")
@@ -117,8 +115,8 @@ def main() -> None:
                                            ("holdout_generator", hg), ("holdout_split", hs))
                        if v is None]
         if undecidable:
-            # Selektor nierozstrzygalny to BRAK ODPOWIEDZI, nie odpowiedz "rozne". Wczesniej
-            # `if val[0] is not None` cicho przeskakiwalo caly test dla tego pakietu.
+            # An undecidable selector is NO ANSWER, not the answer "they differ". Previously
+            # `if val[0] is not None` silently skipped the whole test for such a package.
             entry["issues"].append(
                 f"selektory nierozstrzygalne ({', '.join(undecidable)}) — nie da sie orzec, czy "
                 f"validation i holdout sa rozne; odczytane stale: {sorted(found)}")
@@ -169,10 +167,8 @@ def main() -> None:
                    "duplicate_sample_ids": int(df["sample_id"].duplicated().sum()),
                    "in_distribution_test_split_exists": bool(
                        any(k[0] == "tau" and k[1] == "test" for k in ids))}
-        # Bylo: pairwise_overlap i duplicate_sample_ids liczone i NIGDY nieporownane z zerem, choc
-        # criterion= obiecuje "row overlap is zero in every package". Pomiar, ktory nie moze zmienic
-        # werdyktu, nie jest testem. Dzis zmierzone: wszystkie 3 przeciecia 0, 0 duplikatow —
-        # warunek jest spelniony, ale od teraz jest sprawdzany.
+        # Previously: computed but never compared against zero, even though criterion= requires it —
+        # a measurement that cannot change the verdict is not a test. Now: 3 overlaps = 0, 0 duplicates.
         nonzero = {k: v for k, v in overlap["pairwise_overlap"].items() if v > 0}
         overlap["pairwise_overlap_all_zero"] = not nonzero
         overlap["nonzero_pairs"] = nonzero

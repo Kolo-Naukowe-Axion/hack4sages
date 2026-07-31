@@ -149,12 +149,12 @@ def main() -> None:
         if "error" in r:
             print(f"  {key:8} {r['error']}")
             continue
-        print(f"  {key:8} ({'ta sama sciezka kodu' if r['meta']['same_code_path'] else 'inne device/dtype'})")
+        print(f"  {key:8} ({'same code path' if r['meta']['same_code_path'] else 'different device/dtype'})")
         for s, v in r["by_scale"].items():
             print(f"    scale={s}  max|diff|={v['max_abs_diff']:.3e}  p99={v['p99_abs_diff']:.3e}  "
-                  f"wiersze>tol={v['rows_over_tolerance']}/{v['n_rows']}  "
-                  f"mRMSE rekon/ref = {v['mrmse_reconstruction']:.6f}/{v['mrmse_reference']:.6f}")
-        print(f"    najlepsza skala: {r['best_matching_scale']}")
+                  f"rows>tol={v['rows_over_tolerance']}/{v['n_rows']}  "
+                  f"mRMSE recon/ref = {v['mrmse_reconstruction']:.6f}/{v['mrmse_reference']:.6f}")
+        print(f"    best-matching scale: {r['best_matching_scale']}")
     print(f"\n  {payload['verdict']}")
 
     CHECK.emit("PASS" if ok else "FAIL", payload,

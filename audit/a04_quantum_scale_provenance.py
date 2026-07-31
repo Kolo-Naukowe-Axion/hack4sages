@@ -31,9 +31,9 @@ CHECK = A.Check(
     criterion="some swept scale reproduces a published number AND it equals the selection-time scale from history.csv",
 )
 
-# REPORTED = liczby faktycznie opublikowane (artifact holdout/validation_metrics.json).
-# MAC_REPORTED = ponowna ewaluacja tego samego checkpointu na Macu; NIE jest liczba opublikowana.
-# Trafienie tylko w MAC_REPORTED nie jest ustaleniem prowenansu liczby z raportu.
+# REPORTED = numbers actually published (artifact holdout/validation_metrics.json).
+# MAC_REPORTED = re-evaluation of the same checkpoint on Mac; NOT a published number.
+# Matching only MAC_REPORTED does not establish the provenance of the number in the report.
 REPORTED = {"holdout": 0.2993761897087097, "validation": 0.29361358284950256}
 MAC_REPORTED = {"holdout": 0.29869264364242554, "validation": 0.29482102394104004}
 
@@ -68,12 +68,6 @@ def main() -> None:
         for s in scales:
             pred = A.exobiome_predict(model, aux, spectra, target_scaler, s)
             m = A.mrmse(y, pred)
-            # Klucze formatowane na 6 miejsc PO ROZWAZENIU zarzutu o zaokraglenie i ODRZUCENIU go:
-            # sprawdzane skale sa ilorazami malych liczb calkowitych (0, 1/4, 1/2, 2/3, 1), wiec
-            # blad zaokraglenia do 6 miejsc wynosi <= 5e-7, a jedyne porownanie kluczy uzywa
-            # tolerancji 1e-6 (linia ponizej z `abs(float(h) - selection_scale) < 1e-6`).
-            # 5e-7 < 1e-6 zawsze, wiec kolizji ani chybienia byc nie moze. NIE zmieniaj na .12f
-            # "dla bezpieczenstwa" — zmieni klucze w kazdym zapisanym payloadzie bez zysku.
             table[f"{s:.6f}"] = {"mrmse": m,
                                  "per_gas": dict(zip(A.TARGETS, A.per_gas_rmse(y, pred).tolist())),
                                  "matches_reported": bool(abs(m - REPORTED[split]) < args.tol),
@@ -81,24 +75,13 @@ def main() -> None:
             print(f"  {split:11} scale={s:.4f} mRMSE={m:.6f}"
                   + ("  <== reported" if table[f'{s:.6f}']['matches_reported'] else "")
                   + ("  <== mac re-eval" if table[f'{s:.6f}']['matches_mac_reeval'] else ""))
-        # Poprzednio jedno pole `scales_matching_a_published_number` scalalo trafienia w REPORTED
-        # i w MAC_REPORTED. Bylo mylace az do przeklamania: `matches_reported` jest False dla
-        # WSZYSTKICH pieciu skal na oba splity, wiec kazde trafienie na tej liscie pochodzi
-        # wylacznie z ponownej ewaluacji na Macu — a nazwa pola sugerowala, ze liczba z raportu
-        # zostala odtworzona. Rozdzielone, zeby brak odtworzenia liczby OPUBLIKOWANEJ byl widoczny
-        # wprost w payloadzie, bez porownywania piecioelementowych slownikow.
         scales_reproducing_published = [k for k, v in table.items() if v["matches_reported"]]
         scales_reproducing_mac_only = [k for k, v in table.items()
                                        if v["matches_mac_reeval"] and not v["matches_reported"]]
         hits = scales_reproducing_published + scales_reproducing_mac_only
         gate_off = table[f"{0.0:.6f}"]["mrmse"] if f"{0.0:.6f}" in table else None
-        # Straznik na skale 1.0, tak jak przy 0.0 i selection_scale. --scales jest parametrem CLI,
-        # wiec `--scales 0.0,0.5` bez tego wywalalo KeyError: '1.000000' juz po pelnym sweepie.
         one_key = f"{1.0:.6f}"
         best_scale = min(table, key=lambda k: table[k]["mrmse"])
-        # `gate_off is not None`, nie `if gate_off`: mRMSE == 0.0 to falsy float, wiec test
-        # prawdziwosciowy raportowalby None ("nie zmierzono") dla modelu doskonalego przy scale=0,
-        # czyli dokladnie w przypadku, w ktorym wklad sciezki kwantowej bylby najciekawszy.
         payload["splits"][split] = {
             "n_rows": int(len(ids)), "reported": REPORTED[split], "mac_reported": MAC_REPORTED[split],
             "sweep": table,
@@ -115,12 +98,6 @@ def main() -> None:
             "reported_is_best": bool(abs(table[best_scale]["mrmse"] - REPORTED[split]) < args.tol),
         }
         if not hits:
-            # Poprzednio pusta `hits` po prostu nie dopisywala nic do `mismatches`, wiec sweep, w
-            # ktorym ZADNA skala nie odtwarza zadnej opublikowanej liczby, konczyl sie PASS —
-            # check "potwierdzal prowenans", nie znajdujac go. To poprawka teoretyczna: ostatni
-            # przebieg dal FAIL z innego powodu (skala 1.0 odtwarza re-ewaluacje mac, a selekcja
-            # szla na 0.5), ale rozgalezienie na pustej liscie jest wlasnie tym rodzajem cichego
-            # PASS, ktorego audyt ma nie produkowac.
             not_reproduced.append({
                 "split": split, "swept_scales": sorted(table),
                 "reported": REPORTED[split], "mac_reported": MAC_REPORTED[split],

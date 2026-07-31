@@ -27,10 +27,10 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audit_lib as A  # noqa: E402
 
-# Ulamek wartosci kalibracyjnej, ponizej ktorego uznajemy, ze widma nie niosa pelnej zadeklarowanej
-# sigmy. 0.80 zadeklarowane Z GORY, nie dobrane po wyniku: przy kalibracji 1.0930 daje prog 0.8744,
-# a zmierzona mediana ADC to 0.7569, czyli 13% ponizej progu. Dla porownania: gdyby prog wynosil
-# 0.70, ADC przeszloby — wiec wybor ulamka MA znaczenie i musi byc jawny.
+# Fraction of the calibration value below which we judge the spectra not to carry the full declared
+# sigma. 0.80 is declared UP FRONT, not tuned to the result: with calibration 1.0930 it gives a
+# threshold of 0.8744, and the measured ADC median is 0.7569, i.e. 13% below the threshold. For
+# contrast: at a fraction of 0.70 the ADC would pass — so the choice MATTERS and must be explicit.
 CALIBRATION_FRACTION = 0.80
 
 CHECK = A.Check(
@@ -88,14 +88,13 @@ def main() -> None:
     payload["adc_sigma_is_per_bin"] = bool(np.std(G, axis=1).mean() > 0)
 
     d = payload["adc_instrument_spectrum"]
-    # Prog WYLICZANY z ramienia kalibracyjnego, nie zalozony na 1.0. Docstring tego pliku zarzuca
-    # poprzedniej probie zespolu, ze "assumed a threshold" — a poprzednia wersja tego kodu robila
-    # dokladnie to samo: liczyla oba ramiona kalibracji i nigdy ich nie uzywala, wracajac do 1.0.
-    #
-    # Kalibracja daje odpowiedz na pytanie "ile ta statystyka pokazuje, gdy szum JEST dokladnie
-    # 1.0 sigma" — na tych danych 1.093, czyli powyzej 1.0, bo struktura widma dodaje wariancje
-    # drugich roznic. Prog to ulamek tej wartosci: dopuszczamy, ze widma ADC sa gladsze niz tau,
-    # ale nie ze niosa istotnie mniej szumu.
+    # Threshold DERIVED from the calibration arm, not assumed to be 1.0. This file's docstring faults
+    # the team's earlier attempt for having "assumed a threshold" — and the previous version of this
+    # code did exactly that: it computed both calibration arms, never used them, and fell back to 1.0.
+    # The calibration answers "what does this statistic read when the noise IS exactly 1.0 sigma" —
+    # on these data 1.093 (above 1.0, because spectral structure adds second-difference variance).
+    # The threshold is a fraction of that value: we allow the ADC spectra to be smoother than tau,
+    # but not to carry materially less noise.
     cal = payload.get("calibration_tau_noisy")
     if cal and np.isfinite(cal.get("median", float("nan"))):
         threshold = CALIBRATION_FRACTION * cal["median"]

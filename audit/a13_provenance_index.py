@@ -1,7 +1,7 @@
 """A13 — Does every published number have a backing artifact?
 
-Proves/disproves findings P6 and U8. This is the core of the repo inventory ("inwentaryzacja"):
-for each number that appears in a report, figure script or README, resolve it to
+Proves/disproves findings P6 and U8. This is the core of the repo inventory: for each number
+that appears in a report, figure script or README, resolve it to
 (config + seed + weights or predictions) or mark it unbacked.
 
 Rules applied:
@@ -84,20 +84,20 @@ DOCS = ["docs/VERIFICATION.md", "docs/publication_plan.tex", "docs/exobiome_cont
         "docs/delta_margin_methodology.tex", "docs/raport_lipiec_szkic.tex",
         "reports/taurex_model_comparison.md", "README.md"]
 
-# Bylo: lista DOCS byla JEDYNYM zrodlem wiedzy o dokumentach — w checku, ktorego tematem jest
-# kompletnosc. Dwa konkretne skutki:
-#   (1) 4 z 5 powodow FAIL to byly pliki .tex, ktore ISTNIEJA, tylko w innym worktree
-#       (.claude/worktrees/elastic-blackwell-f063b8/docs/) — czyli bookkeeping worktree'ow
-#       raportowany jako "missing_documents";
-#   (2) odwrotnie: docs/METHODOLOGICAL_AUDIT.md (raport glowny), STATUS.md, TODO_UMOWA.md,
-#       HANDOFF_PROMPT.md, LITERATURA.md, DZIENNIK_KONSULTACJI.md sa nietrackowane i byly POZA
-#       lista DOCS, wiec raport glowny nie byl objety wlasnym kryterium.
-# Teraz dokumenty sa ENUMEROWANE z dysku, a lista DOCS zostaje tylko jako zestaw "musi istniec".
+# Previously: the DOCS list was the ONLY source of knowledge about documents — in a check whose
+# subject is completeness. Two concrete effects:
+#   (1) 4 of 5 FAIL reasons were files that DO EXIST (3x .tex + docs/exobiome_context.md), just in
+#       another worktree (.claude/worktrees/elastic-blackwell-f063b8/docs/) — i.e. worktree
+#       bookkeeping reported as "missing_documents";
+#   (2) conversely, docs/METHODOLOGICAL_AUDIT.md (the main report) and docs/LITERATURA.md sat
+#       outside DOCS, so the check's own criterion never covered them; LITERATURA.md is still
+#       untracked, METHODOLOGICAL_AUDIT.md is now in git.
+# Now documents are ENUMERATED from disk, and DOCS remains only as a "must exist" set.
 DOC_SCAN_GLOBS = ("docs/**/*.md", "docs/**/*.tex", "reports/**/*.md", "reports/**/*.tex")
-# Wykluczenia jawne, bo kazde jest decyzja, nie przeoczeniem:
-#   reports/audit/ = wlasne rekordy tego harnessu, nadpisywane co przebieg — to zapis pomiaru,
-#   nie dokument stawiajacy teze; objecie ich kryterium "tracked" znaczyloby, ze check nie moze
-#   przejsc nigdy po wlasnym uruchomieniu.
+# Exclusions are explicit, because each one is a decision rather than an oversight:
+#   reports/audit/ = this harness's own records, overwritten every run — a measurement log, not a
+#   document asserting a claim; holding them to the "tracked" criterion would mean the check can
+#   never pass after running itself.
 DOC_SCAN_EXCLUDE_PREFIXES = ("reports/audit/",)
 
 
@@ -108,11 +108,11 @@ def tracked(rel: str, root: Path | None = None) -> bool:
 
 
 def worktree_roots() -> list[Path]:
-    """A.REPO na pierwszym miejscu, potem pozostale worktree tego repo.
+    """A.REPO first, then the repo's other worktrees.
 
-    Sciezki dokumentow rozwiazujemy JAWNIE wobec A.REPO (glowny checkout). Gdy plik tam nie
-    istnieje, szukamy go w pozostalych worktree i to raportujemy — inaczej "missing" myli brak
-    dokumentu z tym, ze lezy w innej galezi roboczej.
+    Document paths are resolved EXPLICITLY against A.REPO (the main checkout). When a file is
+    absent there, we look for it in the other worktrees and report that — otherwise "missing"
+    would conflate an absent document with one that merely lives on a different working branch.
     """
     roots = [A.REPO]
     r = subprocess.run(["git", "-C", str(A.REPO), "worktree", "list", "--porcelain"],
@@ -126,10 +126,12 @@ def worktree_roots() -> list[Path]:
 
 
 def enumerate_docs(roots: list[Path]) -> list[dict]:
-    """Wszystkie dokumenty z dysku, z A.REPO ORAZ z worktree, w ktorym lezy ten kod audytu.
+    """All documents found on disk, from A.REPO AND from the worktree this audit code lives in.
 
-    Drugi root jest konieczny: raport glowny (docs/METHODOLOGICAL_AUDIT.md) istnieje wylacznie
-    tam i bez tego nie byl objety kryterium wlasnego checku.
+    The second root exists for the case where this file runs from a worktree other than the
+    main checkout: some report may only exist there, and without scanning it the criterion would
+    not cover the audit's own top-level report. When run from the main checkout (as here), the
+    two roots coincide and this is a no-op.
     """
     audit_root = A.AUDIT_DIR.parent.resolve()
     scan = [A.REPO] + ([audit_root] if audit_root != A.REPO.resolve() else [])
@@ -194,11 +196,11 @@ def main() -> None:
             unbacked.append(c["id"])
         if status == "backed_summary":
             summary_only.append(c["id"])
-        # Bylo: have["weights"] zbierane i nigdy nieuzyte. Skutek: noquant_poseidon dostawal
-        # backed_full przy weights=False, a a14 zglasza DOKLADNIE ten plik
-        # (reports/taurex_noquant_.../best_model_epoch059.pt) jako brakujaca sciezke -> dwa checki
-        # mowily o tym samym pliku dwie rozne rzeczy. Bez wag nie da sie powtorzyc forward passa,
-        # wiec liczba jest odtwarzalna tylko z zapisanego CSV, nie z modelu.
+        # Previously: have["weights"] was collected and never used. Effect: noquant_poseidon got
+        # backed_full with weights=False, while a14 reports EXACTLY that file
+        # (reports/taurex_noquant_.../best_model_epoch059.pt) as a missing path -> two checks said
+        # two different things about one file. Without the weights the forward pass cannot be
+        # repeated, so the number is reproducible only from the stored CSV, not from the model.
         if c.get("weights") and not have["weights"]:
             weights_absent.append({"id": c["id"], "weights": c["weights"],
                                    "also_reported_by": "a14_importability.missing_paths"})
@@ -212,8 +214,8 @@ def main() -> None:
     doc_rows = enumerate_docs(roots)
     enumerated_keys = {(d["resolved_root"], d["doc"]) for d in doc_rows}
 
-    # Lista DOCS zostaje jako zbior "ten dokument MUSI istniec", ale sciezka jest rozwiazywana
-    # jawnie wobec A.REPO, a gdy pliku tam nie ma — szukamy go w pozostalych worktree.
+    # DOCS stays as the "this document MUST exist" set, but each path is resolved explicitly
+    # against A.REPO; when the file is not there, we look for it in the other worktrees.
     elsewhere = []
     for d in DOCS:
         p = A.REPO / d
@@ -251,13 +253,12 @@ def main() -> None:
             print(f"    {e['doc']:52} -> {e['found_in'][0]['worktree']}")
 
     payload = {"claims": rows, "unbacked_or_mismatched": unbacked,
-               # WYBOR: backed_summary WCHODZI do FAIL. Uzasadnienie: criterion= mowi "every result
-               # number is recomputable from committed predictions", a backed_summary znaczy dokladnie,
-               # ze liczba jest PRZEPISANA z JSON-a i nieodtwarzalna. Bez tego, po domknieciu 4
-               # UNBACKED, check dawalby PASS majac dwie nieprzeliczalne liczby na figurze 1
-               # (sota_holdout_median 0,5523 i cnn_holdout 0,6500) — czyli PASS przeczacy wlasnemu
-               # kryterium. Alternatywa (zlagodzenie criterion= do "ma jakikolwiek artefakt") zostala
-               # odrzucona, bo oslabia teze P6, ktora wlasnie o odtwarzalnosc jest.
+               # DECISION: backed_summary DOES count towards FAIL, because criterion= says
+               # "recomputable from committed predictions" and backed_summary is a number
+               # TRANSCRIBED from a JSON. Without this the check would PASS while figure 1 carries
+               # two non-recomputable numbers (sota_holdout_median 0.5523, cnn_holdout 0.6500).
+               # Relaxing criterion= to "has any artifact at all" was rejected — it would weaken
+               # P6, which is precisely about reproducibility.
                "backed_summary_not_recomputable": summary_only,
                "declared_weights_absent": weights_absent,
                "documents": doc_rows, "n_documents": len(doc_rows),

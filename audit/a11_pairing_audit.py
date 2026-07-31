@@ -49,13 +49,13 @@ def loss_semantics() -> dict:
 QUANTUM_BRANCH_MODULES = ("projector", "quantum_block", "quantum_head", "quantum_gate")
 CONTROL_BRANCH_MODULES = ("refinement_projector", "refinement_block", "refinement_head")
 
-# Stale sprzed 2026-07-28, zostawione WYLACZNIE jako punkt odniesienia dla asercji regresji.
-# Nie wolno ich raportowac jako pomiaru — patrz komentarz w residual_branch_params().
+# Constants from before 2026-07-28, kept SOLELY as a regression-assertion reference point.
+# They must never be reported as a measurement — see the comment in residual_branch_params().
 PREVIOUSLY_HARDCODED = {"quantum_arm_total": 69434, "classical_control_arm_total": 85733}
 
 
 def _module_params(model) -> dict:
-    """Suma parametrow po modulach najwyzszego poziomu, tak jak w a06:41-43."""
+    """Sum of parameters per top-level module, same grouping as a06:41-43."""
     g: dict[str, int] = {}
     for name, p in model.named_parameters():
         top = name.split(".")[0]
@@ -64,20 +64,16 @@ def _module_params(model) -> dict:
 
 
 def residual_branch_params(ca: dict, cb: dict) -> dict:
-    """Liczba parametrow galezi rezydualnej w obu ramionach — WYLICZONA z named_parameters().
+    """Residual-branch parameter count for both arms, computed from named_parameters().
 
-    Bylo: dwie stale WPISANE w kod (69 434 i 85 733), nigdy nieporownane z zadnym modelem.
-    Pierwsza jest potwierdzona niezaleznie przez a06 (`quantum_pathway_params`), druga NICZYM —
-    a to z niej brala sie teza "23 % wiecej pojemnosci" w polu `note`, czyli caly wniosek o
-    niesparowaniu pojemnosci stal na liczbie bez zrodla. Liczba udajaca pomiar jest gorsza od
-    braku liczby, bo nie da sie jej sfalsyfikowac przebiegiem.
+    Previously: two constants hardcoded (69,434 and 85,733), never compared against any model — the
+    second one entirely unverified, yet it was the source of the "23% more capacity" claim in `note`.
+    A number that pretends to be a measurement is worse than no number: no run can falsify it.
 
-    Teraz kazde ramie jest budowane z konfiguracji SWOJEGO snapshotu i sumowane po
-    `named_parameters()`. Gdy ramienia nie da sie zbudowac, wchodzi wartosc historyczna
-    z jawnym `source: "hardcoded, unverified"` i `error` — nigdy nie udajac pomiaru.
-
-    `quantum_device` z configu (lightning.gpu) jest podmieniane na lightning.qubit: liczba
-    parametrow nie zalezy od backendu symulatora, a lightning.gpu nie jest w tym srodowisku.
+    Now: each arm is built from its own snapshot's config and summed over `named_parameters()`; if it
+    cannot be built, the historical value is used with an explicit `source: "hardcoded, unverified"`.
+    `quantum_device` (lightning.gpu) is swapped for lightning.qubit, because the parameter count does
+    not depend on the simulator backend and gpu is unavailable in this environment.
     """
     import torch
     sys.path.insert(0, str(A.REPO))
@@ -147,11 +143,10 @@ def main() -> None:
 
     pa, pb = A.REPO / args.a, A.REPO / args.b
 
-    # Bylo: brak config.json -> {} -> zero roznic -> zero confoundow -> PASS, czyli "ramiona sa
-    # sparowane" orzekane na podstawie NIEPRZECZYTANIA zadnego pliku. Udowodnione:
-    #   --a reports/typo_does_not_exist --b reports/also_not_there  ->  "0 differing fields", [PASS].
-    # Literowka w sciezce zamieniala dowod P3 w PASS. To ten sam wzorzec "brak danych = sukces",
-    # ktory naprawiono w run_all.py:73-84 i a04:73-94. Brak wejscia musi byc bledem wejscia.
+    # Previously: a missing config.json -> {} -> zero differences -> PASS, i.e. "the arms are matched"
+    # asserted without reading a single file (even a typo in the path yielded "0 differing fields", PASS).
+    # Same "missing data = success" pattern as run_all.py:73-84 and a04:100-110 — fixed the same way:
+    # a missing input must be an input error.
     load_errors = []
     for label, p in (("a", pa), ("b", pb)):
         cf = p / "config.json"
@@ -185,9 +180,10 @@ def main() -> None:
 
     confounds = {k: v for k, v in diffs.items() if not v["declared_factor"]}
 
-    # Bylo: loss_semantics() liczone i wyrzucane do payloadu, ale NIE wchodzace do statusu — a to
-    # najmocniejszy punkt P3 (jeden string loss_name="mse", dwie rozne funkcje straty). Obecnosc
-    # oba markerow jest roznica konfiguracji ukryta poza config.json, wiec nalezy do confoundow.
+    # Previously: loss_semantics() was computed and dumped into the payload but did NOT feed the
+    # status — even though it is the strongest part of P3 (one loss_name="mse" string, two different
+    # loss functions). Both markers being present is a config difference hidden outside config.json,
+    # so it belongs in the confounds.
     losses = loss_semantics()
     markers = {k: v["marker_present"] for k, v in losses.items()}
     if all(markers.values()):

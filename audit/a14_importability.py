@@ -31,14 +31,14 @@ CHECK = A.Check(
 SCAN_DIRS = ["models", "scripts", "tests"]
 
 ARTIFACT_SUFFIXES = (".pt", ".csv", ".h5", ".hdf5", ".parquet", ".npz", ".json", ".pkl", ".pth")
-# Stringi z tymi znakami to szablony/teksty pomocy, nie sciezki (np. help="default:
-# <run-dir>/best_model_by_mrmse.pt"). Wykluczenie jest jawne, bo inaczej check zglasza
-# nieistniejaca sciezke tam, gdzie autor nigdy jej nie podal.
+# Strings containing these characters are templates or help text, not paths (e.g. help="default:
+# <run-dir>/best_model_by_mrmse.pt"). The exclusion is explicit, because otherwise the check reports
+# a non-existent path where the author never supplied one.
 PLACEHOLDER_CHARS = "<>*?{}%$"
-# Korzenie, wobec ktorych rozwiazujemy stala sciezke. "" = sam A.REPO. Pozostale to korzenie
-# danych, wobec ktorych pakiety skladaja swoje stale w runtime
-# (models/ariel_winner_trace_nf/constants.py:60-66 trzyma "TrainingData/Ground Truth Package/..."
-# i dokleja DEFAULT_DATA_ROOT). Bez tego 7 poprawnych stalych wyszloby jako zepsute sciezki.
+# Roots a constant path is resolved against. "" = A.REPO itself. The rest are data roots the packages
+# join their constants against at runtime (models/ariel_winner_trace_nf/constants.py:60-66 holds
+# "TrainingData/Ground Truth Package/..." and prepends DEFAULT_DATA_ROOT). Without this, 7 correct
+# constants would come out as broken paths.
 ARTIFACT_PATH_ROOTS = ["", "data/ariel-ml-dataset", "data/full-ariel", "data/TauREx set"]
 
 
@@ -51,7 +51,7 @@ def module_exists(dotted: str) -> bool:
 
 
 def resolve_artifact_path(rel: str) -> str | None:
-    """Pierwszy korzen z ARTIFACT_PATH_ROOTS, wobec ktorego `rel` istnieje; None = nigdzie."""
+    """First root in ARTIFACT_PATH_ROOTS under which `rel` exists; None if it exists nowhere."""
     if rel.startswith("/"):
         return "<absolute>" if Path(rel).exists() else None
     for root in ARTIFACT_PATH_ROOTS:
@@ -90,13 +90,11 @@ def main() -> None:
                         broken_imports.append({"file": str(f.relative_to(A.REPO)), "line": node.lineno,
                                                "missing_module": m})
                 # Hard-coded artifact paths as string constants.
-                # BYLO: martwy kod. Jedyna galezia bylo `... and "/" not in v ...: continue`, a
-                # `continue` bylo OSTATNIA instrukcja ciala petli — czyli zadna sciezka nigdy nie
-                # trafiala do broken_paths. Druga polowa criterion= ("all hard-coded artifact paths
-                # exist") byla realizowana WYLACZNIE 6-elementowa lista reczna nizej.
-                # JEST: zbieramy stale zawierajace "/" i sufiks artefaktu i sprawdzamy istnienie.
-                # Nazwy bez "/" zostaja pominiete swiadomie (skladane w runtime z katalogiem), ale
-                # teraz sa policzone w payloadzie, zeby pominiecie bylo widoczne.
+                # Previously: dead code — the only branch ended in `continue` as the loop's last
+                # statement, so no path ever reached broken_paths and the second half of criterion=
+                # rested entirely on the manual list below. Now: constants with "/" and an artifact
+                # suffix are collected and checked for existence; names without "/" (joined at
+                # runtime) are skipped but counted in the payload, so the skip is visible.
                 if isinstance(node, ast.Constant) and isinstance(node.value, str):
                     v = node.value
                     if not v.endswith(ARTIFACT_SUFFIXES) or len(v) <= 8:

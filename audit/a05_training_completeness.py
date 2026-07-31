@@ -4,8 +4,7 @@ Proves/disproves findings K5 (ExoBiome stopped at 8/30 with a diverging trajecto
 baseline-undertraining half of K3 (NSF stopped at 79/300 on val-NLL while its mRMSE was still
 falling, checkpoint chosen from 256 rows x 16 posterior samples every 10th epoch).
 
-Pure log parsing — no model loading, runs in a second, so it can be a pre-commit gate.
-
+Pure log parsing — no model loading, runs in a second.
 PASS criterion for each run:
   (a) the run terminated by its own stopping rule (early stop fired or max_epochs reached);
   (b) the reported metric had plateaued: its minimum is NOT within the last
@@ -34,19 +33,18 @@ CHECK = A.Check(
     criterion="terminated by its own rule AND reported metric plateaued AND selection metric == reported metric AND full-split selection",
 )
 
-
-# Iloraz, ponizej ktorego uznajemy, ze harmonogram LR faktycznie zgasil uczenie. 100 zadeklarowane
-# z gory i z marginesem: w ramieniu NSF LR spada 1e-3 -> 3.90625e-6, czyli iloraz 256, a krok
-# wielkosci 1/100 poczatkowego oznacza, ze pozostale epoki nie moga juz przesunac wag na skale
-# porownywalna z pierwszymi. Prog nie jest dobrany po wyniku: gdyby wynosil 300, NSF by go nie
-# przekroczyl, wiec wybor MA znaczenie i musi byc jawny.
+# The ratio below which we consider the LR schedule to have effectively killed off learning. 100 is declared
+# upfront with a safety margin: in the NSF branch, the LR drops from 1e-3 -> 3.90625e-6, i.e., a ratio of 256, and a step
+# size of 1/100 of the initial value means the remaining epochs can no longer shift weights on a scale
+# comparable to the first ones. The threshold is not tuned post-hoc: if it were 300, NSF would not have
+# exceeded it, so the choice DOES matter and must be explicit.
 LR_COLLAPSE_FACTOR = 100.0
 
-# Ile ostatnich pomiarow metryki liczy sie jako "minimum na koncu trajektorii", czyli brak plateau.
-# 2, bo pomiar co 10 epok daje w NSF tylko 7 punktow: minimum na ostatnim albo przedostatnim z nich
-# oznacza, ze co najmniej 10-20 epok z 300 zaplanowanych wciaz poprawialo metryke i nie ma dowodu,
-# ze trajektoria sie wyplaszczyla. Przy 1 test wykrywalby tylko doslownie ostatni punkt i przegapil
-# faktyczna sytuacje NSF (minimum na 6 z 7 pomiarow).
+# How many trailing metric measurements count as "the minimum sits at the end of the trajectory",
+# i.e. no plateau. 2, because measuring every 10 epochs leaves NSF only 7 points: a minimum at the
+# last or second-to-last of them means at least 10-20 of the 300 planned epochs were still improving
+# the metric, and there is no evidence the trajectory flattened. At 1, the test would catch only the
+# literal last point and would miss NSF's actual case (minimum at measurement 6 of 7).
 IMPROVING_TAIL_MEASUREMENTS = 2
 
 
@@ -59,14 +57,6 @@ def audit_exobiome() -> dict:
     best_epoch = int(state["best_epoch"])
     last_epoch = int(hist["epoch"].max())
 
-    # Wczesniej trajektoria byla ciezta POZYCYJNIE: `val[best_epoch - 1]` jako wartosc w najlepszej
-    # epoce i `val[best_epoch:]` jako ogon po niej. Dzialalo tylko dlatego, ze w tym konkretnym
-    # history.csv epoki sa numerowane 1..8, ciagle i bez brakow (val[5] = 0.29081112 = wartosc dla
-    # epoki 6). Gdyby logowanie zaczynalo sie od 0, to przy best_epoch == 0 wyrazenie val[-1]
-    # odczytalo by CICHO OSTATNIA epoke jako "najlepsza" — czyli check zglaszalby divergencje
-    # wzgledem konca treningu zamiast wzgledem wybranego checkpointu, i to bez zadnego bledu.
-    # Ponizej te same wielkosci przez maski po kolumnie `epoch`, plus asercja ciaglosci, zeby
-    # niejawne zalozenie o numeracji przestalo byc niejawne.
     epochs = hist["epoch"].to_numpy(dtype=np.int64)
     expected = np.arange(int(epochs.min()), int(epochs.max()) + 1, dtype=np.int64)
     if not np.array_equal(epochs, expected):
@@ -148,13 +138,13 @@ def audit_nsf() -> dict:
         issues.append("point estimate is the posterior MEDIAN while the metric is RMSE; the MSE-optimal "
                       "summary is the MEAN (evaluate.py supports it) -> baseline penalised by convention")
     lrs = [h["lr"] for h in hist]
-    # Poprzednio warunkiem bylo TYLKO `lrs[-1] < lrs[0]/100`, a komunikat oskarzal o wygaszenie LR
-    # "while the comparison metric was still improving" — czyli twierdzil rzecz, ktorej warunek
-    # wcale nie sprawdzal. Zarzut mogl byc wiec podniesiony przeciw runowi, ktory zdazyl osiagnac
-    # plateau: wygaszenie LR po zbieznosci jest poprawne, a nie wada. Teraz oba czlony musza
-    # zachodzic naraz, a metryka jest ta sama, na ktorej run jest raportowany (mRMSE z train.log).
-    # Dla NSF zarzut zostaje PRAWDZIWY: LR 1e-3 -> 3.90625e-6 (iloraz 256 > 100), a minimum mRMSE
-    # wypada na 6 z 7 pomiarow (epoka 60 z 79 przebiegnietych z 300), czyli metryka wciaz spadala.
+    # Previously the condition was ONLY `lrs[-1] < lrs[0]/100`, while the message accused the run of
+    # annealing the LR "while the comparison metric was still improving" — asserting something the
+    # condition never tested. The accusation could hit a run that had in fact plateaued (annealing the
+    # LR after convergence is correct, not a defect). Now both clauses must hold at once, on the same
+    # metric the run is reported on (mRMSE from train.log). For NSF the accusation stands: LR
+    # 1e-3 -> 3.90625e-6 (ratio 256 > 100), and the mRMSE minimum falls at measurement 6 of 7
+    # (epoch 60 of the 79 run out of 300) — the metric had not plateaued.
     lr_collapsed = bool(lrs and lrs[-1] < lrs[0] / LR_COLLAPSE_FACTOR)
     lr_ratio = (lrs[0] / lrs[-1]) if (lrs and lrs[-1]) else None
     if lr_collapsed and metric_still_improving:

@@ -28,22 +28,11 @@ import audit_lib as A  # noqa: E402
 
 # (script, needs a model forward pass / heavy, fixed args always passed to this check)
 #
-# a27 i d01 byly POZA suita. To nie byla drobnostka: a27 podpiera A0.2, na ktorym stoja K3, K4 i K9,
-# wiec trzy ustalenia krytyczne opieraly sie na checku, ktory nigdy nie przeszedl przez bramke
-# exit-code i istnial tylko jako pojedynczy przebieg reczny (reports/audit/20260727/, 11:45, czyli
-# JUZ PO summary.json z 10:45 — dokladnie ten mechanizm, ktory zamknieto w run_all:73-84).
-#
-# d01 dostaje na stale `--stage 0`, a nie heavy=True, i to jest wybor:
-#   * stage 1 i 2 wymagaja importowalnego POSEIDON-a, ktorego w .venv-qml NIE MA (sprawdzone:
-#     ModuleNotFoundError). Przy `--stage auto` check i tak konczy na stage 0 ze statusem INFO,
-#     ale wynik zalezy wtedy od tego, co akurat jest zainstalowane — czyli suita przestaje byc
-#     powtarzalna miedzy maszynami;
-#   * stage 2 dodatkowo wymaga 72,1 GB opacities (zenodo 16107813), wiec nie moze byc czescia
-#     rutynowego biegu w zadnym srodowisku;
-#   * `--stage 0` jest tani (import + jeden parquet), nie laduje modelu, wiec przechodzi tez przy
-#     `--fast`; suita rejestruje wtedy DIAGNOZE SRODOWISKA, a nie przypadkowy poziom stage'a.
-# Stage 1 i 2 uruchamia sie recznie w scratch-venvie z POSEIDON-em; d01 zwraca INFO, wiec nie
-# wplywa na exit code w zadnym wariancie.
+# d01 gets a fixed `--stage 0` rather than heavy=True: stages 1/2 need POSEIDON, which is not in
+# .venv-qml (ModuleNotFoundError, verified), and stage 2 additionally needs 72.1 GB of opacities
+# (zenodo 16107813) — no variant is fit for a routine run. `--stage 0` is cheap (an import plus one
+# parquet), so it runs under `--fast` too and records the environment diagnosis rather than an
+# arbitrary stage. Stages 1/2 are run by hand in a scratch venv with POSEIDON
 SUITE = [
     ("a01_spectral_variation.py", False, ()),
     ("a02_trivial_baseline.py", False, ()),
@@ -80,7 +69,7 @@ def main() -> None:
     out = A.out_dir(args.out)
 
     def wanted(s: str, heavy: bool) -> str | None:
-        """None = brany; string = powod pominiecia. Powody ida do summary.json (patrz nizej)."""
+        """None = check is run; a string = the reason it was skipped. Reasons go into summary.json (see below)."""
         if args.fast and heavy:
             return "--fast: check laduje model"
         if args.only and not any(s.startswith(p.strip()) for p in args.only.split(",")):
@@ -106,12 +95,6 @@ def main() -> None:
         proc = subprocess.run(cmd, cwd=str(A.REPO))
         name = script[:-3]
         jf = out / f"{name}.json"
-        # Rekord liczy sie jako wynik TEGO biegu tylko wtedy, gdy check wyszedl z zerem I zapisal
-        # rekord PO starcie biegu. Bez tych dwoch warunkow padniety check byl raportowany jako
-        # sukces na podstawie STAREGO rekordu lezacego w --out. Zweryfikowane empirycznie:
-        # podrzucony rekord PASS z 2020-01-01 + a06 padniete na argparse dawalo
-        # "PASS a06_param_accounting", counts {PASS: 1, ERROR: 0}, exit 0.
-        # Tak samo powstaly re-runy a12/a13/a27 do katalogu 20260727 juz po summary.json.
         stale = None
         if jf.exists():
             rec = json.loads(jf.read_text())
@@ -139,10 +122,7 @@ def main() -> None:
                             "returncode": proc.returncode})
 
     results.sort(key=lambda r: (A.STATUS_ORDER.get(r["status"], 9), r["check"]))
-    # summary.json jest nadpisywane bezwarunkowo, takze przy --only. Wczesniej nie bylo w nim ANI
-    # SLOWA o tym, ze bieg byl czesciowy — plik z jednym checkiem wygladal identycznie jak plik z
-    # pelnej suity, tylko krocej. Teraz `invocation` mowi, co uruchomiono, `skipped` — czego nie i
-    # dlaczego, a `suite_size` daje mianownik.
+    # summary.json is overwritten unconditionally, including under --only
     summary = {"generated_utc": datetime.now(timezone.utc).isoformat(),
                "git_revision": A.git_revision(), "repo": str(A.REPO), "env": A.env_versions(),
                "invocation": {"fast": bool(args.fast), "only": args.only, "extra": args.extra,

@@ -1,9 +1,6 @@
 """A02 — Is every reported number better than a constant predictor?
 
-Proves/disproves finding K2. No table in the repo contains a trivial baseline, which is what
-allowed reports/taurex_model_comparison.md to rank three models that all have negative skill,
-and to *exclude* the only entry that matches the baseline (H200) as "underfit".
-
+Proves/disproves finding K2.
 For every (dataset, reported mRMSE) pair the check computes:
     baseline = mRMSE of the TRAIN-SPLIT mean vector, evaluated on that evaluation set
     skill    = 1 - reported/baseline
@@ -38,15 +35,6 @@ CHECK = A.Check(
 )
 
 # Numbers as published, with the evaluation set each one is computed on.
-#
-# NIE USUWAJ wpisu H200. Recenzja zarzucila, ze trzymanie w tabeli liczby 2.894607, praktycznie
-# rownej baseline'owi poseidon_test (2.8940), czyni FAIL "samospelniajaca sie porazka" — i co do
-# FAKTU ma racje: skill H200 = -0.0002, czyli ten wpis jest z definicji NEGATIVE SKILL. Co do
-# SKUTKU zarzut jest bledny: payload ma CZTERY wiersze NEGATIVE SKILL (quantum -0.1111,
-# noquant -0.1332, winner -0.1932, H200 -0.0002), wiec po usunieciu H200 status pozostaje FAIL na
-# trzech niezaleznych wpisach z marginesem 11–19%. Wpis zostaje wlasnie dlatego, ze jest dowodem
-# tezy K2: raport wykluczyl jako "underfit" jedyna liczbe ROWNA baseline'owi, a zostawil w rankingu
-# trzy GORSZE od niego. Usuniecie go skasowaloby ten dowod, nie zmieniajac werdyktu.
 DEFAULT_REPORTED = [
     {"model": "exobiome hybrid (scale 1.0)", "value": 0.2993761897087097, "set": "adc_holdout",
      "source": "artifacts/ariel_quantum_best_v4_epoch6/holdout_metrics.json"},
@@ -75,14 +63,7 @@ REQUIRED_REPORTED_KEYS = ("model", "value", "set")
 
 
 def load_reported(path: str | None) -> list[dict]:
-    """Waliduje schemat pliku --reported ZANIM cokolwiek sie policzy.
-
-    Bez tego plik JSON bez klucza `set` konczyl sie `KeyError: 'set'` w petli glownej — po
-    zaladowaniu FM_Parameter_Table, obu splitow ADC i parquetu crossgen, bez wskazania, ktory
-    wiersz jest zly. Dla checku, ktorego caly sens polega na tym, ze mozna go przepuscic przez
-    dowolna liste liczb z artykulu, nieczytelny KeyError jest wada uzytkowa: zniecheca do
-    ponownego uruchomienia na wlasnych danych, a wtedy check przestaje byc weryfikowalny.
-    """
+    """Validate the --reported file's schema BEFORE anything gets computed."""
     if path is None:
         return DEFAULT_REPORTED
     p = Path(path)
@@ -114,7 +95,7 @@ def load_reported(path: str | None) -> list[dict]:
 
 
 def check_sets_known(reported: list[dict], sets: dict[str, dict], path: str | None) -> None:
-    """Set membership sprawdzany osobno, bo wymaga juz zbudowanych zbiorow ewaluacyjnych."""
+    """Set membership is checked separately because it needs the evaluation sets already built."""
     where = f"--reported {path}" if path else "DEFAULT_REPORTED"
     for i, row in enumerate(reported):
         if row["set"] not in sets:
@@ -157,17 +138,6 @@ def main() -> None:
     sets = eval_sets()
     check_sets_known(reported, sets, args.reported)
 
-    # Docstring tego pliku mowil wczesniej "baseline = mRMSE of the best single-vector predictor on
-    # that evaluation set", czyli definiowal baseline jako ORACLE liczony na zbiorze ocenianym,
-    # podczas gdy kod od zawsze uzywal base_train (sredniej ze splitu TRENINGOWEGO), a pole
-    # `definition` w payloadzie podawalo jeszcze trzecia wersje. Poprawiono DOKUMENTACJE, nie kod:
-    # oracle czyta cele zbioru ewaluacyjnego, wiec nie moze byc podstawa werdyktu — model, ktory go
-    # nie pobil, wcale nie musi byc gorszy od czegokolwiek, co dala sie uczciwie zbudowac.
-    #
-    # Skutek liczbowy rozbieznosci jest znikomy: maksymalna roznica skilli miedzy oboma wariantami
-    # baseline'u to 0.00069, i zadna klasyfikacja ok / NEGATIVE SKILL sie nie zmienia. Bylo to wiec
-    # klamstwo opisu, nie wyniku — ale to opis decyduje, co czytelnik uzna za zmierzone, wiec oba
-    # warianty sa raportowane obok siebie z jawna adnotacja, ktory z nich glosuje.
     rows, negative = [], []
     max_variant_gap = 0.0
     print(f"{'set':16} {'model':38} {'reported':>9} {'baseline':>9} {'skill':>7}  status")

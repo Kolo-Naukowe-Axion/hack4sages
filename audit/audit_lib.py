@@ -120,27 +120,27 @@ class Check:
                         "sha256": sha256(p)} for p in (inputs or []) if Path(p).is_file()],
             "payload": payload,
         }
-        # NaN / Infinity to NIE jest poprawny JSON (RFC 8259). json.dumps Pythona pisze je
-        # domyslnie jako bare NaN / Infinity, co czyta tylko parser Pythona — kazdy scisly
-        # odrzuca plik. Zamieniamy na null i ZAPISUJEMY, gdzie to sie stalo, zeby informacja
-        # nie zginela po cichu: pole niefinitowe jest wynikiem, nie brakiem danych.
+        # NaN / Infinity are NOT valid JSON (RFC 8259). Python's json.dumps writes them as bare
+        # NaN / Infinity by default, which only Python's own parser accepts — any strict parser
+        # rejects the file. We replace them with null and RECORD where that happened, so the
+        # information is not lost silently: a non-finite field is a result, not missing data.
         nonfinite: list[str] = []
         record["payload"] = _sanitize_nonfinite(payload, nonfinite)
         if nonfinite:
             record["nonfinite_fields"] = sorted(nonfinite)
         d = out_dir(out)
         path = d / f"{self.name}.json"
-        # allow_nan=False -> jesli sanityzacja czegos nie zlapala, padamy zamiast pisac zly plik
+        # allow_nan=False -> if sanitisation missed something, fail loudly rather than write a bad file
         path.write_text(json.dumps(record, indent=2, default=_jsonable, allow_nan=False) + "\n")
         print(f"\n[{status}] {self.name} :: {self.finding} -> {path}")
         return path
 
 
 def _sanitize_nonfinite(obj: Any, found: list[str], path: str = "") -> Any:
-    """Zamienia NaN / +-Infinity na None, zbierajac sciezki do `found`.
+    """Replaces NaN / +-Infinity with None, collecting the paths where it happened into `found`.
 
-    Nie uzywamy math.isnan bezposrednio na dowolnym obiekcie, bo payloady zawieraja stringi,
-    boole i listy niejednorodne. Boole sprawdzamy PRZED liczbami, bo bool jest podklasa int.
+    We do not call math.isnan directly on an arbitrary object, because payloads mix strings,
+    bools and heterogeneous lists. Bools are checked BEFORE numbers, since bool is an int subclass.
     """
     import math
     if isinstance(obj, dict):
@@ -198,10 +198,10 @@ def constant_predictor_mrmse(y_true: np.ndarray, constant: np.ndarray | None = N
 def skill(model_mrmse: float, baseline_mrmse: float) -> float:
     """1 - model/baseline. <= 0 means the model is no better than a constant.
 
-    baseline == 0 znaczy, ze predyktor staly jest DOKLADNY (wszystkie etykiety identyczne),
-    wiec skill jest nieokreslony, a nie zerowy — zwracamy nan zamiast dzielic przez zero.
-    Nieosiagalne na obecnych zbiorach (najmniejszy baseline to 1.4404 na ADC holdout), ale
-    skill() jest wolane przez cztery checki i nie powinno wysadzac przebiegu.
+    baseline == 0 means the constant predictor is EXACT (all labels identical), so skill is
+    undefined, not zero — we return nan instead of dividing by zero. Unreachable on the current
+    datasets (the smallest baseline is 1.4404 on the ADC holdout), but skill() is called by four
+    checks and should not blow up the run.
     """
     if baseline_mrmse == 0:
         return float("nan")
@@ -325,9 +325,9 @@ def load_adc_raw(split: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.nda
     aux = pd.read_csv(adc_root() / "TrainingData/AuxillaryTable.csv")
     aux = aux.drop(columns=[c for c in aux.columns if c.startswith("Unnamed:")]).set_index("planet_ID")
     tgt = load_adc_targets()
-    # .loc z lista etykiet rzuca KeyError, gdy ktorakolwiek nie istnieje — ten sam wzorzec,
-    # ktory w a29 zamienial niedopasowanie w crash. Dzis 0 brakujacych na wszystkich trzech
-    # splitach (33138 / 4142 / 4143), ale komunikat ma mowic, CO nie pasuje, a nie sam KeyError.
+    # .loc with a label list raises KeyError if any label is absent — the same pattern that turned a
+    # mismatch into a crash in a29. Currently 0 missing across all three splits (33138 / 4142 / 4143),
+    # but the message must say WHAT does not match, not just raise a bare KeyError.
     missing = [i for i in ids if i not in aux.index]
     if missing:
         raise KeyError(f"{len(missing)} planet_ID ze splitu '{split}' nie ma w AuxillaryTable "

@@ -25,12 +25,12 @@ The headline number is `skill_share_of_aux = skill(rung 1) / skill(rung 3)` — 
 achievable skill that needs no spectrum at all. Numerator and denominator are taken from the SAME
 learner (see `headline_learner`); the earlier version mixed them, which changed the headline by 3x.
 
-WAZNE ZASTRZEZENIE do rungu 2 (dopisane 2026-07-28, po pomiarze): "aux withheld" znaczy, ze nie
-podajemy TABELI aux — nie, ze blok widmowy jest wolny od informacji aux. Zmierzone ridge R^2
-odzyskania kolumn aux z samego bloku widmowego jest w payloadzie
-(`aux_recoverable_from_spectrum_block`) i jest wysokie: `log_g_cgs` 0,67 z samego KSZTALTU widma na
-tau_val, `star_temperature` 0,75 z samego wektora szumu na ADC. Dlatego
-`skill_share_of_spectrum_only` NIE wolno czytac jako "tyle skillu jest czysto spektroskopowe".
+IMPORTANT CAVEAT on rung 2 (added 2026-07-28, after measuring): "aux withheld" means the aux TABLE
+is not supplied, not that the spectral block is free of aux information. The measured ridge R^2 for
+recovering the aux columns from the spectral block alone is in the payload
+(`aux_recoverable_from_spectrum_block`), and it is high: `log_g_cgs` 0.67 from the spectral SHAPE
+alone on tau_val, `star_temperature` 0.75 from the noise vector alone on ADC. So
+`skill_share_of_spectrum_only` must NOT be read as "this much of the skill is purely spectroscopic".
 
 PASS criterion: for every dataset the aux-only rung carries less than 20 % of the aux+spectrum skill
 (compared against the UPPER end of the bootstrap CI, not the point estimate), and every dataset has
@@ -56,25 +56,21 @@ CHECK = A.Check(
               "on every dataset, and every dataset has a positive aux+spectrum skill to divide",
 )
 
-# WYPROWADZENIE PROGU — bylo `AUX_SHARE_LIMIT = 0.20` bez zadnego uzasadnienia.
+# THRESHOLD DERIVATION — this used to be `AUX_SHARE_LIMIT = 0.20` with no justification at all.
 #
-# Znana, udokumentowana droga tabeli aux do OCENIANYCH celow (gazy) jest jedna: aux wyznacza
-# temperature rownowagowa, a temperatura jest sprzezona z obfitosciami. Oba ogniwa sa zmierzone
-# w `a15` na ADC2023:
-#   * `aux_leakage_of_temperature.rmse_Teq_K = 48,50 K` — aux przypina T z dokladnoscia 48,5 K;
-#   * `conditioning_value.relative_improvement = 0,00259` — podanie modelowi PRAWDZIWYCH T i Rp
-#     poprawia mRMSE gazow o 0,26 %, czyli ta droga jest warta ~0,3 % osiagalnego skillu.
+# The only known, documented route from the aux table to the scored targets (the gases): aux fixes
+# the equilibrium temperature, which is coupled to the abundances. Both links are measured in `a15`
+# on ADC2023: `aux_leakage_of_temperature.rmse_Teq_K = 48.50 K` (aux pins T to that accuracy) and
+# `conditioning_value.relative_improvement = 0.00259` (the true T and Rp improve the gas mRMSE by
+# 0.26 %, so the route is worth ~0.3 % of the achievable skill). The 0.20 limit leaves ~77x margin
+# over that route: a share above it CANNOT be explained by the aux -> T -> abundance coupling and
+# means an undocumented shortcut. A lower limit (say 0.05) would catch the same physical effect and
+# FAIL correct physics; a higher one (0.50) would pass a model taking half its skill from the star
+# catalogue.
 #
-# Prog 0,20 zostawia wiec ~77x zapasu nad jedyna udokumentowana droga aux -> gaz. Interpretacja
-# jest ostra: udzial powyzej 0,20 NIE da sie wyjasnic sprzezeniem aux -> T -> obfitosc i oznacza
-# skrot, ktorego nikt nie opisal. Prog nizszy (np. 0,05) lapalby wlasnie ten fizyczny sprzezenie
-# i dawalby FAIL za poprawna fizyke; prog wyzszy (0,50) przepuszczalby model, ktory polowe skillu
-# bierze z katalogu gwiazd.
-#
-# STAN DZISIAJ: zmierzony udzial to okolo -0,002 (ADC) i -0,004 (tau_val), czyli 50-100x PONIZEJ
-# progu i z niewlasciwym znakiem (rung 1 jest GORSZY od stalej). Prog nie jest wiec dzis wiazacy
-# i jego zdolnosc rozdzielcza przy granicy nie jest przetestowana na tych danych — o czym mowi
-# pole `threshold.binding_today = false`.
+# TODAY: the measured share is about -0.002 (ADC) and -0.004 (tau_val) — 50-100x below the limit and
+# with the wrong sign (rung 1 is WORSE than the constant). So the limit is not binding today and its
+# resolving power near the boundary is untested on these data (`threshold.binding_today = false`).
 AUX_SHARE_LIMIT = 0.20
 AUX_SHARE_LIMIT_BASIS = {
     "limit": AUX_SHARE_LIMIT,
@@ -89,15 +85,15 @@ AUX_SHARE_LIMIT_BASIS = {
                         "estimate — a point estimate cannot be below a limit 'significantly'",
 }
 
-# Liczba losowan bootstrapu przedzialu ufnosci udzialu. 1000 to standardowy minimum dla percentyli
-# 2,5/97,5 (bledy Monte Carlo na koncach ~1 pp przy n_eval rzedu 4 tys.); koszt jest pomijalny, bo
-# resamplujemy GOTOWE predykcje, nie dotrenowujemy modelu.
+# Bootstrap resamples for the CI on the share. 1000 is the standard minimum for the 2.5/97.5
+# percentiles (Monte Carlo error at the tails ~1 pp at n_eval of order 4k); the cost is negligible
+# because we resample FINISHED predictions instead of refitting the model.
 N_BOOTSTRAP = 1000
 BOOTSTRAP_SEED = 26
 
-# Ulamek losowan, powyzej ktorego mianownik uznajemy za numerycznie nieodroznialny od zera i udzial
-# za NIEOKRESLONY. Bez tego strażnika przedzial ufnosci ilorazu z mianownikiem przy zerze jest
-# arytmetycznie poprawny i merytorycznie bezuzyteczny.
+# Fraction of resamples above which the denominator counts as numerically indistinguishable from
+# zero and the share as UNDEFINED. Without this guard, a CI on a ratio whose denominator sits at
+# zero is arithmetically correct and substantively useless.
 MAX_NONPOSITIVE_DENOMINATOR_FRACTION = 0.05
 
 
@@ -125,24 +121,20 @@ LEARNERS = ("ridge", "gbm")
 
 
 def aux_recoverable(x_train, x_eval, aux_idx, spectral_groups, aux_names) -> dict:
-    """Ridge R^2 odzyskania kazdej kolumny aux z bloku widmowego i z kazdej jego czesci.
+    """Ridge R^2 for recovering each aux column from the spectral block and from each of its parts.
 
-    Blok dodany 2026-07-28. Powod: szczebel `2_spectrum_only` byl opisany jako "aux withheld", a
-    `spec` zawiera `np.log10(ref)`, z ktorego na tau_val odtwarza sie `star_radius_rsun` z
-    r = -0,8935, R^2 = 0,798. Zanim cokolwiek usunalem, zmierzylem WSZYSTKIE czesci bloku widmowego
-    i wynik obala przeslanke, ze `log10(ref)` jest jedynym wyciekiem:
+    Added 2026-07-28. Rung `2_spectrum_only` was described as "aux withheld", but `spec` contains
+    `np.log10(ref)`, from which `star_radius_rsun` is recoverable on tau_val (r = -0.8935,
+    R^2 = 0.798). Measuring ALL parts of the spectral block, not just that column, shows it is not
+    the only leak: on tau_val the shape S/ref alone recovers log_g_cgs at R^2 = 0.666; on ADC the
+    noise vector N/ref alone recovers star_temperature at R^2 = 0.749 and star_distance at 0.693.
 
-        tau_val:  z samego KSZTALTU S/ref  ->  log_g_cgs R^2 = 0,666
-        ADC:      z samego wektora szumu N/ref -> star_temperature R^2 = 0,749,
-                                                  star_distance    R^2 = 0,693
-
-    Wniosek, ktory determinuje decyzje: ani usuniecie `log10(ref)` z bloku widmowego, ani
-    przeniesienie go do bloku aux nie czyni rungu 2 wolnym od aux — usuniecie zostawia log_g na
-    0,67, a przeniesienie DODATKOWO opisuje pomiar widmowy (srednia glebokosc tranzytu) jako
-    "tabele aux", co zawyzalo by licznik headline'u. Dlatego `log10(ref)` zostaje w bloku widmowym,
-    OPIS SZCZEBLA jest zmieniony na "aux table withheld", wyciek jest ZMIERZONY i raportowany, a
-    skutek liczbowy samego usuniecia jest policzony osobno jako rung `2b`. Kazdy, kto zacytuje
-    `skill_share_of_spectrum_only`, ma teraz w tym samym rekordzie liczbe, ktora mu tego zabrania.
+    Decision this forces: neither dropping `log10(ref)` from the spectral block (log_g stays at
+    0.67) nor moving it to the aux block (which would mislabel a spectral measurement — mean
+    transit depth — as "aux table", inflating the headline numerator) makes rung 2 aux-free.
+    `log10(ref)` therefore stays in the spectral block; the rung's description now says "aux TABLE
+    withheld", the leak is measured and reported here, and the numeric effect of dropping the
+    column alone is computed separately as rung `2b`.
     """
     out = {"note": "ridge R^2 on the evaluation split; > 0 means the auxiliary column is partly "
                    "reconstructible from spectral columns alone, so no rung here is aux-free",
@@ -165,10 +157,10 @@ def aux_recoverable(x_train, x_eval, aux_idx, spectral_groups, aux_names) -> dic
 
 
 def bootstrap_share(y_eval, const, pred_num, pred_den, n_boot, seed) -> dict:
-    """Przedzial ufnosci udzialu skill(licznik)/skill(mianownik), resampling wierszy oceny.
+    """Confidence interval on the share skill(numerator)/skill(denominator), resampling eval rows.
 
-    Prog porownujemy z GORNYM koncem tego przedzialu, nie z punktem: `AUX_SHARE_LIMIT` ma orzekac
-    "udzial jest na pewno mniejszy niz 20 %", a tego punkt sam nie orzeka.
+    Compared against the UPPER end of this interval, not the point estimate: `AUX_SHARE_LIMIT` is
+    meant to assert "the share is reliably below 20%", which a point estimate alone cannot do.
     """
     rng = np.random.default_rng(seed)
     n = len(y_eval)
@@ -234,17 +226,16 @@ def evaluate_rungs(name, x_train, y_train, x_eval, y_eval, blocks, targets, gbm_
         entry["skill"] = entry[entry["best_learner"]]["skill"]
         res["rungs"][rung] = entry
 
-    # LICZNIK I MIANOWNIK Z TEGO SAMEGO ESTYMATORA.
+    # NUMERATOR AND DENOMINATOR FROM THE SAME ESTIMATOR.
     #
-    # Bylo: `s1, s3 = rungs["1_aux_only"]["skill"], rungs["3_aux_plus_spectrum"]["skill"]`, gdzie
-    # oba `skill` pochodza z pola `best_learner` wybieranego NIEZALEZNIE na kazdym szczeblu. Na
-    # `adc` i `tau_val` licznik wychodzil z ridge, a mianownik z gbm; na `poseidon_test` odwrotnie.
-    # Headline ADC wynosil wtedy -0,000290, a przy spojnym ridge/ridge wynosi -0,000860, czyli 3x
-    # wiecej. Iloraz dwoch roznych estymatorow nie jest "udzialem" niczego.
+    # Previously both `skill` values came from a `best_learner` picked INDEPENDENTLY per rung — on
+    # `adc`/`tau_val` the numerator came out of ridge and the denominator out of gbm (and the other
+    # way round on `poseidon_test`). The ADC headline was then -0.000290; consistent ridge/ridge
+    # gives -0.000860 (3x more) — a ratio of two different estimators is not the "share" of anything.
     #
-    # Regula wyboru jest ZADEKLAROWANA, nie dobrana po wyniku: bierzemy learner, ktory osiaga sufit
-    # (najnizsze mRMSE na szczeblu 3), bo to szczebel 3 definiuje "osiagalny skill", czyli mianownik.
-    # Oba learnery i tak sa raportowane osobno w `skill_share_of_aux_by_learner`.
+    # The selection rule is DECLARED, not picked after the fact: take the learner with the lowest
+    # rung-3 mRMSE, because that rung defines the "achievable skill" (the denominator). Both learners
+    # are reported separately anyway in `skill_share_of_aux_by_learner`.
     head = res["rungs"]["3_aux_plus_spectrum"]["best_learner"]
     res["headline_learner"] = head
     res["headline_learner_rule"] = ("the learner with the lowest rung-3 mRMSE; rung 3 defines the "
@@ -272,20 +263,20 @@ def evaluate_rungs(name, x_train, y_train, x_eval, y_eval, blocks, targets, gbm_
     res["denominator_nonpositive"] = head_aux["denominator_nonpositive"]
     res["skill_share_of_aux"] = head_aux["value"]
     res["skill_share_of_spectrum_only"] = res["skill_share_of_spectrum_only_by_learner"][head]["value"]
-    # Nazwa `skill_share_of_spectrum_only` jest zachowana dla ciaglosci z rekordem 20260727, ale
-    # opatrzona ostrzezeniem, bo raportowane 1,0014 / 0,9930 (powyzej jednosci) samo bylo sygnalem,
-    # ze szczebel 2 nie jest tym, co glosi jego nazwa.
+    # The name `skill_share_of_spectrum_only` is kept for continuity with the 20260727 record, but
+    # now carries a caveat: the reported 1.0014 / 0.9930 (above unity) was itself a signal that
+    # rung 2 is not what its name claims.
     res["skill_share_of_spectrum_only_caveat"] = (
         "rung 2 withholds the auxiliary TABLE, not auxiliary INFORMATION; see "
         "aux_recoverable_from_spectrum_block. A value at or above 1.0 means rung 2 matched or beat "
         "rung 3, which is itself evidence that the aux table adds nothing the spectrum lacks.")
 
-    # ZBIOR BEZ ZADNEGO SKILLU NIE MOZE WSPIERAC PASS.
+    # A DATASET WITH NO SKILL AT ALL CANNOT SUPPORT A PASS.
     #
-    # Bylo: `share = ... if s3 > 0 else None`, a `main()` filtrowalo `is not None`, wiec
-    # `poseidon_test` (rung1 -0,0000, rung2 -0,0194, rung3 -0,0262 — zero skillu do podzialu)
-    # wypadal z `offenders` i MILCZACO WSPIERAL PASS. Check twierdzil "modele robia spektroskopie"
-    # na zbiorze, na ktorym nie robia niczego. Teraz to osobny, jawny stan.
+    # Previously `share = ... if s3 > 0 else None` with `main()` filtering on `is not None`, so
+    # `poseidon_test` (rung 1 -0.0000, rung 2 -0.0194, rung 3 -0.0262 — no skill to divide) dropped
+    # out of `offenders` and SILENTLY SUPPORTED PASS. The check asserted "the models do
+    # spectroscopy" on a dataset where they do nothing at all. Now it is a separate, explicit state.
     if res["denominator_nonpositive"]:
         res["verdict_contribution"] = "no_achievable_skill_to_divide"
         res["skill_share_of_aux_bootstrap"] = None
@@ -317,10 +308,10 @@ def build_adc(n_train: int):
 
     def block(split, limit=None):
         ids = A.adc_split_ids(split)
-        # Bylo `if limit:` — test prawdziwosciowy na intcie, wiec `--n-train 0` NIE obcinalo nic
-        # i cicho znaczylo "wszystkie", podczas gdy `build_crossgen` na tym samym `0` robilo
-        # `[:0]`, czyli PUSTY zbior treningowy. Dwa builder'y, dwa przeciwne znaczenia jednej
-        # flagi. `is not None` usuwa ten przypadek specjalny; `main()` odrzuca 0 wprost.
+        # Was `if limit:` — a truthiness test on an int, so `--n-train 0` truncated NOTHING and
+        # silently meant "all", while `build_crossgen` on the same `0` did `[:0]`, i.e. an EMPTY
+        # training set. Two builders, two opposite meanings for one flag. `is not None` removes the
+        # special case; `main()` rejects 0 outright.
         if limit is not None:
             ids = ids[:limit]
         a = aux.loc[ids]
@@ -332,10 +323,10 @@ def build_adc(n_train: int):
             S = np.stack([h[f"Planet_{p}"]["instrument_spectrum"][:] for p in ids]).astype(float)
             N = np.stack([h[f"Planet_{p}"]["instrument_noise"][:] for p in ids]).astype(float)
         ref = S.mean(axis=1, keepdims=True)
-        # `log10(ref)` ZOSTAJE w bloku widmowym: srednia glebokosc tranzytu to pomiar widmowy, nie
-        # wpis z tabeli aux. Zmienione jest to, co z tego wynika — nazwa i opis szczebla mowia
-        # teraz "aux TABLE withheld", a `spectrum_groups` pozwala zmierzyc, ile aux z ktorej czesci
-        # bloku sie odtwarza (na ADC najgorszym wyciekiem jest N/ref, nie log10(ref)).
+        # `log10(ref)` STAYS in the spectral block: mean transit depth is a spectral measurement, not
+        # an aux-table entry. What changed is the wording around it — the rung's name and description
+        # now say "aux TABLE withheld", and `spectral_groups` lets us measure how much aux each part
+        # of the block recovers (on ADC the worst leak is N/ref, not log10(ref)).
         spec = np.hstack([S / ref, N / ref, np.log10(ref)])
         nb = S.shape[1]
         groups = {"shape_normalised_spectrum": list(range(af.shape[1], af.shape[1] + nb)),
@@ -390,8 +381,8 @@ def main() -> None:
     ap.add_argument("--datasets", default="adc,tau_val,poseidon_test")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
-    # `--n-train 0` nie ma poprawnego znaczenia: zero wierszy nie wytrenuje niczego, a wczesniej
-    # dawalo dwa RÓZNE zachowania w dwoch builderach (patrz komentarz przy `build_adc.block`).
+    # `--n-train 0` has no valid meaning: zero rows train nothing, and it used to produce two
+    # DIFFERENT behaviours in the two builders (see the comment in `build_adc.block`).
     if args.n_train <= 0:
         ap.error("--n-train must be positive; 0 trains on nothing and used to mean two different "
                  "things in build_adc and build_crossgen")
@@ -443,8 +434,8 @@ def main() -> None:
               f"{r['aux_recoverable_from_spectrum_block']['worst_leak']} "
               f"R^2 = {r['aux_recoverable_from_spectrum_block']['worst_leak_r2']:.3f}")
 
-    # Trzy rozlaczne stany zamiast jednego filtra `is not None`. Zbior bez dodatniego skillu na
-    # szczeblu 3 NIE wpada juz milczaco do puli wspierajacej PASS — daje WARN.
+    # Three disjoint states instead of a single `is not None` filter. A dataset with no positive
+    # rung-3 skill no longer falls silently into the PASS-supporting pool — it yields WARN.
     offenders = [k for k, r in payload["datasets"].items()
                  if r["verdict_contribution"] == "aux_dominates"]
     no_skill = [k for k, r in payload["datasets"].items()
@@ -455,9 +446,9 @@ def main() -> None:
     payload["threshold"]["binding_today"] = bool(offenders)
     payload["verdict_contributions"] = {k: r["verdict_contribution"]
                                         for k, r in payload["datasets"].items()}
-    # Uzasadnienie progu odwolywalo sie do TEMPERATURY (48,5 K z a15), ktorej ten check nie ma
-    # wsrod celow — `a24:22` mowi wprost "Temperature and radius are NOT scored". Przeformulowane
-    # na gazy, czyli na to, co tu faktycznie jest oceniane.
+    # The threshold rationale used to appeal to TEMPERATURE (48.5 K from a15), which this check does
+    # not have among its targets — `a24:22` says outright "Temperature and radius are NOT scored".
+    # Reworded in terms of the gases, i.e. what is actually scored here.
     payload["interpretation"] = (
         "A high aux share means the reported accuracy is not spectroscopy. The targets scored here "
         "are the five gas abundances only (a24: temperature and radius are not scored), so the "

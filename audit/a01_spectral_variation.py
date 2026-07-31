@@ -1,8 +1,7 @@
 """A01 — Does every spectrum actually depend on wavelength, and above the noise it was made for?
 
 Proves/disproves finding K1. This is the check that data/crossgen_biosignatures/validate_dataset.py
-does NOT perform: it validates shape, finiteness, positivity, prior bounds and prevalence, but never
-that a spectrum varies across bins. A generator that returns a bare transit depth passes that
+does NOT perform: if a spectrum varies across bins. A generator that returns a bare transit depth passes that
 validator and silently voids every downstream cross-generator number.
 
 TWO CRITERIA, deliberately independent — the verdict must not rest on a tuned threshold:
@@ -14,16 +13,16 @@ TWO CRITERIA, deliberately independent — the verdict must not rest on a tuned 
       with. `std_bins(noiseless) / sigma > 1` for the median row. A dataset whose features sit
       below its own noise floor is unusable regardless of how it was produced.
 
-  (3) belt-and-braces, scale-free: median `std_bins/|mean_bins| > 1e-4`. Transit depths differ by
+  (3) median `std_bins/|mean_bins| > 1e-4`. Transit depths differ by
       orders of magnitude between planets, so an absolute threshold on `std` would reject small
       planets and pass large ones; the ratio is comparable across rows. 1e-4 sits ~3 decades above
       the float32 representation floor (~1.2e-7) and ~2 decades below real structure (~1.3e-2), so
       it can be moved by two orders in either direction without changing any verdict.
 
-WHAT THIS CHECK CANNOT CATCH — read before trusting a PASS. It only detects *absent* structure.
+WHAT THIS CHECK CANNOT CATCH. It only detects *absent* structure.
 A generator that produces structure of the *wrong amplitude* passes: the TauREx side of this very
 dataset is generated without collision-induced absorption (finding K11) and is scored OK here.
-Catching that needs a physical-amplitude check against `2·R_p·H/R_star^2` — see `a25` in the plan.
+Catching that needs a physical-amplitude check against `2·R_p·H/R_star^2`; no such check exists yet.
 """
 from __future__ import annotations
 
@@ -53,15 +52,9 @@ def summarise(arr: np.ndarray, sigma_abs: np.ndarray, is_noiseless: bool) -> dic
     """arr: (N, n_bins) float64. sigma_abs: (N,) absolute noise sigma in transit-depth units."""
     mean_bins = arr.mean(axis=1)
     std_bins = arr.std(axis=1)
-    # mean_bins == 0 daje NaN, a NaN w porownaniu zwraca False — czyli widmo z samych zer
-    # PRZESZLOBY kryterium `rel_variation_median <= MIN_REL_VARIATION` tylnymi drzwiami.
-    # Dzis nieosiagalne (0/42108 wierszy ma mean_bins == 0, min = 3.26e-03), ale to jest
-    # kryterium bezpieczenstwa danych, wiec nie moze zalezec od tego, ze dane sa dobre.
     with np.errstate(divide="ignore", invalid="ignore"):
         rel = np.where(np.abs(mean_bins) > 0, std_bins / np.abs(mean_bins), 0.0)
     n_unique = np.array([len(np.unique(row)) for row in arr])
-    # sigma == 0 to nieskonczony SNR (jest sygnal, nie ma szumu), a nie brak danych. Poprzednio
-    # dawalo NaN, ktore `np.nanmean(snr > 1.0)` liczy jako False, czyli zanizalo frakcje zdanych.
     with np.errstate(divide="ignore", invalid="ignore"):
         snr = np.where(sigma_abs > 0, std_bins / np.where(sigma_abs > 0, sigma_abs, 1.0),
                        np.where(std_bins > 0, np.inf, 0.0))
@@ -107,7 +100,7 @@ def main() -> None:
         "physical": f"median feature amplitude / sigma > {MIN_FEATURE_SNR}",
         "scale_free": f"median std_bins/|mean_bins| > {MIN_REL_VARIATION:g}"},
         "cannot_catch": ("structure of the wrong amplitude — e.g. a generator missing an opacity "
-                         "term (finding K11) passes this check; see a25"),
+                         "term (finding K11) passes this check; no dedicated amplitude check exists yet"),
         "generators": {}}
 
     with h5py.File(path, "r") as f:

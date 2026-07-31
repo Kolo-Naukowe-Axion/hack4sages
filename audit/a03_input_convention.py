@@ -29,40 +29,27 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audit_lib as A  # noqa: E402
 
-# Artefakt, ktory ROZSTRZYGA, ktore ramie punktowe zespol faktycznie opublikowal jako 0.5523.
-# Pole "point_estimate" w tym pliku ma wartosc "median"; klucz "rmse_mean" obok niego NIE oznacza
-# ramienia "mean" — to srednia po gazach, tak nazywa ja evaluate_point_metric. Ta zbieznosc nazw
-# jest zrodlem bledu: poprzednia wersja robila `est = "mean" if "mean" in base["clean"] else ...`,
-# czyli porownywala ramie, ktorego zespol nigdy nie podal. Skutek nie byl kosmetyczny — dla mean
-# ratio_clean wychodzi 1.3485, dla publikowanego median 1.2884, wiec audyt zarzucalby zespolowi
-# przewage o 6 pp inna niz ta, ktora zespol ogloszil. Ramie ustalamy z artefaktu, nie z zgadywania,
-# i zapisujemy w payloadzie sciezke, z ktorej to wiadomo.
 PUBLISHED_METRICS_REL = Path("models/adc_winner_on_ariel/trained_run/holdout_metrics.json")
-# Uzywane TYLKO gdy artefaktu nie ma na dysku. Wartosc nie jest domysleniem: taka jest wartosc
-# pola point_estimate w wersji pliku towarzyszacej publikowanej tabeli.
 PUBLISHED_ESTIMATOR_FALLBACK = "median"
 
-# Seed globalnego RNG torcha przed KAZDYM wywolaniem evaluate_point_metric.
-#
-# Dlaczego to jest potrzebne: estymator punktowy NSF to mediana z `final_num_samples` losowan
-# posterioru. Losowanie idzie przez `IndependentNSF.sample` -> `flow(context).sample(...)`
-# (models/adc_winner_on_ariel/model.py:54), ktore NIE przyjmuje generatora, wiec czerpie z
-# globalnego RNG torcha. Argumenty `row_seed` i `noise_seed`, ktore evaluate_point_metric
-# przyjmuje, seeduja wybor wierszy i szum WEJSCIOWY — nie sam posterior. Bez tej linii kazde
-# uruchomienie a03 dawalo inne liczby NSF (rzad 1e-3 na agregacie, do 5e-3 per gaz), co bylo
-# jedynym zrodlem wariancji przebieg-do-przebiegu w calym harnessie.
-#
-# Czego to NIE naprawia: liczba pozostaje jednym losowaniem Monte Carlo z `final_num_samples`
-# probek, wiec jej odleglosc od wartosci granicznej sie nie zmienia — zmienia sie tylko to, ze
-# jest ODTWARZALNA. Zmniejszenie samego bledu MC wymaga wiekszej liczby probek, nie seeda.
-#
-# Kod zespolu pozostaje nietkniety: seedujemy globalny RNG PRZED wywolaniem zaimportowanej
-# funkcji, dokladnie tak, jak sam evaluate.py:46-47 robi to dla szumu wejsciowego.
+# Seed torch's global RNG before EVERY call to evaluate_point_metric.
+"""
+Why: NSF's point estimate is the median of final_num_samples draws from the posterior, which goes
+through IndependentNSF.sample -> flow(context).sample(...) (model.py:54) and DOES NOT accept
+a generator, so it relies on torch's global RNG. row_seed/noise_seed in evaluate_point_metric
+only seed row selection and INPUT noise, not the posterior. Without this line, every run of a03
+produced different NSF numbers (around 1e-3 on aggregate, up to 5e-3 per gas) — the only
+run-to-run source of variance in the harness.
+What this DOES NOT fix: the number is still a single Monte Carlo draw of final_num_samples samples,
+so its distance from the limiting value doesn't change — it only ensures that it is REPRODUCIBLE.
+Team code untouched: we seed the global RNG BEFORE calling the imported function, exactly
+as evaluate.py:46-47 does for input noise.
+"""
 POSTERIOR_SAMPLE_SEED = 42
 
 
 def published_estimator() -> dict:
-    """READ-ONLY. Ktore ramie punktowe stoi za publikowana liczba 0.5523 — czytane z artefaktu."""
+    """READ-ONLY. Which point-estimate arm the published 0.5523 comes from — read from the artefact."""
     p = A.REPO / PUBLISHED_METRICS_REL
     out = {"source": str(PUBLISHED_METRICS_REL), "source_exists": p.is_file(),
            "field": "point_estimate",
@@ -152,9 +139,9 @@ def eval_baseline(split: str, seeds: list[int], estimators: list[str]) -> dict:
         print(f"  baseline {split:10} clean            est={est:6} mRMSE={r['rmse_mean']:.6f}")
         band = []
         for sd in seeds:
-            # Seed per iteracje, bo inaczej n-te wywolanie zalezy od stanu RNG po (n-1) poprzednich.
-            # Wiazemy go z `sd`, zeby ramie zaszumione nadal mierzylo rozrzut po seedach SZUMU
-            # (sd wchodzi do noise_seed nizej), a nie po stanie globalnego RNG.
+            # Re-seed per iteration, otherwise the n-th call depends on the RNG state left by the
+            # (n-1) before it. Tied to `sd` so the noised arm still measures spread over NOISE seeds
+            # (sd feeds noise_seed below), not over the global RNG state.
             torch.manual_seed(POSTERIOR_SAMPLE_SEED + sd)
             rn = evaluate_point_metric(model, getattr(data, split), data.scalers, device=device,
                                        num_samples=int(settings["evaluation"]["final_num_samples"]),
@@ -192,9 +179,9 @@ def main() -> None:
     status = "INFO"
     if base and "clean" in base and base["clean"]:
         exo_clean = exo["clean"][f"{max(scales):.4f}"]["mrmse"]
-        # Kazde policzone ramie zostaje w payloadzie — raport cytuje i median, i mean, wiec usuniecie
-        # ktoregokolwiek zerwaloby mozliwosc weryfikacji cytatu. Ramie publikowane jest tylko
-        # WSKAZANE, nie uprzywilejowane w liczeniu.
+        # Every computed arm stays in the payload — the report quotes both median and mean, so dropping
+        # either would make a quote unverifiable. The published arm is merely FLAGGED, not privileged
+        # in the computation.
         by_est: dict[str, dict] = {}
         for e in base["clean"]:
             d_clean_e = exo_clean - base["clean"][e]["mrmse"]
@@ -210,8 +197,8 @@ def main() -> None:
                 "degradation_factor_baseline": base.get("degradation_factor", {}).get(e),
             }
         payload["comparison_by_estimator"] = by_est
-        # Werdykt zawisa na ramieniu publikowanym; jesli wywolano check bez tego ramienia, mowimy to
-        # wprost, zamiast po cichu ocenic inne ramie jako "to publikowane".
+        # The verdict hangs on the published arm; if the check was invoked without it, say so
+        # explicitly rather than silently judging a different arm as "the published one".
         est = pub["estimator"] if pub["estimator"] in by_est else next(iter(by_est))
         payload["comparison"] = dict(by_est[est])
         payload["comparison"]["published_arm_evaluated"] = bool(pub["estimator"] in by_est)
@@ -231,12 +218,6 @@ def main() -> None:
         print(f"  delta(exo-base) noised = {d_noised:+.4f}")
         print(f"  ranking reverses with the input convention: {payload['comparison']['sign_flips']}")
 
-    # Wniosek BUDOWANY z policzonych zmiennych. Poprzednio byl to staly napis, dodatkowo umieszczony
-    # POZA blokiem `if base ...` — wiec przy --skip-baseline (albo przy braku prepared data, gdy
-    # eval_baseline zwraca {"error": ...}) payload nadal twierdzil, ze "under the noised convention
-    # it reverses", mimo ze zadnego porownania nie wykonano. Zahardkodowany wniosek nie moze byc
-    # falsyfikowany przez wlasny check: gdyby naprawa a09 albo zmiana skal odwrocila znak, tekst
-    # bylby ten sam. Kazda liczba w zdaniu pochodzi teraz ze zmiennej wyliczonej wyzej.
     if "comparison" in payload:
         c = payload["comparison"]
         deg_exo = float(exo["degradation_factor"])

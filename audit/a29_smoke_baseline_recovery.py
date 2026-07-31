@@ -3,13 +3,8 @@
 Proves/disproves finding K1(b). The bundle `data/TauREx set/` contains `baseline_smoke.json` and
 `baseline_poseidon_predictions.csv`, both produced by the team's own `baseline_smoke.py` before the
 dataset was handed over. They already carry the answer: the ridge baseline learns something modest on
-the TauREx split and nothing at all on POSEIDON.
-
-Provenance of the artefacts, corrected. What is true is narrower: the files were UNTRACKED at the
-moment the dataset was handed over, and it was THIS AUDIT that put them into the index.
-
-Until now those numbers existed only as prose in the report, aggregated by hand. This check turns them
-into a record. Six tests:
+the TauREx split and nothing at all on POSEIDON. This check turns the numbers into a record. Six
+tests:
 
     T1  per-gas RMSE recomputed from the predictions CSV == the RMSE recorded in the JSON
     T2  the scalar mRMSE behind each generator (the JSON stores per-gas dicts, not scalars)
@@ -20,13 +15,6 @@ into a record. Six tests:
 
 T1 is the falsification test named in the report: if the CSV does not reproduce the JSON, the two
 files are not from one run.
-
-WHAT THIS CHECK DOES AND DOES NOT ADJUDICATE. The finding under test is K1(b) — "the team's own
-smoke baseline recorded no skill on POSEIDON and nothing consumed that result". So the verdict turns
-on the EXISTENCE, INTERNAL CONSISTENCY, SIGN CONTRAST and CONSUMPTION of the artefacts, never on how
-large either skill is. The magnitude of the smoke baseline's skill is a statement about baseline
-quality, which belongs to K1 (`a01`) and to the baseline ladders (`a02`, `a26`); it is reported here
-and deliberately kept out of the PASS/FAIL algebra.
 """
 from __future__ import annotations
 
@@ -49,30 +37,41 @@ CHECK = A.Check(
     finding="K1(b) — the team's own ridge smoke baseline ran, shipped in the bundle, and records no skill on POSEIDON",
     question="Do the two smoke artefacts agree per gas, what skill is behind them, and how wide are the predictions?",
     criterion="the finding is REFUTED (PASS) if an artefact is missing, or the CSV does not reproduce "
-              "the JSON within 1e-9, or the two skills share a sign, or any file outside the bundle / "
-              "audit/ / docs/ reads the artefacts by path; it STANDS (FAIL) otherwise",
+              "the JSON within 1e-9, or there is no skill contrast between the two splits (sign test, "
+              "guarded by the n=685 MDE so a |skill| below detectability is read as 'no skill' rather "
+              "than as an agreeing sign), or any file outside the bundle / audit/ / docs/ reads the "
+              "artefacts by path; it STANDS (FAIL) otherwise",
 )
 
 BUNDLE = Path("data/TauREx set")
 PRIOR_LO, PRIOR_HI = -12.0, -2.0
 CONSISTENCY_TOL = 1e-9
 
-# Ktore z dwoch policzonych skilli rozstrzyga o kontrascie. `skill_vs_train_mean` — bo to wariant,
-# ktory raportuje a02 (staly wektor = srednia etykiet tau/train), czyli uczciwy trywialny baseline
-# dostepny modelowi. Wariant `skill_vs_oracle_constant` uzywa sredniej WIERSZY OCENIANYCH, wiec
-# widzi etykiety testowe; jest gornym ograniczeniem na kredyt modelu i zostaje raportowany, ale nie
-# moze rozstrzygac werdyktu.
+# Detectability floor for skill at n=685, copied from `a12.mde_aggregate_mrmse_n685` (80 % power,
+# alpha=0.05, bootstrap of the mRMSE aggregate over the 685 POSEIDON rows). Used ONLY as a guard on
+# condition (c) — see the comment at `no_contrast`. It enters no reported number.
+MDE_SKILL_N685 = 0.043621087128020715
+
+# Which of the two computed skills decides the contrast. `skill_vs_train_mean` — because that is the
+# variant a02 reports (constant vector = mean of the tau/train labels), i.e. the honest trivial
+# baseline available to the model. The `skill_vs_oracle_constant` variant uses the mean of the
+# EVALUATED ROWS and therefore sees the test labels; it is an upper bound on model credit and stays
+# reported, but it cannot decide the verdict.
 DECISIVE_SKILL = "skill_vs_train_mean"
 
 ARTEFACT_NAMES = ("baseline_smoke.json", "baseline_poseidon_predictions.csv")
 
-# T6 pyta, czy KTOKOLWIEK poza samym audytem czyta te pliki po sciezce. Bez wykluczen test znalazlby
-# przede wszystkim siebie, wiec kazde wykluczenie ma powod.
-
-EXCLUDED_PATH_PREFIXES = ("data/TauREx set", "audit", "docs", "reports/audit", ".git")
+EXCLUDED_PATH_PREFIXES = ("data/TauREx set", "audit", "docs", "reports/audit", ".git",
+                          # Git worktrees are COPIES of the same repo. Without this exclusion the
+                          # consumer count grows by the whole file set times the number of
+                          # attached worktrees (measured: 8 -> 51 with one worktree), so the
+                          # headline number stops being reproducible and depends on the state of
+                          # the directory rather than of the repo. `a12` excludes
+                          # `.claude/worktrees/` for the same reason.
+                          ".claude/worktrees")
 EXCLUDED_DIR_GLOBS = (".venv*", "__pycache__", "*.egg-info", "node_modules")
 EXCLUDED_FILES = (".gitignore",)
-# Powyzej tego rozmiaru pliku nie skanujemy.
+# Files larger than this are not scanned.
 MAX_SCAN_BYTES = 8_000_000
 
 
@@ -172,9 +171,6 @@ def file_provenance(paths: dict[str, Path]) -> dict[str, dict]:
             "size_bytes": st.st_size,
             "mtime_utc": datetime.fromtimestamp(st.st_mtime, timezone.utc).isoformat(),
             "git_tracked": git_tracked(p),
-            # Kiedy plik wszedl do indeksu. Dla obu artefaktow to 4c431db (2026-07-27), czyli commit
-            # tego audytu — a nie stan przekazany przez zespol. Bez tego pola `git_tracked: True`
-            # sugerowaloby, ze pliki byly widoczne w gicie od poczatku.
             "added_in": git_added_in(p),
         }
     return out
@@ -189,10 +185,7 @@ def main() -> None:
 
     paths = bundle_paths()
 
-    # Warunek (a) kryterium musi byc rozstrzygany PRZED odczytem. Brak ktoregokolwiek z dwoch
-    # artefaktow obala ustalenie w brzmieniu "przebieg jest, wynik zapisany, nikt nie przeczytal" —
-    # nie ma czego odtwarzac. Rownie wazne: read_text() na nieistniejacym pliku wywalilby check
-    # tracebackiem, czyli warunek (a) bylby formalnie w kryterium, ale nieosiagalny w kodzie.
+    # Criterion (a) must be settled BEFORE any read: is either of the two artefacts absent?
     consumption = find_consumers()
     missing_artefacts = sorted(k for k in ("smoke", "predictions") if not paths[k].is_file())
     if missing_artefacts:
@@ -333,22 +326,50 @@ def main() -> None:
         },
     }
 
-    # Cztery rozlaczne drogi do PASS, kazda obalajaca inny czlon ustalenia K1(b). Zadna nie patrzy na
-    # WIELKOSC skilli — te sa raportowane w t3 i naleza do K1 (a01) oraz do drabin (a02, a26).
-    #   (a) brak artefaktu            -> sprawdzone wyzej, przed odczytem
-    #   (b) CSV nie odtwarza JSON-a   -> to nie jeden przebieg na tym bundlu
-    #   (c) brak kontrastu znakow     -> dostarczone liczby same nie wskazywaly POSEIDON-a
-    #   (d) istnieje konsument        -> wynik ZOSTAL przeczytany
-    # Warunek (c) uzywa znakow, nie wartosci: ustalenie mowi "modest na tau, nic na POSEIDON", czyli
-    # twierdzi o RELACJI dwoch znakow. Gdyby oba znaki byly rowne, sam bundel nie odroznialby
-    # generatorow i ustalenia nie daloby sie z niego wyczytac.
+    # Four disjoint routes to PASS, each refuting a different clause of finding K1(b); none of them
+    # looks at the MAGNITUDE of the skills (that belongs to K1/a01 and the ladders a02, a26):
+    #   (a) artefact missing, (b) the CSV does not reproduce the JSON, (c) no contrast between the
+    #   skill signs, (d) a consumer exists. (c) looks at the SIGNS, not the values — the finding
+    #   says "modest on tau, nothing on POSEIDON", i.e. it is about the RELATION of two signs; were
+    #   both equal, the bundle alone would not tell the generators apart.
     skill_tau = float(skills["taurex_val"][DECISIVE_SKILL])
     skill_pos = float(skills["poseidon_test"][DECISIVE_SKILL])
+
+    # MDE GUARD. A bare `sign(a) == sign(b)` would be a sign test on a quantity that can sit far
+    # below the detectability floor: skill on POSEIDON is about -5e-4, while the MDE for n=685 is
+    # 0.0436 (a12.mde_aggregate_mrmse_n685), i.e. ~92x larger. The sign of such a quantity is not
+    # measurable — another draw would have given +3e-4, equally indistinguishable from zero, and
+    # condition (c) would then refute the WHOLE of K1(b) on noise.
+    # The finding says "modest skill on tau, NO skill on POSEIDON", not "negative skill on
+    # POSEIDON". So the contrast counts only when the tau side is DETECTABLY positive; if |skill| on
+    # either side sinks into the MDE, that side's sign stays out of the algebra.
+    # This does NOT change today's verdict: skill_tau = +0.0938 > MDE, skill_pos ~ 0 -> no contrast
+    # = False, exactly as with the bare sign test.
+    tau_detectable = abs(skill_tau) >= MDE_SKILL_N685
+    pos_detectable = abs(skill_pos) >= MDE_SKILL_N685
+    if tau_detectable and pos_detectable:
+        no_contrast = bool(np.sign(skill_tau) == np.sign(skill_pos))
+    else:
+        # At least one side is below the floor. The contrast exists if and only if tau is detectably
+        # positive and POSEIDON is not detectably positive.
+        no_contrast = not (tau_detectable and skill_tau > 0 and not (pos_detectable and skill_pos > 0))
+
     cond = {
         "a_artefact_missing": False,
         "b_csv_disagrees_with_json": bool(not consistent),
-        "c_no_skill_sign_contrast": bool(np.sign(skill_tau) == np.sign(skill_pos)),
+        "c_no_skill_sign_contrast": bool(no_contrast),
         "d_result_was_consumed": bool(consumption["consumed"]),
+    }
+    # A separate key at payload level, NOT inside `t3_skill`: that dict is iterated per split below
+    # (`for key, s in payload["t3_skill"].items()`), so an extra key of a different shape would
+    # break the printout.
+    payload["skill_detectability"] = {
+        "mde_skill_n685": MDE_SKILL_N685,
+        "mde_source": "a12.mde_aggregate_mrmse_n685 — MDE for the aggregate mRMSE functional, n=685",
+        "skill_taurex_val_detectable": bool(tau_detectable),
+        "skill_poseidon_test_detectable": bool(pos_detectable),
+        "why": "condition (c) is a sign test; a sign is only meaningful above the detectability "
+               "floor, so a |skill| below MDE is read as 'no skill', never as 'agreeing sign'",
     }
     refuting = [k for k, v in cond.items() if v]
     stands = {
@@ -367,7 +388,8 @@ def main() -> None:
     elif all(stands.values()):
         status, resolved_by = "FAIL", []
     else:
-        # Luka miedzy oboma kryteriami (np. skill_tau == 0 przy skill_pos < 0): ani nie obalone, ani
+        # Gap between the two criteria (e.g. skill_tau == 0 with skill_pos < 0): neither refuted nor
+        # fully confirmed by the `stands` conjunction above.
         status, resolved_by = "WARN", []
 
     reasons = []

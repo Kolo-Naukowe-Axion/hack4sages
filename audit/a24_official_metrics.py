@@ -53,23 +53,21 @@ CHECK = A.Check(
 
 GAS_TRACE_COL = {g: 2 + i for i, g in enumerate(A.TARGETS)}  # verified column order, see report K9
 
-# Liczba niezaleznych rozciec 50/50 trace'u na planete, po ktorych usredniamy podloge.
-# Bylo: jedno rozciecie na planete, czyli podloga niosla pelna wariancje pojedynczego losowania.
-# 5 rozciec redukuje ten rozrzut ~2.2x (1/sqrt(5)) przy 5x koszcie — a podloga jest raportowana
-# jako liczba per gaz, wiec jej stabilnosc ma znaczenie. Rozciecia sa POWIAZANE (ta sama kolumna),
-# wiec to nie jest niezalezna proba i nie liczymy z nich bledu standardowego.
+# Number of independent 50/50 splits of each planet's trace that the floor is averaged over.
+# Previously one split per planet, so the floor carried the full variance of a single draw.
+# 5 splits cut the spread ~2.2x (1/sqrt(5)) at 5x the cost. The splits are CORRELATED (same
+# column), so they are not an independent sample and no standard error is derived from them.
 FLOOR_SPLITS = 5
 
-# Seed globalnego RNG torcha przed losowaniem posterioru NSF.
+# Seeds torch's global RNG before the NSF posterior is sampled.
 #
 # `IndependentNSF.sample` -> `flow(context).sample(...)` (models/adc_winner_on_ariel/model.py:54)
-# nie przyjmuje generatora, wiec czerpie z globalnego RNG torcha. Pole "rng_seed": 0 w payloadzie
-# podlogi dotyczy WYLACZNIE rozciec numpy — nie posterioru. Bez tej linii ramie NSF w a24 bylo
-# nieodtwarzalne miedzy przebiegami (KS nsf wahalo sie na czwartym miejscu po przecinku).
-#
-# Seedujemy raz, przed petla po batchach: przy stalej kolejnosci `rows` daje to deterministyczny
-# strumien losowan dla calego ramienia. Liczba pozostaje jednym losowaniem Monte Carlo z
-# `--nsf-samples` probek — seed czyni ja odtwarzalna, nie dokladniejsza.
+# takes no generator, so it draws from torch's global RNG. The "rng_seed": 0 field in the floor
+# payload covers the numpy splits ONLY, not the posterior. Without this line the NSF arm was
+# irreproducible between runs (KS nsf moved in the fourth decimal). Seeded once, before the batch
+# loop, so with a fixed `rows` order the whole arm's draw stream is deterministic. The number is
+# still one Monte Carlo draw of `--nsf-samples` samples — the seed makes it reproducible, not
+# more accurate.
 POSTERIOR_SAMPLE_SEED = 42
 
 
@@ -120,12 +118,11 @@ def main() -> None:
     import h5py
     import pandas as pd
     ap = argparse.ArgumentParser()
-    # None = wszystkie planety z referencyjnym posteriorem (663 w holdoucie ADC). Bylo: 400,
-    # czyli cap wyrzucal 263 planety (39.7%) — i to nie losowo, bo adc_split_ids zwraca liste
-    # posortowana numerycznie rosnaco, wiec zostawal niskonumerowany prefiks. Cap NIE byl
-    # zapisywany w payloadzie, wiec z rekordu nie dalo sie odczytac, ze liczby nie sa z pelnego
-    # zbioru. Skutek na cytowanych liczbach: W1 1.0733 -> 1.2293 (+14.5%),
-    # light_track 0.1291 -> 0.1620 (+25.5%), skill vs prior na light_track +0.6185 -> +0.5384.
+    # None = every planet with a reference posterior (663 in the ADC holdout). Previously 400, so
+    # the cap dropped 263 planets (39.7%) non-randomly — adc_split_ids returns an ascending list,
+    # leaving a low-numbered prefix — and the cap was NOT recorded in the payload. Effect on the
+    # cited numbers: W1 1.0733 -> 1.2293 (+14.5%), light_track 0.1291 -> 0.1620 (+25.5%),
+    # skill vs prior on light_track +0.6185 -> +0.5384.
     ap.add_argument("--max-planets", type=int, default=None,
                     help="None = wszystkie dostepne (663); wartosc >0 ogranicza probke do prefiksu")
     ap.add_argument("--nsf-samples", type=int, default=128)
@@ -148,8 +145,8 @@ def main() -> None:
             if tr.ndim != 2 or tr.shape[1] != 7 or len(w) != len(tr) or w.sum() <= 0:
                 continue
             refs[pid] = (tr, w / w.sum())
-    # Enumeracja jest zawsze PELNA, cap stosowany dopiero po niej — inaczej `n_available` nie
-    # dalo by sie podac, a to jedyna liczba, z ktorej czytelnik rekordu widzi, ile probka pomija.
+    # Enumeration is always FULL, the cap applied only afterwards — otherwise `n_available` could
+    # not be reported, and it is the only number telling a reader how much the sample skips.
     n_available = len(refs)
     ids = list(refs)
     if args.max_planets:
@@ -213,8 +210,8 @@ def main() -> None:
         n_train_pool = len(col)
         prior[g] = rng0.choice(col, size=min(2000, len(col)), replace=False)
     n_prior_draws = len(next(iter(prior.values())))
-    # Cap 2000 z 33138 planet treningowych byl dotad tylko na stdout, nie w payloadzie — czyli
-    # ramie PRIOR bylo w rekordzie liczba bez podanej wielkosci proby, na ktorej powstala.
+    # The 2000-of-33138 training-planet cap used to go to stdout only, not to the payload, so in
+    # the record the PRIOR arm was a number with no stated sample size behind it.
     print(f"  prior arm: training marginal per gas, {n_prior_draws} draws of {n_train_pool} available, "
           "identical for every planet (ignores the spectrum)")
 
@@ -226,18 +223,17 @@ def main() -> None:
         for g in A.TARGETS:
             col = tr[:, GAS_TRACE_COL[g]]
             point = np.array([float(exo.loc[pid, f"pred_{g}"])])
-            # Podloga skonczonej proby, usredniona po FLOOR_SPLITS rozcieciach 50/50.
-            # Bylo: JEDNO rozciecie na planete, wiec kazda liczba podlogi niosla pelna
-            # wariancje jednego losowania — a podloga jest raportowana per gaz i porownywana
-            # z ramionami modelu, wiec jej szum przenosil sie wprost na wniosek.
+            # Finite-sample floor, averaged over FLOOR_SPLITS 50/50 splits.
+            # Previously ONE split per planet, so every floor value carried the full variance of a
+            # single draw — and the floor is reported per gas and compared against the model arms,
+            # so its noise fed straight through to the conclusion.
             #
-            # Czego to NIE naprawia i naprawic nie moze: obie polowki maja ~len(col)/2 (~1442)
-            # probek, a ramiona modelu porownuja sie z PELNA referencja (~2884). Blad KS dwoch
-            # prob skaluje sie jak sqrt(1/n1 + 1/n2), wiec podloga jest z tego powodu ZAWYZONA
-            # o czynnik ~2 (sqrt(2/1442) / sqrt(1/2884 + 1/1) jest zdominowane przez n=1 w
-            # ramieniu punktowym, ale wobec ramion rozkladowych porownanie jest niesymetryczne).
-            # Kierunek jest zachowawczy dla starego kryterium: zawyzona podloga ULATWIALA PASS,
-            # wiec nie zawyzala zarzutu. Podpisane w payloadzie: `floor_definition`.
+            # What this does NOT and cannot fix: both halves hold ~len(col)/2 samples (median
+            # holdout trace is 3940, so ~1970), while the model arms are scored against the FULL
+            # reference (~3940). Two-sample KS error scales as sqrt(1/n1 + 1/n2), so for that reason
+            # the floor stays INFLATED — a conservative direction for the old criterion (an inflated
+            # floor made PASS EASIER, so it did not overstate the finding). Recorded in the payload
+            # as `floor_definition`.
             fk, fw, fl = [], [], []
             for _ in range(FLOOR_SPLITS):
                 half = rng.random(len(col)) < 0.5
@@ -330,14 +326,14 @@ def main() -> None:
         f"every distributional metric the challenge actually used ranks it at or near the worst "
         f"attainable value. This is not a tuning gap — it is a category difference in the output object."
     )
-    # Stara galaz PASS byla STRUKTURALNIE MARTWA — mierzymy to tutaj, para po parze, zeby
-    # twierdzenie nie zostalo samym twierdzeniem. `is not None` zamiast testu prawdziwosciowego
-    # na floacie: `ks.get("floor") and ...` dawalo dla floor == 0.0 wartosc falsy, czyli FAIL
-    # z powodu "podloga jest zerowa" — a zerowa podloga znaczy metryke doskonala i powinna
-    # dawac najsurowszy prog, nie awarie. Nieosiagalne dzis (min podloga per gaz to 0.0407),
-    # ale rozroznienie "brak wartosci" od "wartosc zero" nie moze zalezec od danych.
-    # Pary trzymane PARAMI, filtr niefinitowy stosowany do obu naraz — filtrowanie kazdej listy
-    # osobno rozjechaloby indeksy i zestawialo KS jednej planety z podloga innej.
+    # The old PASS branch was STRUCTURALLY DEAD — measured here pair by pair so the claim does not
+    # stay a mere claim. `is not None` instead of a truthiness test on a float: `ks.get("floor")
+    # and ...` was falsy for floor == 0.0, i.e. FAIL because "the floor is zero" — yet a zero floor
+    # means a perfect metric and should give the strictest threshold, not a failure. Unreachable
+    # today (the lowest per-gas floor is ~0.044), but telling "no value" from "the value zero" must
+    # not depend on the data. Pairs are kept PAIRED and the non-finite filter applied to both at
+    # once; filtering each list separately would shift the indices and match one planet's KS to
+    # another planet's floor.
     pair_ks, pair_fl = [], []
     for g in A.TARGETS:
         for a, b in zip(res["ks"][g]["exobiome"], res["ks"][g]["floor"]):
@@ -360,10 +356,10 @@ def main() -> None:
                         "than a measurement of the model. Retained as a reported quantity, removed from "
                         "the verdict."),
     }
-    # Nowe kryterium: skill wobec ramienia PRIOR na komponencie KS z ADC2023.
-    # Falsyfikowalne w OBU kierunkach na tych samych danych i tym samym przebiegu: ramie NSF
-    # osiaga skill dodatni (PASS), ramie punktowe ujemny (FAIL). To pomiar modelu, nie metryki:
-    # pyta, czy predykcja punktowa bije rozkladowo model, ktory widma nie oglada.
+    # New criterion: skill against the PRIOR arm on the ADC2023 KS component.
+    # Falsifiable in BOTH directions on the same data in the same run: the NSF arm reaches positive
+    # skill (PASS), the point arm negative (FAIL). This measures the model, not the metric: it asks
+    # whether a point prediction beats, distributionally, a model that never sees the spectrum.
     skill_ks = payload["skill_vs_prior"].get("ks", {}).get("exobiome")
     payload["status_terms"] = {
         "criterion": "skill_vs_prior['ks']['exobiome'] > 0",

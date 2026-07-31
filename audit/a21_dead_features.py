@@ -32,17 +32,13 @@ CHECK = A.Check(
     criterion="no zero-variance input dims, no scalar-broadcast channel, no unread varying label column",
 )
 
-# Prog liczby unikalnych wartosci, powyzej ktorego kolumna etykiet wchodzi do testu "kto to czyta".
+# Unique-value threshold above which a label column enters the "who reads this" test.
 #
-# Bylo `> 100` — prog arbitralny, NIEUZASADNIONY i NIERAPORTOWANY w payloadzie. Wyciszal piec
-# kolumn `present_h2o/co2/co/ch4/nh3` (kazda `nunique == 2`), ktore w `models/` nie wystepuja ani
-# raz (grep po calym drzewie: 0 trafien). Czyli prog ukrywal dokladnie te kolumny, ktorych check
-# szuka: zmienne w danych i nieczytane przez zaden pakiet.
-#
-# `> 1` to jedyny prog z uzasadnieniem merytorycznym, a nie liczbowym: kolumna o jednej wartosci
-# nie moze niesc informacji, wiec jej nieczytanie nie jest wada. Kazda kolumna o dwoch lub wiecej
-# wartosciach juz cos rozroznia. Prog jest teraz w payloadzie (`label_column_filter`), zeby
-# czytelnik widzial, ile kolumn odpadlo i dlaczego.
+# Previously `> 100` — arbitrary and never reported in the payload. It silenced the five
+# `present_h2o/co2/co/ch4/nh3` columns (each `nunique == 2`), which appear nowhere under `models/`
+# (grep over the whole tree: 0 hits) — i.e. it hid exactly the columns this check looks for.
+# `> 1` has a substantive justification: a single-valued column cannot carry information, two or
+# more values already discriminate. The threshold is now in the payload (`label_column_filter`).
 MIN_NUNIQUE_TO_BE_INFORMATIVE = 1
 
 
@@ -121,8 +117,8 @@ def main() -> None:
     readers: dict[str, dict] = {}
     interesting = [c for c, v in varying.items()
                    if v["nunique"] > MIN_NUNIQUE_TO_BE_INFORMATIVE and not c.startswith("log10_vmr")]
-    # Prog i jego skutek jawnie w payloadzie — poprzednia wersja filtrowala `> 100` w milczeniu,
-    # wiec z rekordu nie dalo sie odczytac, ze piec kolumn `present_*` nigdy nie weszlo do testu.
+    # Threshold and its effect stated in the payload — the previous version filtered at `> 100`
+    # silently, so the record gave no way to see that five `present_*` columns never entered the test.
     payload["label_column_filter"] = {
         "min_nunique_to_be_informative": MIN_NUNIQUE_TO_BE_INFORMATIVE,
         "rationale": "a column with a single value cannot carry information, so nobody reading it is "
@@ -182,22 +178,21 @@ def main() -> None:
 
     # ---- 4. scalar-broadcast channels
     #
-    # Trzy wady naprawione tu naraz, wszystkie tego samego rodzaju — twierdzenie zamiast pomiaru:
+    # Three defects fixed here at once, all the same kind — assertion instead of measurement:
     #
-    # (a) `n = min(2000, ...)` liczylo `sigma_range_ppm` z pierwszych 2000 z 42 108 wierszy, czyli
-    #     pomijalo 95 % danych, a capa NIE BYLO w payloadzie. Skutek byl mierzalny: probka dawala
-    #     [20,1313; 99,9924], calosc daje [20,0005; 99,9999]. `sigma_ppm` to 42 tys. skalarow
-    #     float32 (~165 kB) — nie ma tu czego capowac, wiec cap usuniety, a `n_rows_*` w payloadzie.
+    # (a) `n = min(2000, ...)` computed `sigma_range_ppm` from the first 2000 of 42,108 rows (95% of
+    #     the data skipped), and the cap was NOT in the payload. The sample gave [20.1313, 99.9924];
+    #     the whole set gives [20.0005, 99.9999]. `sigma_ppm` is 42k float32 scalars (~165 kB), so
+    #     there is nothing to cap: the cap is gone and `n_rows_*` is now in the payload.
     #
-    # (b) `"distinct_values_per_row": 1` bylo WPISANE, nie zmierzone. To najwazniejsza z trzech:
-    #     raport cytuje "10 problemow" z tego checku, a jeden z nich byl twierdzeniem z lektury
-    #     kodu, nie pomiarem. Teraz macierz szumu budujemy WLASNA funkcja pakietu i liczymy
-    #     `np.unique(row).size` na kazdym wierszu.
+    # (b) `"distinct_values_per_row": 1` was HARD-CODED, not measured — one of this check's problems
+    #     quoted in the report was a claim read off the source, not a measurement. Now the noise
+    #     matrix is built with the package's OWN function and `np.unique(row).size` is counted per row.
     #
-    # (c) `problems.append({...218 spectral bins...})` bylo BEZWARUNKOWE, a status to
-    #     `"FAIL" if problems else "PASS"` — wiec PASS byl niemozliwy dla JAKICHKOLWIEK danych.
-    #     Ten sam wzorzec co naprawiona tautologia w `a15:273`. Teraz problem dopisujemy tylko,
-    #     gdy pomiar go potwierdza, a liczby 218 / 444 czytamy ze stalych pakietu, nie z pamieci.
+    # (c) `problems.append({...218 spectral bins...})` was UNCONDITIONAL while the status is
+    #     `"FAIL" if problems else "PASS"` — so PASS was impossible for ANY data. Same pattern as the
+    #     tautology fixed in `a15:381`. The problem is now appended only when the measurement confirms
+    #     it, and 218 / 444 are read from the package constants rather than from memory.
     sys.path.insert(0, str(A.REPO))
     from models.taurex_exobiome.dataset import _build_taurex_noise_matrix
     from models.taurex_fmpe.constants import AUX_FEATURE_COLS, CONTEXT_DIM, SPECTRAL_LENGTH
@@ -205,11 +200,11 @@ def main() -> None:
 
     with h5py.File(A.REPO / "data/TauREx set/spectra.h5", "r") as f:
         n_rows_available = int(f["sigma_ppm"].shape[0])
-        sigma = f["sigma_ppm"][:]                       # calosc, bez capa
+        sigma = f["sigma_ppm"][:]                       # all rows, no cap
         n_bins = int(f["transit_depth_noisy"].shape[1])
 
     def distinct_per_row(mat: np.ndarray) -> dict:
-        """Ile ROZNYCH liczb widzi model w jednym wierszu kanalu szumu — pomiar, nie zalozenie."""
+        """How many DISTINCT values the model sees in one row of the noise channel — measured, not assumed."""
         d = np.array([np.unique(row).size for row in mat])
         return {"min": int(d.min()), "max": int(d.max()), "mean": float(d.mean()),
                 "rows_with_exactly_one_distinct_value": int((d == 1).sum()),
@@ -236,7 +231,7 @@ def main() -> None:
     }
     for where, m in broadcast.items():
         if m["n_columns"] <= 1:
-            continue                                   # kanal jednokolumnowy nie jest broadcastem
+            continue                                   # a single-column channel is not a broadcast
         if m["max"] == 1:
             extra = (f"; for taurex_fmpe that is {SPECTRAL_LENGTH} of {CONTEXT_DIM} context "
                      "dimensions carrying one number" if "fmpe" in where else "")

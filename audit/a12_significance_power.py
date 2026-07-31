@@ -45,22 +45,21 @@ CHECK = A.Check(
 PAIR = ("reports/ariel_quantum_taurex_snapshot_20260312_1003/poseidon_holdout_predictions.csv",
         "reports/taurex_noquant_taurex_snapshot_20260312_133054/poseidon_holdout_predictions.csv")
 
-SEEDS_REQUIRED = 5   # prog z criterion=; deklarowany tu, nie dobierany po wyniku
+SEEDS_REQUIRED = 5   # the threshold from criterion=; declared here, not picked after seeing the result
 
-# Gdzie szukac seedow. Rozstrzygajace sa pliki, ktore ZAPISAL przebieg treningu lub ewaluacji,
-# a nie kod, ktory moglby jakis seed przyjac jako argument — inaczej mierzylibysmy intencje,
-# nie historie.
+# Where to look for seeds. Only files WRITTEN by a training or evaluation run count, not code that
+# could take a seed as an argument — otherwise we would be measuring intent, not history.
 SEED_SCAN_GLOBS = ("**/settings_resolved.yaml", "**/*_metrics.json", "**/config.json")
-# Worktree'y sa kopiami tego samego repo i podwajalyby zliczenia bez wnoszenia nowego seeda;
-# reports/audit to wyniki tego audytu, wiec liczenie ich byloby zapetleniem.
+# Worktrees are copies of the same repo and would double the counts without contributing a new seed;
+# reports/audit holds this audit's own output, so counting it would be circular.
 SEED_SCAN_EXCLUDE = (".git/", ".claude/worktrees/", "node_modules/", "reports/audit/")
 
 
 def _walk_seed_fields(obj, path: str = ""):
-    """Rekurencyjnie wyciaga pary (sciezka, wartosc) dla kluczy zawierajacych 'seed'.
+    """Recursively yield (path, value) pairs for keys containing 'seed'.
 
-    Boole odrzucane PRZED liczbami, bo bool jest podklasa int i `deterministic_seed: true`
-    weszloby do inwentarza jako seed 1.
+    Bools are rejected before the int check — bool is an int subclass, so
+    `deterministic_seed: true` would otherwise enter the inventory as seed 1.
     """
     if isinstance(obj, dict):
         for k, v in obj.items():
@@ -74,27 +73,18 @@ def _walk_seed_fields(obj, path: str = ""):
 
 
 def scan_seed_inventory() -> dict:
-    """Wyprowadza zbior seedow ZE SKANU PLIKOW repozytorium.
+    """Derive the seed inventory from a scan of repository artefacts (not a literal).
 
-    Bylo:
-        n_seeds_found = 1  # seed 42 everywhere; see payload["seed_inventory"]
-        seed_inventory = sorted({str(s) for s in [42] + [c for c in []]})
-
-    Trzy wady w dwoch linijkach. (1) `1` bylo stala wpisana w kod, a raportowane jako pomiar
-    liczby seedow uzytych w repo. (2) `[c for c in []]` to komprehencja po pustej liscie —
-    martwy kod, ktory wygladal jak miejsce, gdzie doklejaja sie znalezione seedy, i nigdy nic
-    nie doklejal. (3) Komentarz odsylal do `payload["seed_inventory"]` jako do zrodla dowodu,
-    a to pole bylo ta sama stala — rozumowanie okrezne.
-
-    Ma to znaczenie, bo caly werdykt tego checku zalezy od liczby seedow. Jesli wynik nadal
-    wynosi 1, to jest POMIAR i tak ma byc zapisany: przeskanowano N plikow, znaleziono M pol
-    seedowych, wszystkie o tej samej wartosci.
+    Previously: `n_seeds_found = 1` was a literal in the source reported as a measurement, and
+    `seed_inventory` was the same literal under another name — circular, with no actual scan. If the
+    result is still 1, it is now a MEASUREMENT: N files scanned, M seed fields found, all with the
+    same value.
     """
     import json as _json
     import yaml
     files, seen = [], set()
     for pat in SEED_SCAN_GLOBS:
-        # `glob` bylo importowane na :20 i NIGDY nieuzywane — import sugerowal, ze skan istnieje.
+        # `glob` was imported at :20 and NEVER used — the import implied a scan that did not exist.
         for f in glob.glob(str(A.REPO / pat), recursive=True):
             rel = str(Path(f).relative_to(A.REPO))
             if any(x in f"{rel}/" for x in SEED_SCAN_EXCLUDE) or rel in seen:
@@ -152,12 +142,9 @@ def main() -> None:
     n_seeds_found = inv["n_distinct_seeds"]
     seed_inventory = [str(s) for s in inv["distinct_seed_values"]]
 
-    # Odpowiednik AGREGATOWY dla n=64. mde_note kaze porownywac cytowane efekty z wielkoscia
-    # agregatowa, a dla n=64 istnial tylko wariant per-wierszowy — i to z sd przeniesionym
-    # z innego zbioru. Bootstrap losuje 64 wiersze ZE ZWRACANIEM z tych samych 685, wiec
-    # szacuje blad standardowy roznicy mRMSE dla zbioru wielkosci 64 z TEJ populacji.
-    # Nadal NIE jest to rozrzut zbioru fair_small_experiment_cpu — tam repo nie przechowuje
-    # predykcji per wiersz, wiec jego sd jest niemierzalne z tego, co jest w repo.
+    # Aggregate counterpart for n=64: the bootstrap draws 64 rows with replacement from the same 685,
+    # so it estimates the mRMSE spread for a set of size 64 from THIS population — still not the
+    # spread of fair_small_experiment_cpu, which the repo does not store per row.
     rng64 = np.random.default_rng(64)
     d64 = np.empty(args.n_boot)
     for i in range(args.n_boot):
@@ -170,7 +157,7 @@ def main() -> None:
         "sign_test": {"a_worse_rows": int((diff > 0).sum()), "b_worse_rows": int((diff < 0).sum()),
                       "fraction_a_worse": float((diff > 0).mean())},
         "per_row_sd_of_paired_difference": float(diff.std(ddof=1)),
-        # dwie drogi do MDE, bo ograniczaja DWIE ROZNE wielkosci:
+        # two routes to the MDE, because they bound TWO DIFFERENT quantities:
         "mde_per_row_estimand_n685": A.min_detectable_effect(diff.std(ddof=1), 685),
         "mde_per_row_estimand_n64": A.min_detectable_effect(diff.std(ddof=1), 64),
         "mde_aggregate_mrmse_n685": A.mde_from_bootstrap(boot["boot_sd"]),
@@ -179,9 +166,9 @@ def main() -> None:
                      "mde_aggregate_* ogranicza roznice AGREGATOWEGO mRMSE, czyli te wielkosc, "
                      "ktora raporty faktycznie cytuja. To rozne funkcjonaly (Jensen); porownuj "
                      "cytowane efekty z ta druga."),
-        # Skad wzielo sie kazde sd. Bez tego pola mde_per_row_estimand_n64 czyta sie jak pomiar
-        # rozrzutu zbioru n=64, a jest przeniesieniem sd z 685 wierszy POSEIDON na inny zbior
-        # o niezmierzonym rozrzucie.
+        # Where each sd came from. Without this field mde_per_row_estimand_n64 reads as a measurement
+        # of the n=64 set's spread, whereas it transplants the sd from 685 POSEIDON rows onto a
+        # different set whose spread was never measured.
         "mde_sd_source": {
             "sd_value": float(diff.std(ddof=1)),
             "measured_on": "685 rows of the POSEIDON holdout pair, sd of the per-row paired RMSE difference",
@@ -236,18 +223,13 @@ def main() -> None:
     print(f"  seed scan: {inv['n_files_scanned']} plikow, {inv['n_seed_fields_found']} pol seedowych, "
           f"{n_seeds_found} rozna wartosc(i): {seed_inventory}")
 
-    # Status WYLICZANY z kryterium. Bylo: CHECK.emit("FAIL", ...) — status jako LITERAL. To nie
-    # byla tautologia jak w a15 (tam porownywano dwie stale), a wpisana stala: criterion= wymagal
-    # koniunkcji "co najmniej 5 seedow AND efekt wiekszy od rozrzutu miedzy-seedowego", a kod nie
-    # testowal ZADNEGO z tych warunkow. Check oglaszal werdykt niezaleznie od danych, wiec zadna
-    # zmiana w repo — w tym dolozenie brakujacych seedow — nie mogla go przestawic.
-    #
-    # Trzeci czlon dawnego criterion= ("numeric noise floor") jest USUNIETY, a nie tylko
-    # nieoceniany: nie istnieje ani w a13, ani tutaj (patrz payload["numeric_noise_floor"]).
+    # Status derived from the criterion. Previously: `CHECK.emit("FAIL", ...)` with the status
+    # hard-coded regardless of the data — the code tested neither of the two conjuncts of criterion=.
+    # The former third conjunct ("numeric noise floor") is removed, not merely left unevaluated: it
+    # exists neither in a13 nor here (payload["numeric_noise_floor"]).
     enough_seeds = n_seeds_found >= SEEDS_REQUIRED
-    # Rozrzut miedzy-seedowy wymaga co najmniej 2 seedow ORAZ delty policzonej per seed.
-    # W repo nie ma ani jednego, ani drugiego, wiec drugi czlon jest nieoceniany — i tak jest
-    # zapisany, zamiast byc po cichu zaliczony na korzysc albo na niekorzysc.
+    # Across-seed spread needs >=2 seeds and a per-seed delta; the repo has neither, so this conjunct
+    # is explicitly unevaluated instead of being silently resolved either way.
     seed_spread_measurable = n_seeds_found >= 2
     effect_exceeds_seed_spread = None
     payload["status_terms"] = {

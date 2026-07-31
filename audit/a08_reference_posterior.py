@@ -41,8 +41,8 @@ CHECK = A.Check(
     criterion="model mRMSE >= reference-run mRMSE, both on the same 663 planets that carry a reference retrieval",
 )
 
-# Nominalne pokrycie przedzialu miedzykwartylowego. Sluzy TYLKO do diagnostyki kalibracji
-# referencji, ktora jest raportowana obok werdyktu i nie wchodzi do niego.
+# Nominal coverage of the interquartile range. Used ONLY to diagnose the reference's calibration,
+# which is reported alongside the verdict and does not enter it.
 NOMINAL_IQR_COVERAGE = 0.50
 
 
@@ -65,17 +65,12 @@ def main() -> None:
     ids = A.adc_split_ids(args.split)
     qq, y = q.reindex(ids), fm.loc[ids]
 
-    # Wspolna maska planet, ktore MAJA referencyjna retrywacje — liczona raz, przed czymkolwiek.
-    # Bylo: referencja liczona na masce nie-NaN kwartyli (663 planety), model na WSZYSTKICH 4143
-    # wierszach CSV predykcji. Dwa rozne zbiory, wbrew wlasnemu criterion= "on the same data".
-    # Ma znaczenie, bo iloraz referencja/model JEST cytowana liczba tego ustalenia: na
-    # rozjechanych zbiorach wychodzi 4.789, na wspolnym 3.803 — 21% mniej, a caly zarzut K8
-    # opiera sie na wielkosci tego ilorazu.
-    #
-    # Maska jest koniunkcja po gazach, bo "te same planety" nie da sie zdefiniowac inaczej.
-    # Na obecnych danych maski per-gaz sa identyczne (663 na kazdym z 5 gazow, AND = OR = 663),
-    # wiec liczby per_gas nie drgna — ale gdyby kiedys sie rozjechaly, kryterium ma zostac
-    # jednoznaczne bez kolejnej naprawy.
+    # Common mask of planets with a reference retrieval, computed once before anything else.
+    # Previously: the reference on the non-NaN mask (663 planets), the model on all 4143 CSV rows —
+    # two different sets despite criterion= "on the same data". It matters: the reference/model ratio
+    # is this finding's quoted number (4.789 on the mismatched sets vs 3.803 on the common one).
+    # Conjunction over gases, because the per-gas masks happen to be identical today (663 each) —
+    # should they diverge, the criterion stays unambiguous without a further fix.
     have = np.ones(len(ids), dtype=bool)
     for t in A.TARGETS:
         for suf in ("q1", "q2", "q3"):
@@ -88,7 +83,7 @@ def main() -> None:
         q1, q2, q3 = (qq[f"{t}_q1"].to_numpy(float), qq[f"{t}_q2"].to_numpy(float), qq[f"{t}_q3"].to_numpy(float))
         truth = y[t].to_numpy(float)
         m_gas = ~(np.isnan(q1) | np.isnan(q2) | np.isnan(q3))
-        m = have                                   # wszystkie liczby na WSPOLNEJ masce
+        m = have                                   # every number on the COMMON mask
         sig = (q3[m] - q1[m]) / 1.349
         r = float(np.sqrt(np.mean((q2[m] - truth[m]) ** 2)))
         bias = float(np.mean(q2[m] - truth[m]))
@@ -118,8 +113,8 @@ def main() -> None:
     model_m = A.mrmse(yt, yp)
     base_m, _ = A.constant_predictor_mrmse(yt)
 
-    # Ta sama wielkosc na PELNYM CSV — tylko po to, zeby roznica wzgledem starego przebiegu byla
-    # widoczna wprost, a nie wymagala rekonstrukcji. NIE wchodzi do werdyktu.
+    # The same quantity on the FULL CSV — only so the difference against the old run is visible
+    # directly instead of having to be reconstructed. Does NOT enter the verdict.
     yt_all = pred[[f"true_{t}" for t in A.TARGETS]].to_numpy(float)
     yp_all = pred[[f"pred_{t}" for t in A.TARGETS]].to_numpy(float)
 
@@ -130,14 +125,11 @@ def main() -> None:
         counts = {t: 0 for t in A.TARGETS}
         n_ok = 0
         with h5py.File(trace_path, "r") as h:
-            # Probka LOSOWA z PELNEJ listy planet z trace'ami. Bylo: ids[:trace_planets], a
-            # adc_split_ids zwraca liste posortowana numerycznie rosnaco — wiec pierwsze 200
-            # pozycji to najnizej numerowany skraj holdoutu, w ktorym trace'y ma 104 planety
-            # (52%) wobec globalnych 663/4143 (16.0%). Frakcje multimodalnosci opisywaly wiec
-            # ten skraj, nie holdout, a byly cytowane jako wlasnosc holdoutu.
-            #
-            # Enumeracja czyta tylko metadane ksztaltu (h5py nie wciaga danych na .shape),
-            # wiec pelny przeglad 4143 kluczy jest tani.
+            # RANDOM sample from the full list of trace-bearing planets. Previously:
+            # ids[:trace_planets] — because adc_split_ids sorts numerically, the first 200 positions
+            # are the lowest-numbered edge of the holdout, where 52% of planets carry a trace against
+            # 16.0% globally; that was quoted as a property of the whole holdout. Enumeration reads
+            # only shapes (h5py does not load data for .shape), so sweeping all 4143 keys is cheap.
             avail = []
             for pid in ids:
                 key = f"Planet_{pid}"
@@ -153,16 +145,12 @@ def main() -> None:
                 if avail else np.asarray([], dtype=object)
             for pid in picked:
                 key = f"Planet_{pid}"
-                # Rozbite na dwa warunki. Bylo:
-                #   if key not in h or "tracedata" in h[key] and h[key]["tracedata"].shape == ():
-                # `or` wiaze slabiej niz `and`, wiec to znaczylo A or (B and C): brak klucza
-                # "tracedata" dawal B=False, calosc False, `continue` sie NIE wykonywalo i
-                # nastepna linia leciala KeyError. Ten sam wzorzec co a24:109, tam poprawny.
-                # Zweryfikowane na synteycznym HDF5: dla grupy bez klucza "tracedata" stare
-                # wyrazenie rzuca KeyError, nowe robi continue; dla pozostalych trzech
-                # przypadkow (brak grupy, skalar, macierz 2D) oba zachowuja sie identycznie.
-                # Nieosiagalne na obecnych danych: w holdoucie 0 z 4143 grup nie ma klucza
-                # "tracedata" (3480 ma go jako SKALAR, 663 jako macierz), wiec liczby nie drgna.
+                # Split into two conditions. Previously: `if key not in h or "tracedata" in h[key] and
+                # h[key]["tracedata"].shape == ()` — `or` binds looser than `and`, so a missing
+                # "tracedata" key made the whole test False, `continue` never ran, and a KeyError
+                # followed (the same pattern as a24:141, which gets it right). Unreachable on today's
+                # data: in the holdout 0 of 4143 groups lack "tracedata" (3480 hold it as a scalar,
+                # 663 as a matrix), so no number moves — but the code should be correct regardless.
                 if key not in h or "tracedata" not in h[key]:
                     continue
                 if h[key]["tracedata"].shape == ():
@@ -209,8 +197,8 @@ def main() -> None:
                            "SMALLER error than the reference run. The previous key was named "
                            "`model_over_reference_ratio` while holding exactly this quantity — inverted "
                            "relative to its contents, and the report quoted the key name"),
-        # Kalibracja referencji: zmierzona, raportowana, JAWNIE poza kryterium. Uzasadnia
-        # oslabienie tezy z "exact Bayesian solution" na "konkretny przebieg MultiNest".
+        # Reference calibration: measured, reported, EXPLICITLY outside the criterion. It justifies
+        # weakening the claim from "exact Bayesian solution" to "one concrete MultiNest run".
         "reference_calibration_not_in_criterion": {
             "mean_bias_dex": float(np.mean(ref_bias)),
             "mean_iqr_coverage_of_truth": float(np.mean(ref_cov)),
