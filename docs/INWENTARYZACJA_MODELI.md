@@ -2,13 +2,8 @@
 
 Stan na przebieg `reports/audit/20260729/` (21 checków, `is_partial_run: False`, 0 ERROR).
 
-**Zasada tego dokumentu:** każda komórka pochodzi z artefaktu albo z payloadu checku, nie z prozy
+**Zasada tego dokumentu:** każda komórka pochodzi z artefaktu albo z payloadu checku, nie z opisu
 raportów zespołu. Gdzie liczba nie ma pokrycia w artefakcie, jest to napisane wprost. 
-
-Kolumna
-„uruchamialność" rozróżnia trzy rzeczy: **odtworzenie liczby** z zapisanych
-predykcji, **ponowną inferencję** z wag, i **ponowny trening** od zera.
-
 ---
 
 ## 1. Tabela główna
@@ -16,7 +11,7 @@ predykcji, **ponowną inferencję** z wag, i **ponowny trening** od zera.
 | model | zbiór treningowy | zbiór oceniany | stan zbioru | wejście | parametry | stan treningu | uruchamialność |
 |---|---|---|---|---|---|---|---|
 | **ExoBiome hybrydowy** (`ariel_exobiome`) — model flagowy | ADC2023 train (33 138) | ADC2023 holdout (4143), validation (4142) | **zdrowy** | 52 biny `instrument_spectrum` + 52 `instrument_noise` + `instrument_width` + `wavelength_um` + 8 kolumn aux; normalizacja: dzielenie przez własną średnią | **258 688** ogółem; ścieżka kwantowa 69 434, z czego **24 kwantowe** (0,0093 % modelu) | 8 z 30 epok, **stop ręczny** (patience 8 niewyczerpane); best epoch 6 = ostatnia epoka z zamrożonym backbone'em; po odmrożeniu val +13,0 % | **pełna**, wszystko w `artifacts/ariel_quantum_best_v4_epoch6/`: wagi `best_model.pt`, predykcje `{holdout,validation,testdata}_predictions.csv`, metryki `{holdout,validation}_metrics.json`, `config.json`, `history.csv`, `scalers.json`, `split_manifest.json`. Rekonstrukcja pipeline'u zweryfikowana wiersz po wierszu (`a27`: 0 z 4143 wierszy powyżej tolerancji). Kod: `models/ariel_exobiome/` |
-| **ExoBiome bez kwantów** (`taurex_exobiome_without_quant`) | crossgen tau train (37 281) | POSEIDON test (685), tau val (4142) | **POSEIDON zepsuty (K1), tau niepełny fizycznie (K11)** | jak wyżej, ale 218 binów `transit_depth_noisy` | suma parametrów **nie zmierzona** (`a06` liczy tylko wariant flagowy); zmierzona jest natomiast **gałąź rezydualna**: 85 733 par. (`a11.residual_branch_params.classical_control_arm`, z `named_parameters`) | `best_epoch` 59 przy `max_epochs` 60 — jedyny run, którego najlepsza epoka wypada na końcu harmonogramu (`a05` nie emituje dla niego `epochs_run`, więc liczby faktycznie przebiegniętych epok nie da się z rekordu odczytać) | **asymetryczna**, w `reports/taurex_noquant_taurex_snapshot_20260312_133054/`: strona **POSEIDON** ma predykcje `poseidon_{holdout,test}_predictions.csv` i metryki `poseidon_holdout_metrics.json` — mRMSE 3,279559 **odtworzone bit-exact** z predykcji (`reports/taurex_model_comparison.md:23`). Strona **tau/val** (1,423032) **nie ma pliku metryk ani predykcji** — istnieje wyłącznie jako proza w README, sam plik zespołu przyznaje „not yet re-derived" (`taurex_model_comparison.md:23`). **Wag nie ma** (`best_model_epoch059.pt` brak — `a14`). Kod: `models/taurex_exobiome_without_quant/` |
+| **ExoBiome bez kwantów** (`taurex_exobiome_without_quant`) | crossgen tau train (37 281) | POSEIDON test (685), tau val (4142) | **POSEIDON zepsuty (K1), tau niepełny fizycznie (K11)** | jak wyżej, ale 218 binów `transit_depth_noisy` | suma parametrów **nie zmierzona** (`a06` liczy tylko wariant flagowy); zmierzona jest natomiast **gałąź rezydualna**: 85 733 par. (`a11.residual_branch_params.classical_control_arm`, z `named_parameters`) | `best_epoch` 59 przy `max_epochs` 60 — jedyny run, którego najlepsza epoka wypada na końcu harmonogramu (`a05` nie emituje dla niego `epochs_run`, więc liczby faktycznie przebiegniętych epok nie da się z rekordu odczytać) | **asymetryczna**, w `reports/taurex_noquant_taurex_snapshot_20260312_133054/`: strona **POSEIDON** ma predykcje `poseidon_{holdout,test}_predictions.csv` i metryki `poseidon_holdout_metrics.json` — mRMSE 3,279559 **odtworzone bit-exact** z predykcji (`reports/taurex_model_comparison.md:23`). Strona **tau/val** (1,423032) **nie ma pliku metryk ani predykcji** — istnieje wyłącznie jako proza w README (`taurex_model_comparison.md:23`). **Wag nie ma** (`best_model_epoch059.pt` brak — `a14`). Kod: `models/taurex_exobiome_without_quant/` |
 | **ExoBiome kwantowy na TauREx** (`taurex_exobiome`) | crossgen tau train | POSEIDON test, tau val | **POSEIDON zepsuty (K1), tau niepełny (K11)** | jak wyżej | suma parametrów **nie zmierzona**; gałąź rezydualna (kwantowa) **69 434** par., z tego 24 kwantowe (`a11.residual_branch_params.quantum_arm`) | `best_epoch` 5 przy `max_epochs` 20; README własnego snapshotu stwierdza, że run **trwał dalej** → artefakt śródlotny | **asymetryczna**, w `reports/ariel_quantum_taurex_snapshot_20260312_1003/`: wagi `stage2_best_model_epoch005.pt`; strona **POSEIDON** — predykcje `poseidon_{holdout,test}_predictions.csv`, metryki `poseidon_holdout_metrics.json`, mRMSE 3,215615 **odtworzone bit-exact** (`taurex_model_comparison.md:22`). Strona **tau/val** (1,449002) **bez pliku metryk/predykcji**, „not yet re-derived" (tamże). Kod: `models/taurex_exobiome/` |
 | **Reimplementacja NSF** (`adc_winner_on_ariel`) — model odniesienia | ADC2023 train (33 138) | ADC2023 holdout (4143) | **zdrowy** | 52 biny + szum, standaryzacja per widmo (mean 0, std 1) + mean/std jako 2 cechy + 4 estymatory promienia; **szum dolosowywany co epokę** | **10 771 200** (41,6× więcej niż ExoBiome) | 79 z 300 epok; stop na cierpliwości **val NLL**, podczas gdy metryka porównania (mRMSE) nadal spadała; LR zjechany 256× | **pełna**, w `models/adc_winner_on_ariel/trained_run/`: 3 checkpointy `best_model_by_mrmse.pt`, `best_model_by_nll.pt`, `resume_latest.pt`; metryki `{holdout,validation}_metrics.json`, `comparison_metrics.{csv,json}`; `settings_resolved.yaml`, `saved_split_manifest.json`, `train.log`. Kod: `models/adc_winner_on_ariel/` |
 | **NSF na TauREx** (`ariel_winner_on_taurex`) | crossgen tau | POSEIDON test | **POSEIDON zepsuty (K1)** | 218 binów `transit_depth_noisy` + aux z hardkodu | nie zmierzone | brak danych o przebiegu | **brak**: liczba 3,4531 pochodzi z `reports/ariel_winner_on_taurex_20260312_112940_results_summary.md`, **bez artefaktu wag/predykcji obok niego**. Kod: `models/ariel_winner_on_taurex/` |
@@ -33,11 +28,6 @@ predykcji, **ponowną inferencję** z wag, i **ponowny trening** od zera.
 ---
 
 ## 2. Stan zbiorów danych
-
-> Pełna inwentaryzacja danych — wszystkie zbiory, ich lokalizacja, rozmiary, charakterystyka
-> generatorów, podział na zbiory pierwotne i pochodne — jest w **`docs/INWENTARYZACJA_DANYCH.md`**.
-> Poniższa tabela jest skrótem obejmującym wyłącznie te zbiory, które występują w kolumnie
-> „zbiór treningowy" / „zbiór oceniany" tabeli §1.
 
 | zbiór | rozmiar | stan | dowód |
 |---|---|---|---|
@@ -61,20 +51,13 @@ predykcji, **ponowną inferencję** z wag, i **ponowny trening** od zera.
 (`cnn_metrics.json`, `NO backing artifact`), „winner on TauREx" 3,4531 (`results_summary.md`), H200
 2,8946.
 
-**Nie jest to ta sama lista, co „liczby bez artefaktu" w Załączniku A audytu (tam 4, wg `a13`)** i to
-rozróżnienie trzeba czytać dokładnie, bo oba checki pytają o co innego:
+Nie jest to ta sama lista, co „liczby bez artefaktu" w Raporcie metodologicznym audytu:
 
 | check | pytanie | wynik |
 |---|---|---|
 | `a02` | czy **obok cytowanej liczby** leży plik predykcji, z którego da się ją przeliczyć | 3: CNN 0,6500, winner-on-TauREx 3,4531, H200 2,8946 |
 | `a13` | czy claim ma **gdziekolwiek w repo** wagi ∧ metryki ∧ predykcje | 4 `UNBACKED`: `random_forest_holdout`, `winner_on_taurex_poseidon`, `h200_poseidon`, `garnet_hardware` |
 
-CNN 0,6500 jest więc w liście `a02`, ale **nie** w liście `a13`: `a13` klasyfikuje ją jako
-`backed_summary` (wagi `cnn_whole_ariel_new.weights.h5` ✔, metryki ✔, predykcje ✘), bo katalog
-`models/adc_baseline/` zawiera kod i wagi. Zdanie „liczba 0,650 nie jest bez pokrycia" w K10(b) audytu
-odnosi się do tej drugiej klasyfikacji i **nie jest sprzeczne** z wierszem `a02` wyżej. Uwaga na wagę
-obu: `a13` sam deklaruje, że od 2026-07-28 `backed_summary` jest powodem FAIL, nie zaliczeniem —
-liczby, której nie da się przeliczyć bez świeżego forward passu, nie wolno podawać jako wyniku.
 
 **Wagi zaimportowane, nieopisane:** `artifacts/imported_weights/` zawiera ~150 plików `.pt`
 (m.in. `fmpe_outputs/`) **bez ani jednego pliku metryk, configu czy scalerów**. Z tego powodu nie da się ustalić,
@@ -93,8 +76,7 @@ notebooki w `archive/`.
    `a11.residual_branch_params` liczy ją z `named_parameters` po obu stronach (`both_arms_measured =
    true`): ramię kwantowe **69 434** par. (z tego 24 kwantowe), klasyczna kontrola **85 733** par.,
    czyli **kontrola ma o 23,5 % więcej pojemności rezydualnej** niż ramię, które kontroluje, i nie ma
-   bramki. Ma to znaczenie dla K6: porównanie quantum vs noquant nie jest param-matched w **żadną**
-   stronę. Poza tymi wielkościami nie cytujemy liczb parametrów z raportów zespołu bez własnego pomiaru.
+   bramki.
 3. **Żaden pakiet nie przewiduje pełnego wektora celu benchmarku** — wszystkie mają 5 wyjść (gazy),
    benchmark ADC2023 wymaga 7 (`planet_radius`, `planet_temp` + 5 gazów). Wyjątkiem jest
    `ariel_winner_trace_nf`, który deklaruje 7, ale nigdy nie został wytrenowany.

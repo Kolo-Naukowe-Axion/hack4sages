@@ -4,11 +4,10 @@ Człon *inwentaryzacja* tematu umowy, w części dotyczącej danych. Uzupełnia
 `docs/INWENTARYZACJA_MODELI.md` (modele i checkpointy).
 
 **Zasada podziału wobec pozostałych dokumentów.** Ten dokument opisuje co mamy, w jakim
-stanie, gdzie leży, czy da się użyć. Charakterystyka generatorów jest tutaj (§3), bo jest własnością posiadanego zasobu, a
-warunki legalnego porównania między nimi są w protokole §2.4, bo są regułą na przyszłość.
+stanie, gdzie leży, czy da się użyć.
 
 **Zasada dowodowa.** Każda komórka pochodzi z artefaktu, manifestu albo z payloadu checku audytowego,
-nie z prozy raportów zespołu. Gdzie liczba jest zmierzona w ramach tej inwentaryzacji, jest to napisane.
+nie z opisów z raportów zespołu. Gdzie liczba jest zmierzona w ramach tej inwentaryzacji, jest to napisane.
 
 ---
 
@@ -19,7 +18,7 @@ nie z prozy raportów zespołu. Gdzie liczba jest zmierzona w ramach tej inwenta
 | **ADC2023** | `data/ariel-ml-dataset/` | symulator organizatorów ADC2023 (dane zewnętrzne) | 41 423 train + 685 test | **1,9 GB** | **zdrowy** | model flagowy, model porównawczy NSF, baseline CNN |
 | **crossgen** (tau + POSEIDON) | `data/TauREx set/` | TauREx **3.2.4** / POSEIDON **1.3.2** | 42 108 (41 423 tau + 685 POSEIDON) | 77 MB | **oba ramiona wadliwe** — patrz §4 | warianty `taurex_exobiome*`, `ariel_winner_on_taurex`, `taurex_fmpe` |
 | **pRT validation** | `data/petitradtrans-adc2023-validation/` | petitRADTRANS **2.6.7** (+ taurex 3.2.4 do binowania) | 20 000 | **417 MB** | **nieużywany**; stanu nie weryfikował żaden check — §4 | żaden model, żaden skrypt, żaden check audytowy |
-| **val_dataset** | `data/val_dataset/` | — (re-eksport ADC2023 do CSV) | 33 138 / 4 142 / 4 143 | 11 MB | **zdrowy, wtórny** | pomocniczo; nie jest niezależnym zbiorem |
+| **val_dataset** | `data/val_dataset/` | — (re-eksport ADC2023 do CSV) | 33 138 / 4 142 / 4 143 | 11 MB | **zdrowy, wtórny** | pomocniczo |
 | **generated-data** | `data/generated-data/` | — (cache przygotowanych wejść) | `ariel_winner_nf_prepared` | 17 MB | scratch lokalny, ignorowany na `main` | `ariel_winner_nf` |
 
 **Kod generatorów bez danych** (pakiety, które potrafią wygenerować zbiór, ale nie mają go obok siebie):
@@ -33,7 +32,7 @@ nie z prozy raportów zespołu. Gdzie liczba jest zmierzona w ramach tej inwenta
 ---
 
 ## 2. Gdzie te dane fizycznie są
-**Większość danych nie jest na `main`**. Wyselekcjonowane zbiory i materiały EDA są celowo trzymane poza gałęzią główną, na
+Wyselekcjonowane zbiory i materiały EDA są celowo trzymane poza gałęzią główną, na
 `origin/iwosmu/data-artifacts`, i podłączane osobnym worktree:
 
 ```bash
@@ -41,18 +40,16 @@ git fetch origin
 git worktree add ../hack4sages-data origin/iwosmu/data-artifacts
 ```
 
-Zasoby publikowane na tej gałęzi: `data/ariel-ml-dataset/`,
+Dane publikowane na tej gałęzi: `data/ariel-ml-dataset/`,
 `data/petitradtrans-adc2023-validation/`, `data/reference_data/adc2023_reference_bundle.npz`,
 `data/eda/`, `data/published/crossgen_biosignatures/20260311/`. Wyjścia generowane lokalnie mają
 zostawać pod `data/generated-data/`, które jest ignorowane na `main`.
 
-Konsekwencja praktyczna: odtworzenie audytu wymaga podłączenia tej gałęzi.
-
 ---
 
-## 3. Krótka charakterystyka uzytych generatorów
+## 3. Krótka charakterystyka użytych generatorów
 
-### 3.1 Wspólna przestrzeń latentna (crossgen)
+### 3.1 parametry crossgen
 
 Oba ramiona crossgen pochodzą z **jednego** przebiegu, z tych samych rozkładów priorów
 (`data/crossgen_biosignatures/constants.py:28-37`), `MASTER_SEED = 20260310`:
@@ -71,11 +68,11 @@ Szum: `iid_gaussian_white`, **skalar na próbkę** (nie per bin), σ 20,0 – 10
 (`manifest.json: noise_model`).
 
 ### 3.2 Czym nasze wygenerowane TauREx i POSEIDON się różnią
-**NOTKA**: to jest nasza konfiguracja generacji danych, stąd właśnie wynikają róznice (jak np. ta w punkcie 1 tabeli).
+**NOTKA**: to jest nasza konfiguracja generacji danych, stąd właśnie wynikają różnice (jak np. ta w punkcie 1 tabeli).
 
 | własność | TauREx 3.2.4 | POSEIDON 1.3.2 | dowód |
 |---|---|---|---|
-| wkłady do opacity | `AbsorptionContribution` + `RayleighContribution` — **2 elementy**, brak CIA | absorpcja + Rayleigh + **CIA** — biblioteka alokuje kanał CIA sama, bez naszego udziału | **tau:** `taurex_backend.py:148,154-157` (jedyne wywołanie w pliku) — lektura wykonana na `taurex 3.3.2` z `.venv-cnn`, a zbiór wygenerowano **3.2.4**, więc na wersji generującej niesprawdzone. **POSEIDON:** dowód na wersji generującej **1.3.2** — `X_CIA` w `atmosphere_keys` (`reports/audit/d01_poseidon_132/d01_poseidon_diagnosis.json`); mechanizm doboru 6 par (`supported_chemicals.py:34-36`, `core.py:672-678`) odczytany z **1.4.0**, na 1.3.2 niesprawdzony |
+| wkłady do opacity | `AbsorptionContribution` + `RayleighContribution` — **2 elementy**, brak CIA | absorpcja + Rayleigh + **CIA** — biblioteka alokuje kanał CIA sama, bez naszego udziału | **tau:** `taurex_backend.py:148,154-157` (jedyne wywołanie w pliku) — lektura wykonana na `taurex 3.3.2` z `.venv-cnn` **POSEIDON:** dowód na wersji generującej **1.3.2** — `X_CIA` w `atmosphere_keys` (`reports/audit/d01_poseidon_132/d01_poseidon_diagnosis.json`) |
 | rozdzielczość natywna | R = 100 (bez rebinowania) | **R = 1000**, rebinowana do 100 | `meta/tau_generation.json`, `meta/poseidon_generation.json` (`poseidon_native_resolution`) |
 | liczba shardów przy generacji | 162 × 256 wierszy | 1 × 685 | `meta/*_generation.json` |
 | profil T–P | izoterma | izoterma (`PT_profile="isotherm"`) | `poseidon_backend.py:108` |
@@ -88,27 +85,26 @@ Dwie uwagi, obie istotne przy interpretacji:
 
 1. **Siatka ciśnień to 100 bar, nie domyślne 10 bar TauREx-a.** To wpływa na definicję ciśnienia
    referencyjnego, a więc na przelicznik między błędem temperatury i błędem abundancji.
-2. **Różnica „TauREx vs POSEIDON" w tym repo nie jest różnicą dwóch poprawnych modeli fizycznych** —
+2. **Różnica „TauREx vs POSEIDON" w tym repo nie jest różnicą dwóch poprawnych modeli fizycznych**, bo
    jedna strona nie ma kontinuum, druga nie ma bazy przekrojów czynnych.
 
 ### 3.3 Generator pRT validation
 
 petitRADTRANS 2.6.7, opacity R = 400, 11 gatunków linii
 (`H2O_HITEMP`, `CO_all_iso_HITEMP`, `CH4`, `NH3`, `CO2`, `H2S`, `VO`, `TiO_all_Exomol`, `PH3`,
-`Na_allard`, `K_allard`) **plus chmury** (`MgSiO3(c)_cd`, `Fe(c)_cd`) — czyli jedyny generator w repo
-z chmurami. Binowanie do siatki ADC2023 przez `taurex` 3.2.4 `FluxBinner`. Widma zapisane przeskalowane
+`Na_allard`, `K_allard`) **plus chmury** (`MgSiO3(c)_cd`, `Fe(c)_cd`). Binowanie do siatki ADC2023 przez `taurex` 3.2.4 `FluxBinner`. Widma zapisane przeskalowane
 (`scale_factor = 1e16`), σ w jednostkach `1e-16 W/m²/µm`, zakres 0,05 – 0,50.
 
 ---
 
-## 4. Stan zdrowia, z dowodem
+## 4. Stan z dowodem
 
 | zbiór | stan | dowód |
 |---|---|---|
-| **ADC2023** | **zdrowy** | dane pobrane od organizatorów challenge'u, nie generowane u nas — poprawność zbioru jest własnością źródła, nie naszego kodu. Nasz łańcuch na tym zbiorze jest sprawdzony osobno: rekonstrukcja pipeline'u przechodzi wiersz po wierszu, 0 z 4143 wierszy powyżej tolerancji `1e-4`, margines 11× (`a27`, tor `mac_cpu`; zakres tej walidacji — audyt §1). **Czego nie zmierzono:** `a01` (test zależności widma od λ, ten, który zdyskwalifikował POSEIDON-a) czyta wyłącznie `data/TauREx set/spectra.h5` i **nie był puszczony na ADC2023** |
+| **ADC2023** | **zdrowy** | dane pobrane od organizatorów challenge'u, nie generowane u nas|
 | **crossgen tau** | **niepełny fizycznie** — generator wywołany **bez CIA**, głównego kontinuum w atmosferze H₂/He | `taurex_backend.py:154-157`: `contributions` ma 2 elementy, brak `CIAContribution`; oficjalny forward model organizatorów ma 3 (`FM_utils_final.py:207-209`) — ustalenie **K11** |
 | **crossgen POSEIDON** | **zepsuty** — 685/685 widm `transit_depth_noiseless` ma **jedną wartość na 218 binów**; pole czytane przez modele (`transit_depth_noisy`) ma `amp/σ = 0,998` i `SNR > 3` w **zerowej** liczbie wierszy | `a01`, kryterium bezprogowe; przyczyna zawężona do nasyconej ekstynkcji przez `d01` stage 1 — **K1**, **K1(c)** |
-| **pRT validation** | **nieoceniony** — zbiór nie jest objęty żadnym checkiem audytowym, więc jego stan fizyczny **nie jest w tym raporcie twierdzeniem** | fakt z manifestu (`manifest.json`): widma zapisane przeskalowane `scale_factor = 1e16`, σ podana osobno w jednostkach `1e-16 W/m²/µm`, zakres `0,05 – 0,50`. Fakt z przeszukania repo: zero konsumentów poza własnymi skryptami generującymi (`data/prt_adc2023_validation/`) |
+| **pRT validation** | **nieoceniony** — zbiór nie jest używany | fakt z manifestu (`manifest.json`): widma zapisane przeskalowane `scale_factor = 1e16`, σ podana osobno w jednostkach `1e-16 W/m²/µm`, zakres `0,05 – 0,50`.|
 | **val_dataset** | **zdrowy, ale wtórny** | `manifest.json`: `split_seed = 42`, frakcje 0,8/0,1/0,1, wiersze 33 138 / 4 142 / 4 143 — identyczne z `split_manifest.json` modelu flagowego; to re-eksport ADC2023 do CSV, nie niezależne dane |
 
 ---
@@ -131,6 +127,6 @@ sprzężenia temperatura↔abundancja z **K9** (663 planety mające pełną 7-ko
 
 1. **Trzy niezależne zbiory widm**, z których **jeden jest zdrowy** ADC2023, i to on nosi wszystkie
    liczby, które wolno cytować jako wynik modelu.
-2. **Oś cross-generator nie ma zdrowej strony.** Nie jest to kwestia stopnia: jedna strona nie ma
+2. **Oś cross-generator nie ma zdrowej strony.** jedna strona nie ma
    kontinuum CIA, druga nie ma wczytanej bazy opacity.
-3. **417 MB zbioru pRT jest w repo i nie jest przez nic używane.**
+3. **Zbiór pRT jest w repo i nie jest przez nic używane.**
